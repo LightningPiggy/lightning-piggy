@@ -56,7 +56,7 @@ int walletBalance = 0;
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Lightning Piggy v1.0.3 starting up");
+    Serial.println("Lightning Piggy v1.0.3 http-debug starting up");
 
     SPI.begin(EPD_SCLK, EPD_MISO, EPD_MOSI);
     display.init();
@@ -294,10 +294,12 @@ String getEndpointData(String endpointUrl) {
                "X-Api-Key: " + invoiceKey + " \r\n" +
                "Content-Type: application/json\r\n" +
                "Connection: close\r\n\r\n";
+  Serial.println("Sending http request: " + request);
   client.print(request);
   while (client.connected())
   {
     const String line = client.readStringUntil('\n');
+    Serial.println("while looking for return, got: " + line);
     if (line == "\r")
     {
       break;
