@@ -61,6 +61,7 @@ bool prependCurrencySymbol() {
   (strncmp(btcPriceCurrencyChar,"GBP",3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "JPY", 3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "CNY", 3) == 0) ||
+  (strncmp(btcPriceCurrencyChar, "BRL", 3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "RMB", 3) == 0)) {
       return true;
   }
@@ -78,6 +79,8 @@ String getCurrentCurrencyCode() {
     return "Fr.";
   } else if (strncmp(btcPriceCurrencyChar, "GBP", 3) == 0) {
     return "£";
+  } else if (strncmp(btcPriceCurrencyChar, "BRL", 3) == 0) {
+    return "R$";
   } else if ((strncmp(btcPriceCurrencyChar, "JPY", 3) == 0) || (strncmp(btcPriceCurrencyChar, "CNY", 3) == 0) || (strncmp(btcPriceCurrencyChar, "RMB", 3) == 0)) {
     return "¥";
   } else {
@@ -103,7 +106,7 @@ char getCurrentCurrencyThousandsSeparator() {
 
 // Replace dot with CurrencyDecimalSeparator
 String floatToString(float number, int decimals) {
-  char buffer[15]; 
+  char buffer[15];
 
   // Minimum width of 0 means it takes whatever width is required
   dtostrf(number, 0, decimals, buffer);
@@ -111,11 +114,11 @@ String floatToString(float number, int decimals) {
   for (int i = 0; i < strlen(buffer); i++) {
     if (buffer[i] == '.') {
       buffer[i] = getCurrentCurrencyDecimalSeparator();
-      break; 
+      break;
     }
   }
 
-  return String(buffer); 
+  return String(buffer);
 }
 
 String ipToString(IPAddress ip) { // IP v4 only
@@ -205,5 +208,5 @@ String paymentJsonToString(JsonObject areaElems) {
 
 String getRandomElementFromArray(String inputArray[], int numOfSlogans) {
   int randomIndex = random(0, numOfSlogans); // Generate a random index between 0 and numOfSlogans-1
-  return inputArray[randomIndex]; 
+  return inputArray[randomIndex];
 }

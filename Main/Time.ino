@@ -12,7 +12,7 @@ String getTimeFromNTP() {
   #endif
   String timeData = getEndpointData(timeServer, String(timeServerPath) + String(timezone), false);
 
-  DynamicJsonDocument doc(8192); 
+  DynamicJsonDocument doc(8192);
 
   DeserializationError error = deserializeJson(doc, timeData);
   if (error)
@@ -52,6 +52,8 @@ String getDayOfWeekString(int dayOfWeek) {
     return nlWeekdays[dayOfWeek];
   } else if (strncmp(localeSetting,"es",2) == 0) {
     return esWeekdays[dayOfWeek];
+  } else if (strncmp(localeSetting,"pt",2) == 0) {
+    return ptWeekdays[dayOfWeek];
   } else {
      return enWeekdays[dayOfWeek];
   }
