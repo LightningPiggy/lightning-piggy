@@ -43,7 +43,7 @@ String currentVersion = "6.4.2";
 
 #define CONFIG_FILE "/config.json"
 
-extern const int NOT_SPECIFIED = -1; 
+extern const int NOT_SPECIFIED = -1;
 
 #define MAX_CONFIG_LENGTH 256 // used to be 131 but people with longer LNURLs had issues
 #define MAX_CONFIG_LENGTH_NWCURL 512
@@ -88,6 +88,7 @@ const char * dkWeekdays[] = { "Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"};
 const char * esWeekdays[] = { "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"};
 const char * enWeekdays[] = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 const char * nlWeekdays[] = { "Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"};
+const char * ptWeekdays[] = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
 
 
 typedef enum {
@@ -133,9 +134,9 @@ static const char login_html[] PROGMEM = R"rawliteral(
 <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); padding: 2rem; width: 300px; text-align: center;">
 <h2 style="color: #EC008C; margin-bottom: 1.5rem;">Lightning Piggy Configuration Login</h2>
 <div id="error-message" style="color: #EC008C; margin-bottom: 1rem; display: none;">Invalid credentials, please try again.</div>
-<form action="/submit" method="POST">
-<input type="text" name="username" placeholder="Username" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
-<input type="password" name="password" placeholder="Password" style="width: 100%; padding: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
+<form action="/submit" method="POST" autocapitalize="none" autocorrect="off" spellcheck="false">
+<input type="text" name="username" placeholder="Username" autocapitalize="none" autocorrect="off" spellcheck="false" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
+<input type="password" name="password" placeholder="Password" autocapitalize="none" autocorrect="off" spellcheck="false" style="width: 100%; padding: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
 <input type="submit" value="Login" style="width: 100%; padding: 0.75rem; background-color: silver; color: black; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s, transform 0.3s;" onmouseover="this.style.backgroundColor='#EC008C'; this.style.color='white';" onmouseout="this.style.backgroundColor='silver'; this.style.color='black';">
 </form>
 <script>
