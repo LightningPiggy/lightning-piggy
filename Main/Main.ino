@@ -44,12 +44,22 @@ void setup()
   print_reset_reasons();
   print_wakeup_reason();
 
-  setup_watchdog(); // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
-
   setup_display();
   displayVoltageWarning();
   showBootSlogan();
   showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
+
+  displayWaitingConfig();
+  if (!loadConfigOrSetup())
+  {
+    Serial.println("Failed to load config or setup new one");
+    delay(1000);
+
+    ESP.restart();
+    return;
+  }
+
+  setup_watchdog(); // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
 
   displayWifiConnecting();
 #ifndef DEBUG

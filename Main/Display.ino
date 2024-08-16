@@ -541,7 +541,12 @@ void displayLNURLPayments(int limit, int maxX, int startY, int maxY)
 
 void displayWifiConnecting()
 {
-  displayFit("Wifi: " + String(ssid), 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
+  displayFit("Connected to WiFi", 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
+}
+
+void displayWaitingConfig()
+{
+  displayFit("Connect to AP to config", 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
 }
 
 void displayWifiStrengthBottom()
