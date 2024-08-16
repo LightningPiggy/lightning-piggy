@@ -81,16 +81,9 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info)
   Serial.println(details);
 }
 
-void connectWifi()
+void setupWifiCallback()
 {
-  Serial.println("Connecting to " + String(ssid));
   WiFi.onEvent(wifiEventCallback);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(1000);
-    Serial.print(".");
-  }
   Serial.print("WiFi connected! IP address: ");
   Serial.println(WiFi.localIP());
 }
@@ -103,14 +96,14 @@ void disconnectWifi()
   delay(500);
 }
 
-bool wifiConnected()
+bool isWifiConnected()
 {
   return (WiFi.status() == WL_CONNECTED);
 }
 
 // Take measurements of the Wi-Fi strength and return the average result.
 // 100 measurements takes 2 seconds so 20ms per measurement
-int getStrength(int points)
+int getWifiStrength(int points)
 {
 #ifdef DEBUG
   delay(points * 20);
@@ -141,7 +134,7 @@ int getStrength(int points)
   RSSI < – 90 dBm  Extremely weak signal (unusable)
 
  */
-int strengthPercent(float strength)
+int toWifiPercentStrength(float strength)
 {
   int strengthPercent = 100 + strength;
   // ESP32 returns RSSI above 0 sometimes, so limit to 99% max:
@@ -266,7 +259,7 @@ String getEndpointData(const char *host, String endpointUrl, bool sendApiKey)
 void connectWebsocket()
 {
   disconnectWebsocket(); // make sure it's disconnected
-  if (!wifiConnected())
+  if (!isWifiConnected())
   {
     Serial.println("Not connecting websocket because wifi is not connected.");
     return;
@@ -281,7 +274,7 @@ void connectWebsocket()
   String url = websocketApiUrl + String(invoiceKey);
   int lnbitsPortInteger = getConfigValueAsInt((char *)lnbitsPort, DEFAULT_LNBITS_PORT);
   Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
-  webSocket.onEvent(webSocketEvent);
+  webSocket.onEvent(handleWebSocketEvent);
   webSocket.setReconnectInterval(1000);
   webSocket.beginSSL(lnbitsHost, lnbitsPortInteger, url);
 }
@@ -317,7 +310,7 @@ void parseWebsocketText(String text)
   }
 }
 
-void webSocketEvent(WStype_t type, uint8_t *payload, size_t wslength)
+void handleWebSocketEvent(WStype_t type, uint8_t *payload, size_t wslength)
 {
   String payloadStr = "";
   switch (type)

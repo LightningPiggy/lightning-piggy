@@ -6,7 +6,7 @@ String getTimeFromNTP()
   // and show a clear error if there's something wrong with it.
   if (!isConfigured(timezone))
     return "";
-  if (!wifiConnected())
+  if (!isWifiConnected())
     return "NoNetwork";
 
 #ifdef DEBUG

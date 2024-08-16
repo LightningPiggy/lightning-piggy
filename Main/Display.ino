@@ -551,7 +551,7 @@ void displayWifiStrengthBottom()
 
 void displayWifiStrength(int y)
 {
-  int wifiStrengthPercent = strengthPercent(getStrength(5));
+  int wifiStrengthPercent = toWifiPercentStrength(getWifiStrength(5));
   String wifiString = "Wifi:" + String(wifiStrengthPercent) + "%";
   displayFit(wifiString, displayWidth() - 8 * 7, y, displayWidth(), displayHeight(), 1, false, true);
 }
@@ -587,9 +587,9 @@ void displayStatus(int xBeforeLNURLp, bool showsleep)
     if (!showsleep)
     {
       wifiString = "Wifi:";
-      if (wifiConnected())
+      if (isWifiConnected())
       {
-        int wifiStrengthPercent = strengthPercent(getStrength(5));
+        int wifiStrengthPercent = toWifiPercentStrength(getWifiStrength(5));
         wifiString += String(wifiStrengthPercent) + "%";
       }
       else
