@@ -1,15 +1,18 @@
 String lastTime = "";
 
-String getTimeFromNTP() {
+String getTimeFromNTP()
+{
   // Later on, this could validate the timezone even more,
   // and show a clear error if there's something wrong with it.
-  if (!isConfigured(timezone)) return "";
-  if (!wifiConnected()) return "NoNetwork";
+  if (!isConfigured(timezone))
+    return "";
+  if (!wifiConnected())
+    return "NoNetwork";
 
-  #ifdef DEBUG
+#ifdef DEBUG
   lastTime = "W23:39";
   return "W23:39";
-  #endif
+#endif
   String timeData = getEndpointData(timeServer, String(timeServerPath) + String(timezone), false);
 
   JsonDocument doc;
@@ -34,27 +37,41 @@ String getTimeFromNTP() {
   return lastTime;
 }
 
-String getLastTime() {
+String getLastTime()
+{
   return lastTime;
 }
 
 // In alphabetical order
-String getDayOfWeekString(int dayOfWeek) {
-  if (dayOfWeek < 0 || dayOfWeek > 6) {
+String getDayOfWeekString(int dayOfWeek)
+{
+  if (dayOfWeek < 0 || dayOfWeek > 6)
+  {
     Serial.println("Invalid day of week: " + String(dayOfWeek));
     return "";
   }
-  if (strncmp(localeSetting,"de",2) == 0) {
-     return deWeekdays[dayOfWeek];
-  } else if (strncmp(localeSetting,"dk",2) == 0) {
-     return dkWeekdays[dayOfWeek];
-  } else if (strncmp(localeSetting,"nl",2) == 0) {
+  if (strncmp(localeSetting, "de", 2) == 0)
+  {
+    return deWeekdays[dayOfWeek];
+  }
+  else if (strncmp(localeSetting, "dk", 2) == 0)
+  {
+    return dkWeekdays[dayOfWeek];
+  }
+  else if (strncmp(localeSetting, "nl", 2) == 0)
+  {
     return nlWeekdays[dayOfWeek];
-  } else if (strncmp(localeSetting,"es",2) == 0) {
+  }
+  else if (strncmp(localeSetting, "es", 2) == 0)
+  {
     return esWeekdays[dayOfWeek];
-  } else if (strncmp(localeSetting,"pt",2) == 0) {
+  }
+  else if (strncmp(localeSetting, "pt", 2) == 0)
+  {
     return ptWeekdays[dayOfWeek];
-  } else {
-     return enWeekdays[dayOfWeek];
+  }
+  else
+  {
+    return enWeekdays[dayOfWeek];
   }
 }

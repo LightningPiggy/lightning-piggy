@@ -1,13 +1,15 @@
 #include <ArduinoJson.h>
 #include "Constants.h"
 
-float getBitcoinPrice() {
+float getBitcoinPrice()
+{
   String btcPriceCurrency = String(btcPriceCurrencyChar);
   Serial.println("Getting Bitcoin price...");
 
-  #ifdef DEBUG
-  Serial.println("Mocking getBitcoinPrice:"); return 30000.2;
-  #endif
+#ifdef DEBUG
+  Serial.println("Mocking getBitcoinPrice:");
+  return 30000.2;
+#endif
 
   // Get the data
   String path = "/v1/bpi/currentprice/" + btcPriceCurrency + ".json";
@@ -26,7 +28,8 @@ float getBitcoinPrice() {
 
   float btcPrice = doc["bpi"][btcPriceCurrency]["rate_float"];
 
-  if (btcPrice == 0.0) {
+  if (btcPrice == 0.0)
+  {
     Serial.println("BTC Price not found, returning NOT_SPECIFIED");
     return (float)NOT_SPECIFIED;
   }
