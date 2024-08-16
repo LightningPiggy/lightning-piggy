@@ -133,8 +133,8 @@ int strengthPercent(float strength) {
 /**
  * @brief GET data from a HTTPS URL
  *
- * @param endpointUrl 
- * @return String 
+ * @param endpointUrl
+ * @return String
  */
 String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   int connectionAttempts = 0;
@@ -251,7 +251,7 @@ void connectWebsocket() {
 
 void parseWebsocketText(String text) {
   String returnValue = "";
-  DynamicJsonDocument doc(4096); // 4096 bytes is plenty for just the wallet details (id, name and balance info)
+  JsonDocument doc;
 
   DeserializationError error = deserializeJson(doc, text);
   if (error) {

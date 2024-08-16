@@ -17,7 +17,7 @@ int getWalletBalance() {
 
   const String line = getEndpointData(lnbitsHost, url, true);
   Serial.println("Got wallet balance line: " + line);
-  DynamicJsonDocument doc(4096); // 4096 bytes is plenty for just the wallet details (id, name and balance info)
+  JsonDocument doc;
 
   DeserializationError error = deserializeJson(doc, line);
   if (error)
@@ -56,7 +56,7 @@ void fetchLNURLPayments(int limit) {
 
   Serial.println("Got payments: " + line);
 
-  DynamicJsonDocument doc(limit * 4096); // 4KB per lnurlpayment should be enough for everyone (tm)
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, line);
   if (error)
   {
@@ -101,7 +101,7 @@ String getLNURLp() {
 
   // Get the first lnurlp
   String lnurlpData = getEndpointData(lnbitsHost, "/lnurlp/api/v1/links?all_wallets=false", true);
-  DynamicJsonDocument doc(8192); // the size of the list of links is unknown so don't skimp here
+  JsonDocument doc;
 
   DeserializationError error = deserializeJson(doc, lnurlpData);
   if (error)

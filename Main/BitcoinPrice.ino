@@ -12,7 +12,7 @@ float getBitcoinPrice() {
   // Get the data
   String path = "/v1/bpi/currentprice/" + btcPriceCurrency + ".json";
   String priceData = getEndpointData("api.coindesk.com", path, false);
-  DynamicJsonDocument doc(8192); // the size of the list of links is unknown so don't skimp here
+  JsonDocument doc;
 
   DeserializationError error = deserializeJson(doc, priceData);
   if (error)

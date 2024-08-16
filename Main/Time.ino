@@ -12,7 +12,7 @@ String getTimeFromNTP() {
   #endif
   String timeData = getEndpointData(timeServer, String(timeServerPath) + String(timezone), false);
 
-  DynamicJsonDocument doc(8192);
+  JsonDocument doc;
 
   DeserializationError error = deserializeJson(doc, timeData);
   if (error)
