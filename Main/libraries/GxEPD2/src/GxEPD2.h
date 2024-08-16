@@ -64,6 +64,7 @@ class GxEPD2
       GDEM029T94,
       GDEY029T94,
       DEPG0290BS,
+      GDEY029T71H,
       GDEW027W3,  Waveshare_2_7_bw = GDEW027W3,
       GDEY027T91,
       GDEQ031T10,
@@ -82,6 +83,7 @@ class GxEPD2
       GDEW075T7,  Waveshare_7_5_bw_T7 = GDEW075T7,
       GDEY075T7,
       GDEM102T91,
+      GDEM1085T51,
       GDEH116T91,
       GDEW1248T3, Waveshare_12_24_bw = GDEW1248T3,
       GDEM133T91,
@@ -112,13 +114,16 @@ class GxEPD2
       GDEY1248Z51,
       GDEM133Z91,
       // 4-color
+      GDEY0213F51,
       GDEY0266F51H,
       GDEY029F51H,
       Waveshare3inch4color,
       GDEY0420F51,
       Waveshare437inch4color,
+      GDEY116F51,
       // 7-color
       ACeP565,     Waveshare_5_65_7c = ACeP565,
+      GDEP0565D90,
       GDEY073D46,
       ACeP730,     Waveshare_7_30_7c = ACeP730
     };
