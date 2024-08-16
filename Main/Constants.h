@@ -3,7 +3,7 @@
 
 String currentVersion = "4.3.1";
 
-extern const int NOT_SPECIFIED = -1; 
+extern const int NOT_SPECIFIED = -1;
 
 const char * NOTCONFIGURED = "REPLACETHISBY";
 const unsigned int NOTCONFIGURED_LENGTH = 13;
@@ -38,6 +38,7 @@ const char * dkWeekdays[] = { "Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"};
 const char * esWeekdays[] = { "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"};
 const char * enWeekdays[] = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 const char * nlWeekdays[] = { "Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"};
+const char * ptWeekdays[] = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
 
 
 typedef enum {
