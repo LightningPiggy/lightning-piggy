@@ -5,7 +5,7 @@
 // - ESP32 Board Support version 2.0.17
 // - Preferences -> Compiler warnings: Default
 // - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
-// - Tools -> Upload Speed: 921600
+// - Tools -> Upload Speed: 115200
 // - Tools -> CPU Frequency: 240Mhz
 // - Tools -> Flash Frequency: 80Mhz
 // - Tools -> Flash Mode: QIO

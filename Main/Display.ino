@@ -445,7 +445,7 @@ void displayFetching() {
 // returns the y value after showing all the status info
 void displayStatus(int xBeforeLNURLp, bool showsleep) {
   setFont(0);
-  int lineHeight = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent(); // there's no fontDescent in these status lines 
+  int lineHeight = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent(); // there's no fontDescent in these status lines
   int qrPixels = displayWidth() - xBeforeLNURLp; // square
   Serial.println("qrPixels = " + String(qrPixels));
 
@@ -457,10 +457,10 @@ void displayStatus(int xBeforeLNURLp, bool showsleep) {
     // Show battery voltage if battery detected (by heuristic)
     double voltage = getLastVoltage();
     if (showsleep) voltage = getBatteryVoltage(); // only refresh voltage before going to sleep
-    if (voltage > 0) startY += drawLine("Batt:" + String(batteryVoltageToPercent(voltage)) + "%", displayWidth(), startY, false, true);
+    if (voltage > 0) startY += drawLine("Bat:" + String(batteryVoltageToPercent(voltage)) + "%", displayWidth(), startY, false, true);
 
     // wifi strength or zzzz
-    String wifiString = "..zzZZZ";
+    String wifiString = "ZzZzz";
     if (!showsleep) {
       wifiString = "Wifi:";
       if (wifiConnected()) {
@@ -546,7 +546,7 @@ void showFiatValues(int balance, int maxX) {
     toDisplay += " (" + formatIntWithSeparator((int)btcPrice) + " " + getCurrentCurrencyCode() + ")";
   }
 
-  displayFit(toDisplay, 0, fiatHeight, maxX, displayHeight(), 2, true);
+  displayFit(toDisplay, 0, fiatHeight, maxX, displayHeight(), 4, false);
 }
 
 

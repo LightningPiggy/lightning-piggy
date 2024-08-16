@@ -16,7 +16,7 @@ int showLNURLpQR(String qrData) {
   int qrVersion = getQrCodeVersion(qrData);
   int pixSize = getQrCodePixelSize(qrVersion);
   uint8_t qrcodeData[qrcode_getBufferSize(qrVersion)];
-  
+
   qrcode_initText(&qrcoded, qrcodeData, qrVersion, 0, qrDataChar);
 
   Serial.println("Displaying LNURLp QR code...");
@@ -46,9 +46,9 @@ int showLNURLpQR(String qrData) {
 
 /**
  * @brief Get the size of the qr code to produce
- * 
- * @param qrData 
- * @return int 
+ *
+ * @param qrData
+ * @return int
  */
 int getQrCodeVersion(String qrData) {
   int qrVersion = 0;
@@ -57,7 +57,7 @@ int getQrCodeVersion(String qrData) {
   // Using this chart with ECC_LOW https://github.com/ricmoo/QRCode#data-capacities
   if(stringLength <= 25) {
     qrVersion = 1;
-  }  
+  }
   else if(stringLength <= 47) {
     qrVersion = 2;
   }
@@ -86,13 +86,13 @@ int getQrCodeVersion(String qrData) {
 
 /**
  * @brief Get the Qr Code Pixel Size object
- * 
+ *
  * @param qrCodeVersion The QR code version that is being used
  * @return int The size of the QR code pixels
  */
 int getQrCodePixelSize(int qrCodeVersion) {
   Serial.println("getQrCodePixelSize for qrCodeVersion " + String(qrCodeVersion));
-  
+
   // Using https://github.com/ricmoo/QRCode#data-capacities
   // Get the QR code size (blocks not pixels)
   int qrCodeHeight = 0;
