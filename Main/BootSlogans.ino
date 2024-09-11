@@ -46,7 +46,8 @@ String bitcoinSlogans_en[] = {
   "'Lost coins only make everyone else's coins worth slightly more. Think of it as a donation to everyone.' - Satoshi Nakamoto",
   "'Stay humble, stack sats.' - Matt Odell",
   "'Bitcoin is a strange game where the only winning move is to play.' - Bitstein",
-  "'If privacy is outlawed, only outlaws will have privacy.' - Phil Zimmermann"
+  "'If privacy is outlawed, only outlaws will have privacy.' - Phil Zimmermann",
+  "'We reject: kings, presidents, and voting. We believe in: rough consensus and running code.' — David Clark"
 };
 
 String bitcoinSlogans_nl[] = {
