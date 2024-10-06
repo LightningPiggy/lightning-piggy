@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "4.3.3";
+String currentVersion = "4.4.0-sc";
 
 extern const int NOT_SPECIFIED = -1;
 
