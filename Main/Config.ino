@@ -105,7 +105,7 @@ bool saveConfigToDisk()
   return true;
 }
 
-bool tryToGetConfigFromApServer()
+bool setupConfigFromApServer()
 {
   WiFiManagerParameter customParamLnBitsHost("lnbitsHost", "LN Bits Host", lnbitsHost, 60);
   WiFiManagerParameter customParamLnBitsPort("lnbitsPort", "LN Bits Port", lnbitsPort, 6);
@@ -119,9 +119,6 @@ bool tryToGetConfigFromApServer()
   wifiManager.addParameter(&customParamLnBitsHost);
   wifiManager.addParameter(&customParamLnBitsPort);
   wifiManager.addParameter(&customParamInvoiceKey);
-
-  // for debugging
-  wifiManager.resetSettings();
 
   Serial.println("AutoConnect");
   if (!wifiManager.autoConnect("LN Piggy"))
@@ -137,9 +134,11 @@ bool tryToGetConfigFromApServer()
   strcpy(lnbitsPort, customParamLnBitsPort.getValue());
   strcpy(invoiceKey, customParamInvoiceKey.getValue());
 
+#ifdef DEBUG
   Serial.println("LN Bits Host: " + String(lnbitsHost));
   Serial.println("LN Bits Port: " + String(lnbitsPort));
   Serial.println("Invoice Key: " + String(invoiceKey));
+#endif
 
   if (shouldSaveConfig)
   {
@@ -151,10 +150,10 @@ bool tryToGetConfigFromApServer()
 
 bool loadConfigOrSetup()
 {
-  if (!loadConfigFromFS())
-    return false;
-  if (!tryToGetConfigFromApServer())
-    return false;
+  if (loadConfigFromFS())
+    return true;
+  if (setupConfigFromApServer())
+    return true;
 
-  return true;
+  return false;
 }
