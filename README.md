@@ -13,7 +13,7 @@ The source code in Main/Main.ino works on both the TTGO LilyGo T5 ePaper 2.13 in
 **Tested with:**
 
 - Arduino IDE version 1.8.13
-- ESP32 Board Support version 2.0.14
+- ESP32 Board Support version 2.0.17
 - Preferences -> Compiler warnings: Default
 - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 
@@ -58,7 +58,7 @@ To install Lightning Piggy from the code base (rather than just using the latest
 - Connect the device via USB
 - Open /Main/Main.ino using Arduino Studio.
 - Update values in config.h
-- Copy the libraries used from C:\...\lightning-piggy\Splash\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
+- Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
 - Upload using Sketch > Upload.
 
 To install the temporary Lightning Piggy Splash (used for shipping):
@@ -76,8 +76,9 @@ To make a new release available on the web installer:
 - Update version number in Constants.h
 - Make sure config.h has no unintended development changes (cp Main/config.h /tmp; git checkout Main/config.h)
 - Update CHANGELOG.md
-- Copy the libraries used from C:\...\lightning-piggy\Splash\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
+- Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
 - Compile the project using Sketch > Compile.
-- Copy /tmp/build_*/Main.ino.bin to firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/
+- Copy /tmp/build_*/Main.ino*.bin to firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/
+- Check that ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin still matches firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/boot_app0.bin
 - Update the version number in lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x.json
 - Revert back to default code with custom config (cp /tmp/config.h Main/config.h)
