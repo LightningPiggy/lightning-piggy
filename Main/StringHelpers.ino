@@ -180,9 +180,6 @@ String paymentJsonToString(JsonObject areaElems) {
   long long amount = areaElems["amount"]; // long long to support amounts above 999999000 millisats
   long amountSmaller = amount / 1000; // millisats to sats
 
-  String paymentWalletID = areaElems["wallet_id"];
-  setFoundWalletID(paymentWalletID);
-
   String paymentAmount(amountSmaller);
   String units = "sats";
   if (amountSmaller < 2) units = "sat";

@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "4.3.1";
+String currentVersion = "4.3.2";
 
 extern const int NOT_SPECIFIED = -1; 
 
@@ -26,6 +26,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define UPDATE_VOLTAGE_PERIOD_MILLIS 1000 * 60 * 5 // update voltage display every 5 minutes
 
 #define HIBERNATE_CHECK_PERIOD_MILLIS 1000 * 30 // hibernate check every 30 seconds
+
+#define TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS 1000 * 30
 
 #define DEFAULT_LNBITS_PORT 443
 

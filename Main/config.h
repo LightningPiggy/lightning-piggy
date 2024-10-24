@@ -8,33 +8,21 @@
 // MANDATORY:
 // ==========
 
-// The logic with invoiceKey, staticLNURLp and walletID is as follows:
-// - invoiceKey is mandatory (otherwise we can't check balance or payments)
-// - staticLNURLp is recommended because then no need to fetch it so it's faster
-// - walletID is recommended because it's need for the websocket, which then allows for instant incoming payments
-// How this is handled in code:
-// if the user hasn't provided a staticLNURLp then lnurlp and walletID are fetched using lnurlp/api/v1/links
-// if the user has provided a staticLNURLp then that one is used and:
-//    - if the user also provided a wallet ID then that one is used (no need to fetch it)
-//    - if the user hasn't provided a wallet ID:
-//        - the wallet ID is taken from incoming payments, if any are found
-//        - if there are no incoming payments, then the wallet ID is fetched using lnurlp/api/v1/links
+// The logic with invoiceKey, staticLNURLp is as follows:
 const char* ssid     = "REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID_REPLACETHISBYWIFISSID"; // wifi SSID here
 const char* password = "REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY_REPLACETHISBYWIFIKEY"; // wifi password here
 const char* lnbitsHost = "REPLACETHISBYLNBITSHOST_REPLACETHISBYLNBITSHOST_REPLACETHISBYLNBITSHOST"; // HOST NAME HERE E.G. legend.lnbits.com
 const char* lnbitsPort = "REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT_REPLACETHISBYLNBITSPORT"; // PORT NUMBER HERE E.G. 443
+// invoiceKey is mandatory (otherwise we can't check balance or payments)
 const char* invoiceKey = "REPLACETHISBYLNBITSKEY_REPLACETHISBYLNBITSKEY_REPLACETHISBYLNBITSKEY"; // lnbits wallet invoice hey here
 
 // OPTIONAL:
 // =========
 
-const char* staticLNURLp = "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING"; // optional, avoids an API call and resolves ambiguity in case multiple lnurlp's are available
-const char* walletID = "REPLACETHISBYWALLETID_REPLACETHISBYWALLETID_REPLACETHISBYWALLETID";
+const char* staticLNURLp = "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING"; // faster (avoids an API call) and resolves ambiguity in case multiple lnurlp's are available
 
 // Regular configuration values
 const char* checkUpdateHost = "m.lightningpiggy.com";
-
-const int sleepTimeMinutes = 60;
 
 // If the fiat currency (btcPriceCurrencyChar) is not configured, then no fiat values are shown
 // Example: USD, EUR, DKK, CHF, GBP, JPY, CNY, RMB,...

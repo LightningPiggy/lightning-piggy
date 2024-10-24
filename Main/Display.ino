@@ -374,7 +374,6 @@ void displayBalanceAndPayments(int xBeforeLNURLp, bool forceRefresh) {
   if (currentBalance != lastBalance || forceRefresh) updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
 }
 
-// fetchPayments forcing option is there to populate the walletID for the websocket (in case it's not configured)
 void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchPayments) {
   lastBalance = currentBalance;
 

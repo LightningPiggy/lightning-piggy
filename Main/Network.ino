@@ -3,6 +3,7 @@
 #define BUFFSIZE 1024
 
 WebSocketsClient webSocket;
+long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS;
 
 const char * system_event_names[] = { "WIFI_READY", "SCAN_DONE", "STA_START", "STA_STOP", "STA_CONNECTED", "STA_DISCONNECTED", "STA_AUTHMODE_CHANGE", "STA_GOT_IP", "STA_LOST_IP", "STA_WPS_ER_SUCCESS", "STA_WPS_ER_FAILED", "STA_WPS_ER_TIMEOUT", "STA_WPS_ER_PIN", "STA_WPS_ER_PBC_OVERLAP", "AP_START", "AP_STOP", "AP_STACONNECTED", "AP_STADISCONNECTED", "AP_STAIPASSIGNED", "AP_PROBEREQRECVED", "GOT_IP6", "ETH_START", "ETH_STOP", "ETH_CONNECTED", "ETH_DISCONNECTED", "ETH_GOT_IP", "MAX"};
 const char * system_event_reasons2[] = { "UNSPECIFIED", "AUTH_EXPIRE", "AUTH_LEAVE", "ASSOC_EXPIRE", "ASSOC_TOOMANY", "NOT_AUTHED", "NOT_ASSOCED", "ASSOC_LEAVE", "ASSOC_NOT_AUTHED", "DISASSOC_PWRCAP_BAD", "DISASSOC_SUPCHAN_BAD", "UNSPECIFIED", "IE_INVALID", "MIC_FAILURE", "4WAY_HANDSHAKE_TIMEOUT", "GROUP_KEY_UPDATE_TIMEOUT", "IE_IN_4WAY_DIFFERS", "GROUP_CIPHER_INVALID", "PAIRWISE_CIPHER_INVALID", "AKMP_INVALID", "UNSUPP_RSN_IE_VERSION", "INVALID_RSN_IE_CAP", "802_1X_AUTH_FAILED", "CIPHER_SUITE_REJECTED", "BEACON_TIMEOUT", "NO_AP_FOUND", "AUTH_FAIL", "ASSOC_FAIL", "HANDSHAKE_TIMEOUT", "CONNECTION_FAIL" };
@@ -234,16 +235,15 @@ void connectWebsocket() {
     Serial.println("Not connecting websocket because wifi is not connected.");
     return;
   }
-  // wss://legend.lnbits.com/api/v1/ws/<walletid>
-  String url = websocketApiUrl;
-  if (getWalletID().length() > 0) {
-    url += getWalletID();
-  } else {
-    Serial.println("Can't connect to websocket because no wallet ID is configured nor found in the LNURLp list. Aborting.");
+  if ((millis() - lastWebsocketConnectionAttempt) < TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS) {
+    Serial.println("Not connecting websocket because it was attempted just recently.");
     return;
   }
+  lastWebsocketConnectionAttempt = millis();
+  // wss://demo.lnpiggy.com/api/v1/ws/<invoice read key>
+  String url = websocketApiUrl + String(invoiceKey);
   int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
-  Serial.println("Trying to connect websocket: https://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
+  Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(1000);
   webSocket.beginSSL(lnbitsHost, lnbitsPortInteger, url);
@@ -285,7 +285,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
             break;
         case WStype_CONNECTED:
             Serial.printf("[WSc] Connected to url: %s, waiting for incoming payments...\n",  payload);
-            webSocket.sendTXT("Connected"); // send message to server when Connected
+            // No need: webSocket.sendTXT("Connected"); // send message to server when Connected
             break;
         case WStype_TEXT:
             payloadStr = String((char*)payload);
@@ -304,8 +304,12 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
     }
 }
 
-void websocket_loop() {
+void loop_websocket() {
     webSocket.loop();
+}
+
+bool isWebsocketConnected() {
+  return webSocket.isConnected();
 }
 
 void disconnectWebsocket() {
