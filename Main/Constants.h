@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "4.3.2";
+String currentVersion = "4.3.3";
 
 extern const int NOT_SPECIFIED = -1; 
 
@@ -21,7 +21,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define CHECK_UPDATE_PERIOD_SECONDS 7*24*60*60 // every week
 
-#define UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // fallback to updating balance every 10 minutes if the instant websocket method is unavailable
+#define UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // fallback to updating balance every 15 minutes if the instant websocket method is unavailable
 
 #define UPDATE_VOLTAGE_PERIOD_MILLIS 1000 * 60 * 5 // update voltage display every 5 minutes
 

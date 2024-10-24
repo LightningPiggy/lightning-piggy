@@ -371,7 +371,11 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
 // returns whether it updated the display
 void displayBalanceAndPayments(int xBeforeLNURLp, bool forceRefresh) {
   int currentBalance = getWalletBalance();
-  if (currentBalance != lastBalance || forceRefresh) updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
+  if (currentBalance != lastBalance || forceRefresh) {
+    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
+  } else {
+    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, false);
+  }
 }
 
 void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchPayments) {

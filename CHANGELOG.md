@@ -1,3 +1,6 @@
+**4.3.3**
+- Fix bug that caused only the QR code and status (bottom) right to be displayed after 15 minutes of uptime
+
 **4.3.2**
 - Fix instant payments that broke due to LNBits WebSockets API change
 - Add Spanish (es) boot slogans. Thanks, @Petrotronic!
