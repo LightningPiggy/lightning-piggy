@@ -1,3 +1,7 @@
+**4.3.2**
+- Fix instant payments that broke due to LNBits WebSockets API change
+- Add Spanish (es) boot slogans. Thanks, @Petrotronic!
+
 **4.3.1**
 - Reduce "Back up!" after tilt from 5 seconds to 2.
 
