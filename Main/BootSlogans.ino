@@ -222,7 +222,7 @@ String bitcoinSlogans_de_CH[] {
   "'Wenn d Privatsphäri verbote wird, wärde nume no Gesetzlosi ä Privatsphäri ha.' - Phil Zimmermann"
 };
 
-String bitcoinSlogans_sp[] = {
+String bitcoinSlogans_es[] = {
   "Bitcoin es el oro de los frikis.",
   "En Bitcoin confiamos.",
   "Sé tu propio banco.",
@@ -268,14 +268,16 @@ String bitcoinSlogans_sp[] = {
 // Function to get a random Bitcoin slogan from the array
 String getRandomBootSlogan() {
   if (isConfigured(localeSetting)) {
-    if (strncmp(localeSetting,"nl",2) == 0) {
-      return getRandomElementFromArray(bitcoinSlogans_nl, sizeof(bitcoinSlogans_nl)/sizeof(bitcoinSlogans_nl[0]));
-    } else if (strncmp(localeSetting,"da",2) == 0) {
+    if (strncmp(localeSetting,"da",2) == 0) {
       return getRandomElementFromArray(bitcoinSlogans_da, sizeof(bitcoinSlogans_da)/sizeof(bitcoinSlogans_da[0]));
-    } else if (strncmp(localeSetting,"de_CH",5) == 0) {
+    } else if (strncmp(localeSetting,"de_CH",5) == 0) { // check specific locales first because they are preferred (de_CH before de)
       return getRandomElementFromArray(bitcoinSlogans_de_CH, sizeof(bitcoinSlogans_de_CH)/sizeof(bitcoinSlogans_de_CH[0]));
     } else if (strncmp(localeSetting,"de",2) == 0) { // matches de_DE and other de_* locales
       return getRandomElementFromArray(bitcoinSlogans_de_DE, sizeof(bitcoinSlogans_de_DE)/sizeof(bitcoinSlogans_de_DE[0]));
+    } else if (strncmp(localeSetting,"es",2) == 0) { // matches Spanish (Espanol) and other es_* locales
+      return getRandomElementFromArray(bitcoinSlogans_es, sizeof(bitcoinSlogans_es)/sizeof(bitcoinSlogans_es[0]));
+    } else if (strncmp(localeSetting,"nl",2) == 0) { // matches Dutch (Nederlands) and other nl_* locales
+      return getRandomElementFromArray(bitcoinSlogans_nl, sizeof(bitcoinSlogans_nl)/sizeof(bitcoinSlogans_nl[0]));
     }
   }
 

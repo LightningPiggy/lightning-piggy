@@ -2,7 +2,7 @@
 //
 // Tested with:
 // - Arduino IDE version 1.8.13
-// - ESP32 Board Support version 2.0.14
+// - ESP32 Board Support version 2.0.17
 // - Preferences -> Compiler warnings: Default
 // - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 // - Tools -> Upload Speed: 921600
@@ -28,7 +28,6 @@
 
 long lastUpdatedBalance = -UPDATE_BALANCE_PERIOD_MILLIS;  // this makes it update when first run
 int lastBalance = -NOT_SPECIFIED;
-bool alreadyTriedFindingWalletIDinLNURLpList = false;
 bool forceRefreshBalanceAndPayments = false;
 int xBeforeLNURLp;
 
@@ -66,6 +65,7 @@ void setup() {
 
 void loop() {
   loop_interrupts();
+  loop_websocket();
 
   // If there is no balance OR it has been a long time since it was refreshed, then refresh it
   if (lastBalance == -NOT_SPECIFIED || (millis() - lastUpdatedBalance) > UPDATE_BALANCE_PERIOD_MILLIS || forceRefreshBalanceAndPayments) {
@@ -79,19 +79,9 @@ void loop() {
     forceRefreshBalanceAndPayments = false;
 
     checkShowUpdateAvailable();
-    connectWebsocket();
   }
 
-  // The wallet ID (needed for the websocket) is configured statically or is found in the incoming payments.
-  // But if not, because there were no incoming payments, then fetch it from lnurlp/list.
-  // Only attempt to do this once, to avoid becoming very slow here
-  if (getWalletID().length() == 0 && !alreadyTriedFindingWalletIDinLNURLpList) {
-    Serial.println("No wallet ID was configured or found in incoming payments, fetching it from the LNURLp list...");
-    alreadyTriedFindingWalletIDinLNURLpList = true;
-    getLNURLp(true);
-    connectWebsocket(); // slow operation so make sure websocket is connected
-  }
-  if (getWalletID().length() > 0) websocket_loop();
+  if (!isWebsocketConnected()) connectWebsocket();
 
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
   if (!hibernateDependingOnBattery()) delay(200);

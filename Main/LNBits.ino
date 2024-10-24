@@ -1,7 +1,5 @@
 #include "Constants.h"
 
-String foundWalletID = "";
-
 String lnurlPayments[MAX_PAYMENTS];
 int nroflnurlPayments = 0;
 
@@ -80,28 +78,20 @@ void fetchLNURLPayments(int limit) {
 }
 
 
-String getLNURLp() {
-  return getLNURLp(false); // mustFetchWalletID = false
-}
-
 /**
  * @brief Get the first available LNURLp from the wallet
- *
- * if mustFetch is true then the return value (String LNURLp) isn't used
- * but rather, the walletIDfromLNURLp is what will be used later.
  *
  * @return lnurlp for accepting payments
  *
  */
-String getLNURLp(bool mustFetchWalletID) {
+String getLNURLp() {
   #ifdef DEBUG
   Serial.println("Mocking getLNURLp:"); return "LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7DTRWE2NVKQ72L5D3";
   #endif
 
-  // Only fetch the first one using the API if no fixed lnurlPayments was configured (unless mustFetchWalletID)
-  if (isConfigured(staticLNURLp) && !mustFetchWalletID) {
+  // Only fetch the first one using the API if no fixed lnurlPayments was configured
+  if (isConfigured(staticLNURLp))
     return staticLNURLp;
-  }
 
   if (cachedLNURLp.length() > 0) {
     return cachedLNURLp;
@@ -121,32 +111,10 @@ String getLNURLp(bool mustFetchWalletID) {
   }
   String lnurlpId = doc[0]["id"];
   String lnurlp = doc[0]["lnurl"];
-  String localWalletIDfromLNURLp = doc[0]["wallet"];
-  setFoundWalletID(localWalletIDfromLNURLp);
 
-  Serial.println("Fetched LNURLp: " + lnurlp + " and found LNURLp wallet ID:" + localWalletIDfromLNURLp);
+  Serial.println("Fetched LNURLp: " + lnurlp);
   cachedLNURLp = lnurlp;
   return lnurlp;
-}
-
-void setFoundWalletID(String walletID) {
-  if (foundWalletID.length() == 0) {
-    foundWalletID = walletID;
-    Serial.println("Setting foundWalletID = " + String(walletID));
-  } else {
-    Serial.println("Not setting foundWalletID = " + String(walletID));
-  }
-}
-
-// Returns the wallet ID from configuration,
-// or the wallet ID that was found
-// either in the LNURLp list or in an incoming payment.
-String getWalletID() {
-  if (isConfigured(walletID)) {
-    return walletID;
-  } else {
-    return foundWalletID;
-  }
 }
 
 void addLNURLpayment(String toadd) {
