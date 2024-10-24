@@ -179,6 +179,7 @@ String bitcoinSlogans_de_DE[] = {
 };
 
 String bitcoinSlogans_de_CH[] {
+  "Dr Vättu dobe het di gärn.",
   "Bitcoin isch Goud für Computerfreaks.",
   "Mir vertroue uf Bitcoin.",
   "Muesch dini eigeti Bank si.",
@@ -205,7 +206,6 @@ String bitcoinSlogans_de_CH[] {
   "Was du machsch, bestimmt, wär du bisch.",
   "Du hesch es Rächt uf Eigetum.",
   "Di Körper isch dis Eigetum.",
-  "Dr Vättu dobe het di gärn.",
   "Du bisch dr Einzig, wo für di zueständig isch.",
   "Dis Läbe ghört dir u nume dir allei.",
   "Nume du chasch dis Läbe läbe.",
@@ -220,6 +220,49 @@ String bitcoinSlogans_de_CH[] {
   "'nume nid zgäi, tuesch gschider no chlei sats horte.' - Matt Odell",
   "'Bitcoin isch es komisches Spieli, u dr einzig Siegerzug isch, das Spieli spiele.' - Bitstein",
   "'Wenn d Privatsphäri verbote wird, wärde nume no Gesetzlosi ä Privatsphäri ha.' - Phil Zimmermann"
+};
+
+String bitcoinSlogans_sp[] = {
+  "Bitcoin es el oro de los frikis.",
+  "En Bitcoin confiamos.",
+  "Sé tu propio banco.",
+  "HODL",
+  "Si no son tus llaves, no es tu dinero.",
+  "Hay 100.000.000 sats en un Bitcoin.",
+  "Bitcoin fué vaticinado por Henry Ford, Friedrich Hayek y Milton Friedman",
+  "Haz tu propia busqueda de conocimiento.",
+  "Piensa por ti mismo.",
+  "No deleges tu manera de pensar a otros.",
+  "Persigue la verdad incansablemente.",
+  "Ámate a ti mismo y ama a los demás.",
+  "Bitcoin tenia razón.",
+  "Sé justo, sé equitativo y sé amable.",
+  "Si tienes miedo de algo, estúdialo.",
+  "Todos tienen un corazón hambriento.",
+  "Todos los seres humanos quieren las mismas cosas fundamentales por las mismas razones.",
+  "No importa cuánto tengas, serás igual de feliz.",
+  "Tener más no te hará feliz.",
+  "Practica la compasión; ponte en el lugar de otra persona.",
+  "Practica la atención; siente sin juzgar. Experimenta con curiosidad.",
+  "Practica la gratitud; siempre encuentra cosas por las que estar agradecido.",
+  "Las acciones hablan más fuerte que las palabras.",
+  "Lo que haces determina quién eres.",
+  "Tienes derecho a la propiedad privada.",
+  "Tu cuerpo es tu propiedad.",
+  "Tú eres el único responsable de ti mismo.",
+  "Tu vida es tuya y solo tuya.",
+  "Solo tú puedes vivir tu vida.",
+  "Los ciberpunks escriben código.",
+  "'Si no me crees o no lo entiendes, no tengo tiempo para intentar convencerte, lo siento.' - Satoshi Nakamoto",
+  "'El calor de tu ordenador no se desperdicia si necesitas calentar tu hogar.' - Satoshi Nakamoto",
+  "'¿Qué opina todo el mundo sobre el símbolo B con las dos líneas a través del exterior?' - Satoshi Nakamoto",
+  "'La credencial que establece a alguien como real es la capacidad de suministrar potencia de CPU.' - Satoshi Nakamoto",
+  "'Para mayor privacidad, es mejor usar las direcciones de bitcoin solo una vez.' - Satoshi Nakamoto",
+  "'Estoy seguro de que en 20 años habrá un volumen de transacciones muy grande o ningún volumen.' - Satoshi Nakamoto",
+  "'Las monedas perdidas solo hacen que las monedas de los demás valgan un poco más. Piénsalo como una donación para todos.' - Satoshi Nakamoto",
+  "'Mantente humilde, acumula sats.' - Matt Odell",
+  "'Bitcoin es un juego extraño donde el único movimiento ganador es jugar.' - Bitstein",
+  "'Si la privacidad se ilegaliza, solo los fuera de la ley tendrán privacidad.' - Phil Zimmermann"
 };
 
 // Function to get a random Bitcoin slogan from the array
