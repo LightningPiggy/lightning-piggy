@@ -78,7 +78,7 @@ void longsleepAfterMaxWatchdogReboots()
   rtc_max_watchdog_reboot_count = max_watchdog_reboot_count; // save the value in a variable that is preserved across deepsleep
 
   int sleepHours = SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS * max_watchdog_reboot_count;
-  String errorMsg = "After " + String(watchdog_reboot_count) + " failure restarts, sleeping for ";
+  String errorMsg = "Depois de " + String(watchdog_reboot_count) + " errors, dormindo por ";
   errorMsg += String(sleepHours) + "h now. Happened " + String(max_watchdog_reboot_count) + " times in a row already.";
   Serial.println(errorMsg);
   // Wifi errors go up to y=40 so this error starts at y=41 and ends at displayHeight()-16 because "connecting to <SSID>" starts at displayHeight()-15

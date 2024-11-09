@@ -113,7 +113,6 @@ bool setupConfigFromApServer()
   WiFiManager wifiManager;
 
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-  wifiManager.setTimeout(900);
   wifiManager.setCaptivePortalEnable(true);
 
   wifiManager.addParameter(&customParamLnBitsHost);

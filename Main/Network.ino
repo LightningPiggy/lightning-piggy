@@ -21,15 +21,15 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info)
   if (eventid == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)
   {
     uint8_t reason = info.wifi_sta_disconnected.reason;
-    details = "Wifi error " + String(reason) + ": " + String(reason2str(reason));
+    details = "Erro no WIFI " + String(reason) + ": " + String(reason2str(reason));
 
     if (reason == WIFI_REASON_MIC_FAILURE || reason == WIFI_REASON_AUTH_FAIL || reason == WIFI_REASON_AUTH_EXPIRE || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT)
     {
-      details += ". Wrong password? Max. WPA2 security.";
+      details += ". Senha errada?";
     }
     else if (reason == WIFI_REASON_NO_AP_FOUND)
     {
-      details += ". Wrong SSID? Only 2.4Ghz supported.";
+      details += ". SSID errado? Apenas 2.4Gz é suportado.";
     }
 
     if (reason != WIFI_REASON_ASSOC_LEAVE)
@@ -70,7 +70,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info)
   }
   else if (eventid == ARDUINO_EVENT_WIFI_STA_GOT_IP)
   {
-    details = "Obtained IP address: " + ipToString(WiFi.localIP());
+    details = "Recebi o endereço de IP: " + ipToString(WiFi.localIP());
   }
   else if (eventid == ARDUINO_EVENT_WIFI_STA_CONNECTED)
   {
@@ -172,11 +172,7 @@ String getEndpointData(const char *host, String endpointUrl, bool sendApiKey)
   if (!client.connected())
     return "";
 
-  String request = "GET " + endpointUrl + " HTTP/1.1\r\n" +
-                   "Host: " + String(host) + "\r\n" +
-                   "User-Agent: " + getFullVersion() + "\r\n" +
-                   "Content-Type: application/json\r\n" +
-                   "Connection: close\r\n";
+  String request = "GET " + endpointUrl + " HTTP/1.1\r\n" + "Host: " + String(host) + "\r\n" + "User-Agent: " + getFullVersion() + "\r\n" + "Content-Type: application/json\r\n" + "Connection: close\r\n";
   if (sendApiKey)
     request += "X-Api-Key: " + String(invoiceKey) + "\r\n";
   request += "\r\n";

@@ -50,28 +50,6 @@ String getDayOfWeekString(int dayOfWeek)
     Serial.println("Invalid day of week: " + String(dayOfWeek));
     return "";
   }
-  if (strncmp(localeSetting, "de", 2) == 0)
-  {
-    return deWeekdays[dayOfWeek];
-  }
-  else if (strncmp(localeSetting, "dk", 2) == 0)
-  {
-    return dkWeekdays[dayOfWeek];
-  }
-  else if (strncmp(localeSetting, "nl", 2) == 0)
-  {
-    return nlWeekdays[dayOfWeek];
-  }
-  else if (strncmp(localeSetting, "es", 2) == 0)
-  {
-    return esWeekdays[dayOfWeek];
-  }
-  else if (strncmp(localeSetting, "pt", 2) == 0)
-  {
-    return ptWeekdays[dayOfWeek];
-  }
-  else
-  {
-    return enWeekdays[dayOfWeek];
-  }
+
+  return ptWeekdays[dayOfWeek];
 }
