@@ -497,7 +497,7 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
   {
     if (currentBalance == NOT_SPECIFIED)
     {
-      displayFit("Unknown Balance", 0, 0, xBeforeLNURLp - 5, balanceHeight - 1 + delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
+      displayFit("Sem desc.", 0, 0, xBeforeLNURLp - 5, balanceHeight - 1 + delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
     }
     else
     {
@@ -541,12 +541,12 @@ void displayLNURLPayments(int limit, int maxX, int startY, int maxY)
 
 void displayWifiConnecting()
 {
-  displayFit("Connected to WiFi", 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
+  displayFit("Conectando ao WiFi", 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
 }
 
-void displayWaitingConfig()
+void displayWaitingConfig(String ssid)
 {
-  displayFit("Connect to AP to config", 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
+  displayFit("Conecte no meu WiFi: " + ssid, 0, displayHeight() - smallestFontHeight, displayWidth(), displayHeight(), 1);
 }
 
 void displayWifiStrengthBottom()
@@ -563,7 +563,7 @@ void displayWifiStrength(int y)
 
 void displayFetching()
 {
-  displayFit("Fetching " + String(lnbitsHost), 0, displayHeight() - smallestFontHeight, displayWidth() - 8 * 7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
+  displayFit("Buscando " + String(lnbitsHost), 0, displayHeight() - smallestFontHeight, displayWidth() - 8 * 7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
 }
 
 // returns the y value after showing all the status info
@@ -588,7 +588,7 @@ void displayStatus(int xBeforeLNURLp, bool showsleep)
       startY += drawLine("Bat:" + String(batteryVoltageToPercent(voltage)) + "%", displayWidth(), startY, false, true);
 
     // wifi strength or zzzz
-    String wifiString = "ZzZzz";
+    String wifiString = "ZzZZz";
     if (!showsleep)
     {
       wifiString = "Wifi:";
@@ -599,7 +599,7 @@ void displayStatus(int xBeforeLNURLp, bool showsleep)
       }
       else
       {
-        wifiString += "off";
+        wifiString += "des.";
       }
     }
     Serial.println("Displaying wifi string: " + wifiString);
@@ -607,7 +607,7 @@ void displayStatus(int xBeforeLNURLp, bool showsleep)
 
     String versionString = "v" + getShortVersion();
     if (isUpdateAvailable())
-      versionString += " UPD!";
+      versionString += " ATT!";
     startY += drawLine(versionString, displayWidth(), startY, false, true);
 
     // Excluded because not really necessary and takes up screen space:
@@ -630,7 +630,7 @@ bool displayVoltageWarning()
   // Print big fat warning on top of everything if low battery
   if (voltage > 0 && voltage < 3.8)
   {
-    String lowBatString = " ! LOW BATTERY (" + String(voltage) + "V) ! ";
+    String lowBatString = " ! BAT. BAIXA (" + String(voltage) + "V) ! ";
     displayFit(lowBatString, 0, displayHeight() - 12 - 18, displayWidth(), displayHeight() - 12, 2, true);
     return true;
   }
