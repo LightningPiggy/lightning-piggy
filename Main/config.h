@@ -37,9 +37,7 @@ const char *btcPriceCurrencyChar = "BRL";
 
 // The ESP32 can't keep a time when it's off because it doesn't have a battery, so it needs to be fetched from a server
 const char *timeServer = "worldtimeapi.org";
-const char *timeServer = "worldtimeapi.org";
 // timezone is added after this path, so it becomes: https://worldtimeapi.org/api/timezone/Europe/Copenhagen
-const char *timeServerPath = "/api/timezone/";
 const char *timeServerPath = "/api/timezone/";
 // Configure the timezone here, example: Europe/Copenhagen
 const char *timezone = "America/Sao_Paulo";

@@ -99,7 +99,8 @@ void connectOrStartConfigAp(bool autoConnect)
 
   String mac = WiFi.macAddress();
   mac.replace(":", "");
-  String apName = "LN Piggy " + mac.substring(4);
+  String apNameStr = "LN Piggy " + mac.substring(4);
+  const char *apName = apNameStr.c_str();
   if (autoConnect && !wifiManager.autoConnect(apName))
   {
     Serial.println("failed to connect and hit timeout");
@@ -107,7 +108,7 @@ void connectOrStartConfigAp(bool autoConnect)
   }
   else if (!autoConnect)
   {
-    Serial.println("AutoConnect: " + apName);
+    Serial.println("AutoConnect: " + apNameStr);
     if (!wifiManager.startConfigPortal(apName))
     {
       Serial.println("failed to start config portal");
