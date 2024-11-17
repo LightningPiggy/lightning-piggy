@@ -29,10 +29,7 @@
 // OPTIONAL:
 // =========
 
-const char *staticLNURLp = "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING"; // faster (avoids an API call) and resolves ambiguity in case multiple lnurlp's are available
-
 // Regular configuration values
-const char *checkUpdateHost = "m.lightningpiggy.com";
 
 // If the fiat currency (btcPriceCurrencyChar) is not configured, then no fiat values are shown
 // Example: USD, EUR, DKK, CHF, GBP, JPY, CNY, RMB,...
@@ -61,10 +58,10 @@ const char *defaultDecimalSeparator = ".";
 
 // A bit of text to show before the boot slogan.
 // Example: "Here's a bit of wisdom:"
-const char *bootSloganPrelude = "Teste SatsConf";
+const char *bootSloganPrelude = "SatsConf 2024";
 
 // Whether or not to show the boot slogan. Set to "YES" if you want it:
-const char *showSloganAtBoot = "Y";
+const char *showSloganAtBoot = "YES";
 
 // Value to add to the balance (can also be negative)
 // This can be used to account for the sats that have been moved to cold storage etc.

@@ -97,10 +97,6 @@ String getLNURLp()
   return "LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7DTRWE2NVKQ72L5D3";
 #endif
 
-  // Only fetch the first one using the API if no fixed lnurlPayments was configured
-  if (isConfigured(staticLNURLp))
-    return staticLNURLp;
-
   if (cachedLNURLp.length() > 0)
   {
     return cachedLNURLp;

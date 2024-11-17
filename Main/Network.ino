@@ -81,9 +81,41 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info)
   Serial.println(details);
 }
 
-void setupWifiCallback()
+void connectOrStartConfigAp(bool autoConnect)
 {
-  WiFi.onEvent(wifiEventCallback);
+  wifiManager.setCaptivePortalEnable(true);
+  wifiManager.setConfigPortalTimeout(60 * 60);
+  wifiManager.setClass("invert");    // dark theme
+  wifiManager.setScanDispPerc(true); // show percentage instead of quality icons
+  wifiManager.setMinimumSignalQuality(10);
+  wifiManager.setRemoveDuplicateAPs(false);
+  wifiManager.setCountry("BR");
+
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  wifiManager.addParameter(&customParamLnBitsHost);
+  wifiManager.addParameter(&customParamLnBitsPort);
+  wifiManager.addParameter(&customParamInvoiceKey);
+
+  String mac = WiFi.macAddress();
+  mac.replace(":", "");
+  String apName = "LN Piggy " + mac.substring(4);
+  if (autoConnect && !wifiManager.autoConnect(apName))
+  {
+    Serial.println("failed to connect and hit timeout");
+    ESP.restart();
+  }
+  else if (!autoConnect)
+  {
+    Serial.println("AutoConnect: " + apName);
+    if (!wifiManager.startConfigPortal(apName))
+    {
+      Serial.println("failed to start config portal");
+      ESP.restart();
+    }
+    Serial.println("AutoConnect end");
+  }
+
   Serial.print("WiFi connected! IP address: ");
   Serial.println(WiFi.localIP());
 }

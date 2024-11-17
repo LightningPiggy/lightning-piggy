@@ -13,6 +13,13 @@ void saveConfigCallback()
   shouldSaveConfig = true;
 }
 
+void resetConfig()
+{
+  Serial.println("formatting FS");
+  SPIFFS.format();
+  ESP.restart();
+}
+
 bool loadConfigFromFS()
 {
   // read configuration from FS json
@@ -42,6 +49,14 @@ bool loadConfigFromFS()
           Serial.println("Parsed JSON Config");
           serializeJsonPretty(json, Serial);
 
+          // verify that keys exist in the json
+          if (json["lnbitsHost"].isNull() || json["lnbitsPort"].isNull() || json["invoiceKey"].isNull())
+          {
+            Serial.println("JSON Config is missing keys, resetting to defaults");
+            resetConfig();
+            return false;
+          }
+
           strcpy(lnbitsHost, json["lnbitsHost"]);
           strcpy(lnbitsPort, json["lnbitsPort"]);
           strcpy(invoiceKey, json["invoiceKey"]);
@@ -54,13 +69,15 @@ bool loadConfigFromFS()
         configFile.close();
       }
     }
+    else
+    {
+      return false;
+    }
   }
   else
   {
     Serial.println("failed to mount FS");
-    Serial.println("formatting FS");
-    SPIFFS.format();
-    ESP.restart();
+    resetConfig();
     return false;
   }
 
@@ -105,29 +122,12 @@ bool saveConfigToDisk()
   return true;
 }
 
+WiFiManagerParameter customParamLnBitsHost("lnbitsHost", "LN Bits Host", lnbitsHost, 60);
+WiFiManagerParameter customParamLnBitsPort("lnbitsPort", "LN Bits Port", lnbitsPort, 6);
+WiFiManagerParameter customParamInvoiceKey("invoiceKey", "Invoice Key", invoiceKey, 32);
 bool setupConfigFromApServer()
 {
-  WiFiManagerParameter customParamLnBitsHost("lnbitsHost", "LN Bits Host", lnbitsHost, 60);
-  WiFiManagerParameter customParamLnBitsPort("lnbitsPort", "LN Bits Port", lnbitsPort, 6);
-  WiFiManagerParameter customParamInvoiceKey("invoiceKey", "Invoice Key", invoiceKey, 32);
-  WiFiManager wifiManager;
-
-  wifiManager.setSaveConfigCallback(saveConfigCallback);
-  wifiManager.setCaptivePortalEnable(true);
-
-  wifiManager.addParameter(&customParamLnBitsHost);
-  wifiManager.addParameter(&customParamLnBitsPort);
-  wifiManager.addParameter(&customParamInvoiceKey);
-
-  Serial.println("AutoConnect");
-  if (!wifiManager.autoConnect("LN Piggy"))
-  {
-    Serial.println("Failed to setup config using the AP");
-    ESP.restart();
-
-    return false;
-  }
-  Serial.println("AutoConnect end");
+  connectOrStartConfigAp(false);
 
   strcpy(lnbitsHost, customParamLnBitsHost.getValue());
   strcpy(lnbitsPort, customParamLnBitsPort.getValue());
@@ -149,10 +149,5 @@ bool setupConfigFromApServer()
 
 bool loadConfigOrSetup()
 {
-  if (loadConfigFromFS())
-    return true;
-  if (setupConfigFromApServer())
-    return true;
-
-  return false;
+  return loadConfigFromFS() || setupConfigFromApServer();
 }
