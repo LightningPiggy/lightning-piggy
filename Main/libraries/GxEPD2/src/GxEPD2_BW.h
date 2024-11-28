@@ -139,6 +139,9 @@
 #if __has_include("epd/GxEPD2_290_BS.h")
 #include "epd/GxEPD2_290_BS.h"
 #endif
+#if __has_include("gdey/GxEPD2_290_GDEY029T71H.h")
+#include "gdey/GxEPD2_290_GDEY029T71H.h"
+#endif
 #if __has_include("epd/GxEPD2_270.h")
 #include "epd/GxEPD2_270.h"
 #endif
@@ -172,6 +175,9 @@
 #if __has_include("gdeq/GxEPD2_426_GDEQ0426T82.h")
 #include "gdeq/GxEPD2_426_GDEQ0426T82.h"
 #endif
+#if __has_include("gdey/GxEPD2_579_GDEY0579T93.h")
+#include "gdey/GxEPD2_579_GDEY0579T93.h"
+#endif
 #if __has_include("epd/GxEPD2_583.h")
 #include "epd/GxEPD2_583.h"
 #endif
@@ -192,6 +198,9 @@
 #endif
 #if __has_include("gdem/GxEPD2_1020_GDEM102T91.h")
 #include "gdem/GxEPD2_1020_GDEM102T91.h"
+#endif
+#if __has_include("gdem/GxEPD2_1085_GDEM1085T51.h")
+#include "gdem/GxEPD2_1085_GDEM1085T51.h"
 #endif
 #if __has_include("epd/GxEPD2_1160_T91.h")
 #include "epd/GxEPD2_1160_T91.h"

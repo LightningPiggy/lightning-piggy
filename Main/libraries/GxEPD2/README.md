@@ -83,6 +83,7 @@
 - GDEW0213Z16    2.13" b/w/r 104x212, UC8151 (IL0373)
 - GDEW0213Z19    2.13" b/w/r 104x212, UC8151D
 - GDEY0213Z98    2.13" b/w/r 122x250, SSD1680
+- GDEY0213F51    2.13" 4-color 122x250, JD79661
 - DEPG0213BN     2.13" b/w 122x250, SSD1680, e.g. LILYGO® TTGO T5 V2.3.1 2.13 inch
 - GDEY0213B74    2.13" b/w 122x250, SSD1680
 - GDEW026T0      2.6" b/w 152x296, UC8151 (IL0373)
@@ -104,6 +105,7 @@
 - GDEM029C90     2.9" b/w/y 128x296, SSD1680
 - DEPG0290BS     2.9" b/w 128x296, SSD1680, e.g. LILYGO® TTGO T5 V2.4.1 2.9"
 - GDEY029T94     2.9" b/w 128x296, SSD1680
+- GDEY029T71H    2.9" b/w 168x384, SSD1685
 - GDEY029F51H    2.9" 4-color 168x384, JD79667
 - Waveshare3inch4color 3.0" 4-color 168x400
 - GDEQ031T10     3.1" b/w 240x320, UC8253
@@ -113,17 +115,23 @@
 - GDEW042M01     4.2" b/w 400x300, UC8176 (IL0398), DES
 - GDEW042Z15     4.2" b/w/r 400x300, UC8176 (IL0398)
 - GDEQ042Z21     4.2" b/w/r 400x300, UC8276, (Waveshare V2)
+- GDEY042Z98     4.2" b/w/r 400x300, SSD1683
 - GDEY042T81     4.2" b/w 400x300, SSD1683
 - GDEY0420F51    4.2" 4-color 400x300, HX8717
 - GDEQ0426T82    4.26" b/w 800x480, SSD1677
 - Waveshare437inch4color Waveshare 4.37" 4-color e-paper display 512x368 
 - ACeP565        5.65" Waveshare 5.65" 7-color e-paper display 600x448
+- GDEP0565D90    5.65" 7-color 600x448
+- GDEY0579T93    5.79" b/w 792x272, SSD1683
+- GDEY0579Z93    5.79" b/w/r 792x272, SSD1683
+- GDEY0579F51    5.79" 4-color 792x272, HX8717
 - GDEW0583T7     5.83" b/w 600x448, UC8159c (IL0371)
 - GDEW0583T8     5.83" b/w 648x480, EK79655 (GD7965)
 - GDEW0583Z83    5.83" b/w/r 648x480, EK79655 (GD7965)
 - GDEQ0583T31    5.83" b/w 648x480, UC8179
 - GDEQ0583Z31    5.83" b/w/r 648x480, UC8179C
 - GDEY073D46     7.3" 800x480 7-color
+- GDEP073E01     7.3" 800x480 7-color
 - ACeP730        7.3" Waveshare 7-color e-paper display 800x480, PhotoPainter
 - GDEW075T8      7.5" b/w 640x384, UC8159c (IL0371)
 - GDEW075T7      7.5" b/w 800x480, EK79655 (GD7965)
@@ -132,8 +140,10 @@
 - GDEW075Z08     7.5" b/w/r 800x480, EK79655 (GD7965)
 - GDEH075Z90     7.5" b/w/r 880x528, SSD1677
 - GDEM102T91    10.2" b/w 960x640, SSD1677
+- GDEM1085T51   10.85 b/w 1360x480, JD79686AB
 - GDEH116T91    11.6" b/w 960x640, SSD1677
 - GDEY116Z91    11.6" b/w/r 960x640, SSD1677
+- GDEY116F51    11.6" 4-color 960x640, SSD2677
 - GDEW1248T3    12.48" b/w 1304x984, UC8179
 - GDEY1248Z51   12.48" b/w/r 1304x984, UC8179
 - GDEM133T91    13.3" b/w 960x680, SSD1677
@@ -148,10 +158,29 @@
 - ES103TC1     10.3" grey levels, 1872x1404, on Waveshare e-Paper IT8951 Driver HAT
 
 ### I can and will only support e-paper panels I have!
-- promotion panels from suppliers are welcome, to add support to GxEPD2
-- donation panels from users are welcome, to add support to GxEPD2
+- I can accept panel donations to add support to GxEPD2.
+- But only few panels at any time, and only panels from known sources. 
+- Adding support will take as much time as needed.
 
-### Version 1.5.6
+### Version 1.5.9
+- added Power Save command (PWS) to GDEY075T7 init (issue with dithered bitmaps)
+- added support for GDEY0579T93 5.79" b/w 792x272, SSD1683
+- added support for GDEY0579Z93 5.79" b/w/r 792x272, SSD1683
+- added support for GDEY0579F51 5.79" 4-color 792x272, HX8717
+- the GDEY0579F51 has partial window addressing capability, 
+- but of little use, because the controller buffer is modified during refresh
+- partial window refresh can't be used on GDEY0579F51, refresh is full screen
+- added support for GDEY042Z98 4.2" b/w/r 400x300, SSD1683
+- GDEY042Z98 has "fast" full refresh and supports fast b/w partial refresh
+- added support for GDEP073E01 7.3" 800x480 7-color
+#### Version 1.5.8
+- added support for GDEP0565D90 5.65" 7-color 600x448
+- added support for GDEY116F51 11.6"  4-color 960x640, SSD2677
+- added support for GDEY029T71H 2.9" b/w 168x384, SSD1685
+#### Version 1.5.7
+- added support for GDEY0213F51 2.13" 4-color 122x250, JD79661
+- added support for GDEM1085T51 10.85 b/w 1360x480, JD79686AB
+#### Version 1.5.6
 - version for ongoing fixes and additions
 - added support for GYE042A87  4.2" b/w 400x300
 - added support for SE0420NQ04 4.2" b/w 400x300

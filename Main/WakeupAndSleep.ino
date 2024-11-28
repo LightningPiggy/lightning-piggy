@@ -44,9 +44,8 @@
 // 22:05:08.530 -> Wakeup from sleep count: 1
 // 22:05:08.530 -> Wakeup caused by timer
 
-
-#include "driver/rtc_io.h"  // for rtc_gpio_pullup_dis and rtc_gpio_pulldown_en
-#include <rom/rtc.h>        // for rtc_get_reset_reason
+#include "driver/rtc_io.h" // for rtc_gpio_pullup_dis and rtc_gpio_pulldown_en
+#include <rom/rtc.h>       // for rtc_get_reset_reason
 
 #define BUTTON_PIN_BITMASK 4294967296 // 2^32 means GPIO32
 
@@ -60,59 +59,124 @@ long lastHibernateCheck = -HIBERNATE_CHECK_PERIOD_MILLIS;
 
 long lastPaymentReceivedMillis = 0;
 
-String print_reset_reasons() {
-    Serial.println("CPU0 reset reason:");
-    print_reset_reason(rtc_get_reset_reason(0));
-    verbose_print_reset_reason(rtc_get_reset_reason(0));
+String print_reset_reasons()
+{
+  Serial.println("CPU0 reset reason:");
+  print_reset_reason(rtc_get_reset_reason(0));
+  verbose_print_reset_reason(rtc_get_reset_reason(0));
 
-    Serial.println("CPU1 reset reason:");
-    print_reset_reason(rtc_get_reset_reason(1));
-    verbose_print_reset_reason(rtc_get_reset_reason(1));
+  Serial.println("CPU1 reset reason:");
+  print_reset_reason(rtc_get_reset_reason(1));
+  verbose_print_reset_reason(rtc_get_reset_reason(1));
 
-    return "cpu 0: " + String(rtc_get_reset_reason(0)) + " cpu 1: " + String(rtc_get_reset_reason(1));
+  return "cpu 0: " + String(rtc_get_reset_reason(0)) + " cpu 1: " + String(rtc_get_reset_reason(1));
 }
 
-void print_reset_reason(int reason) {
-  switch ( reason)
+void print_reset_reason(int reason)
+{
+  switch (reason)
   {
-    case 1 : Serial.println ("POWERON_RESET");break;          /**<1,  Vbat power on reset, after flashing firmware or pushing reset button */
-    case 3 : Serial.println ("SW_RESET");break;               /**<3,  Software reset digital core*/
-    case 4 : Serial.println ("OWDT_RESET");break;             /**<4,  Legacy watch dog reset digital core*/
-    case 5 : Serial.println ("DEEPSLEEP_RESET");break;        /**<5,  Deep Sleep reset digital core, after wakeup from hibernate */
-    case 6 : Serial.println ("SDIO_RESET");break;             /**<6,  Reset by SLC module, reset digital core*/
-    case 7 : Serial.println ("TG0WDT_SYS_RESET");break;       /**<7,  Timer Group0 Watch dog reset digital core*/
-    case 8 : Serial.println ("TG1WDT_SYS_RESET");break;       /**<8,  Timer Group1 Watch dog reset digital core*/
-    case 9 : Serial.println ("RTCWDT_SYS_RESET");break;       /**<9,  RTC Watch dog Reset digital core*/
-    case 10 : Serial.println ("INTRUSION_RESET");break;       /**<10, Instrusion tested to reset CPU*/
-    case 11 : Serial.println ("TGWDT_CPU_RESET");break;       /**<11, Time Group reset CPU*/
-    case 12 : Serial.println ("SW_CPU_RESET");break;          /**<12, Software reset CPU: happens after ESP.reset() as well as Task Watchdog Timer (TWDT) reset */
-    case 13 : Serial.println ("RTCWDT_CPU_RESET");break;      /**<13, RTC Watch dog Reset CPU*/
-    case 14 : Serial.println ("EXT_CPU_RESET");break;         /**<14, for APP CPU, reseted by PRO CPU*/
-    case 15 : Serial.println ("RTCWDT_BROWN_OUT_RESET");break;/**<15, Reset when the vdd voltage is not stable*/
-    case 16 : Serial.println ("RTCWDT_RTC_RESET");break;      /**<16, RTC Watch dog reset digital core and rtc module, after sliding switch off-on */
-    default : Serial.println ("NO_MEAN");
+  case 1:
+    Serial.println("POWERON_RESET");
+    break; /**<1,  Vbat power on reset, after flashing firmware or pushing reset button */
+  case 3:
+    Serial.println("SW_RESET");
+    break; /**<3,  Software reset digital core*/
+  case 4:
+    Serial.println("OWDT_RESET");
+    break; /**<4,  Legacy watch dog reset digital core*/
+  case 5:
+    Serial.println("DEEPSLEEP_RESET");
+    break; /**<5,  Deep Sleep reset digital core, after wakeup from hibernate */
+  case 6:
+    Serial.println("SDIO_RESET");
+    break; /**<6,  Reset by SLC module, reset digital core*/
+  case 7:
+    Serial.println("TG0WDT_SYS_RESET");
+    break; /**<7,  Timer Group0 Watch dog reset digital core*/
+  case 8:
+    Serial.println("TG1WDT_SYS_RESET");
+    break; /**<8,  Timer Group1 Watch dog reset digital core*/
+  case 9:
+    Serial.println("RTCWDT_SYS_RESET");
+    break; /**<9,  RTC Watch dog Reset digital core*/
+  case 10:
+    Serial.println("INTRUSION_RESET");
+    break; /**<10, Instrusion tested to reset CPU*/
+  case 11:
+    Serial.println("TGWDT_CPU_RESET");
+    break; /**<11, Time Group reset CPU*/
+  case 12:
+    Serial.println("SW_CPU_RESET");
+    break; /**<12, Software reset CPU: happens after ESP.reset() as well as Task Watchdog Timer (TWDT) reset */
+  case 13:
+    Serial.println("RTCWDT_CPU_RESET");
+    break; /**<13, RTC Watch dog Reset CPU*/
+  case 14:
+    Serial.println("EXT_CPU_RESET");
+    break; /**<14, for APP CPU, reseted by PRO CPU*/
+  case 15:
+    Serial.println("RTCWDT_BROWN_OUT_RESET");
+    break; /**<15, Reset when the vdd voltage is not stable*/
+  case 16:
+    Serial.println("RTCWDT_RTC_RESET");
+    break; /**<16, RTC Watch dog reset digital core and rtc module, after sliding switch off-on */
+  default:
+    Serial.println("NO_MEAN");
   }
 }
 
-void verbose_print_reset_reason(int reason) {
-  switch ( reason)
+void verbose_print_reset_reason(int reason)
+{
+  switch (reason)
   {
-    case 1  : Serial.println ("Vbat power on reset");break;
-    case 3  : Serial.println ("Software reset digital core");break;
-    case 4  : Serial.println ("Legacy watch dog reset digital core");break;
-    case 5  : Serial.println ("Deep Sleep reset digital core");break;
-    case 6  : Serial.println ("Reset by SLC module, reset digital core");break;
-    case 7  : Serial.println ("Timer Group0 Watch dog reset digital core");break;
-    case 8  : Serial.println ("Timer Group1 Watch dog reset digital core");break;
-    case 9  : Serial.println ("RTC Watch dog Reset digital core");break;
-    case 10 : Serial.println ("Instrusion tested to reset CPU");break;
-    case 11 : Serial.println ("Time Group reset CPU");break;
-    case 12 : Serial.println ("Software reset CPU");break;
-    case 13 : Serial.println ("RTC Watch dog Reset CPU");break;
-    case 14 : Serial.println ("for APP CPU, reseted by PRO CPU");break;
-    case 15 : Serial.println ("Reset when the vdd voltage is not stable");break;
-    case 16 : Serial.println ("RTC Watch dog reset digital core and rtc module");break;
-    default : Serial.println ("NO_MEAN");
+  case 1:
+    Serial.println("Vbat power on reset");
+    break;
+  case 3:
+    Serial.println("Software reset digital core");
+    break;
+  case 4:
+    Serial.println("Legacy watch dog reset digital core");
+    break;
+  case 5:
+    Serial.println("Deep Sleep reset digital core");
+    break;
+  case 6:
+    Serial.println("Reset by SLC module, reset digital core");
+    break;
+  case 7:
+    Serial.println("Timer Group0 Watch dog reset digital core");
+    break;
+  case 8:
+    Serial.println("Timer Group1 Watch dog reset digital core");
+    break;
+  case 9:
+    Serial.println("RTC Watch dog Reset digital core");
+    break;
+  case 10:
+    Serial.println("Instrusion tested to reset CPU");
+    break;
+  case 11:
+    Serial.println("Time Group reset CPU");
+    break;
+  case 12:
+    Serial.println("Software reset CPU");
+    break;
+  case 13:
+    Serial.println("RTC Watch dog Reset CPU");
+    break;
+  case 14:
+    Serial.println("for APP CPU, reseted by PRO CPU");
+    break;
+  case 15:
+    Serial.println("Reset when the vdd voltage is not stable");
+    break;
+  case 16:
+    Serial.println("RTC Watch dog reset digital core and rtc module");
+    break;
+  default:
+    Serial.println("NO_MEAN");
   }
 }
 
@@ -120,19 +184,33 @@ void verbose_print_reset_reason(int reason) {
 Method to print the reason by which ESP32
 has been awaken from sleep
 */
-String print_wakeup_reason(){
+String print_wakeup_reason()
+{
   Serial.println("Wakeup from sleep count: " + String(wakeup_count));
   wakeup_count++;
 
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-  switch(wakeup_reason)
+  switch (wakeup_reason)
   {
-    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using EXT0 RTC_IO"); break;
-    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using EXT1 RTC_CNTL"); print_GPIO_wake_up(); break;
-    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
-    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
-    default : Serial.printf("Wakeup was not caused by deep sleep, wakeup reason: %d\n",wakeup_reason); break;
+  case ESP_SLEEP_WAKEUP_EXT0:
+    Serial.println("Wakeup caused by external signal using EXT0 RTC_IO");
+    break;
+  case ESP_SLEEP_WAKEUP_EXT1:
+    Serial.println("Wakeup caused by external signal using EXT1 RTC_CNTL");
+    print_GPIO_wake_up();
+    break;
+  case ESP_SLEEP_WAKEUP_TIMER:
+    Serial.println("Wakeup caused by timer");
+    break;
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    Serial.println("Wakeup caused by touchpad");
+    break;
+  case ESP_SLEEP_WAKEUP_ULP:
+    Serial.println("Wakeup caused by ULP program");
+    break;
+  default:
+    Serial.printf("Wakeup was not caused by deep sleep, wakeup reason: %d\n", wakeup_reason);
+    break;
   }
 
   return "This is the " + String(wakeup_count) + "th wakeup in a row, for reason (%d): " + String(wakeup_reason);
@@ -141,10 +219,11 @@ String print_wakeup_reason(){
 /*
 Method to print the GPIO that triggered the wakeup
 */
-void print_GPIO_wake_up(){
+void print_GPIO_wake_up()
+{
   uint64_t GPIO_reason = esp_sleep_get_ext1_wakeup_status();
   Serial.print("GPIO pin(s) that woke it up: " + String(GPIO_reason) + " which translates to pin: ");
-  Serial.println((log(GPIO_reason))/log(2), 0);
+  Serial.println((log(GPIO_reason)) / log(2), 0);
 }
 
 /*
@@ -159,39 +238,34 @@ void print_GPIO_wake_up(){
  * >3.70V => wakeup every 8 hours
  * <3.70V => wakeup every 10 hours (should not happen because battery completely drained)
  */
-int batteryVoltageToSleepSeconds(double voltage) {
-  if (voltage > 4.18) {
+int batteryVoltageToSleepSeconds(double voltage)
+{
+  if (voltage > 4.18)
+  {
     return 0; // don't go to sleep
-  } else if (voltage > 4.10) {
-    return 60*60;
-  } else if (voltage > 4.0) {
-    return 2*60*60;
-  } else if (voltage > 3.9) {
-    return 4*60*60;
-  } else if (voltage > 3.8) {
-    return 6*60*60;
-  } else if (voltage > 3.7) {
-    return 8*60*60;
-  } else {
-    return 10*60*60;
   }
+  return 60 * 60;
 }
 
 // returns: true if hibernate was checked, false if it was rate limited
-bool hibernateDependingOnBattery() {
-  // rate limit these hibernate checks because it seems to become buggy 
+bool hibernateDependingOnBattery()
+{
+  // rate limit these hibernate checks because it seems to become buggy
   long nowCheckedHibernate = millis();
-  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS) {
+  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS)
+  {
     return false;
-  } else {
+  }
+  else
+  {
     lastHibernateCheck = nowCheckedHibernate;
   }
   Serial.println("FREE HEAP MEMORY: " + String(ESP.getFreeHeap()));
 
   int resetReason = rtc_get_reset_reason(0);
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-  if ((resetReason == POWERON_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1)
-    && (millis()-lastPaymentReceivedMillis) < (AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000)) {
+  if ((resetReason == POWERON_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1) && (millis() - lastPaymentReceivedMillis) < (AWAKE_SECONDS_AFTER_MANUAL_WAKEUP * 1000))
+  {
     Serial.println("Device was woken up or received payment less than " + String(AWAKE_SECONDS_AFTER_MANUAL_WAKEUP) + "s ago, not sleeping yet because another payment might come in..");
     return true;
   }
@@ -199,26 +273,33 @@ bool hibernateDependingOnBattery() {
   double voltage = getBatteryVoltage(); // takes around 450ms (due to 4 battery voltage samples with 100ms delay between)
   // voltage < 0 means it's battery powered, but sometimes it can glitch and show NOT battery powered
   // to avoid going to sleep on just a glitch, don't go to sleep as long as the average battery voltage is not also negative.
-  if (voltage < 0) {
+  if (voltage < 0)
+  {
     Serial.println("Device is not battery powered so not sleeping.");
     return true;
-  } else if (getAverageBatteryVoltage()<2.5) {
+  }
+  else if (getAverageBatteryVoltage() < 2.5)
+  {
     Serial.println("Saved from an unwanted sleep by the average battery voltage (" + String(getAverageBatteryVoltage()) + "<2.5V) check!");
     return true;
   }
 
   int sleepTimeSeconds = batteryVoltageToSleepSeconds(voltage);
-  if (sleepTimeSeconds == 0) {
+  if (sleepTimeSeconds == 0)
+  {
     Serial.println("Device has extremely full battery so not sleeping.");
     return true;
-  } else {
+  }
+  else
+  {
     Serial.println("Battery voltage is " + String(voltage) + " so sleeping for " + String(sleepTimeSeconds) + "seconds.");
     hibernate(sleepTimeSeconds);
   }
   return true;
 }
 
-void hibernate(int sleepTimeSeconds) {
+void hibernate(int sleepTimeSeconds)
+{
   Serial.println("Going to sleep for " + String(sleepTimeSeconds) + " seconds...");
 
   displayStatus(xBeforeLNURLp, true);
@@ -231,22 +312,23 @@ void hibernate(int sleepTimeSeconds) {
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON); // RTC peripherals needs to stay on for GPIO32's pulldown to work
   // disabled to allow for wakeup_count to stay: esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
   esp_sleep_enable_timer_wakeup(deepSleepTime);
 
   // Enable GPIO39 (user button) wakeup
   // GPIO39 is active low, which ext1 doesn't support so we need ext0:
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39,0); //1 = High, 0 = Low
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0); // 1 = High, 0 = Low
 
   // Enable GPIO32 (tilt sensor pin wakeup)
   // ext0 only supports a single wakeup pin so we need ext1 for an additional one:
   rtc_gpio_pullup_dis(GPIO_NUM_32);  // pullup disabled because pulldown enabled
   rtc_gpio_pulldown_en(GPIO_NUM_32); // pulldown is needed to avoid floating pin that triggers randomly
-  esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
+  esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ANY_HIGH);
 
   esp_deep_sleep_start();
 }
 
-void resetLastPaymentReceivedMillis() {
+void resetLastPaymentReceivedMillis()
+{
   lastPaymentReceivedMillis = millis();
 }

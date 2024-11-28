@@ -1,11 +1,11 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "4.3.3";
+String currentVersion = "4.4.0-sc";
 
 extern const int NOT_SPECIFIED = -1;
 
-const char * NOTCONFIGURED = "REPLACETHISBY";
+const char *NOTCONFIGURED = "REPLACETHISBY";
 const unsigned int NOTCONFIGURED_LENGTH = 13;
 #define MAX_CONFIG_LENGTH 131
 
@@ -17,9 +17,9 @@ extern const int MAX_BOOTSLOGAN_SECONDS = 15;
 extern const int MAX_WATCHDOG_REBOOTS = 3;
 extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
-#define AWAKE_SECONDS_AFTER_MANUAL_WAKEUP 3*60
+#define AWAKE_SECONDS_AFTER_MANUAL_WAKEUP 3 * 60
 
-#define CHECK_UPDATE_PERIOD_SECONDS 7*24*60*60 // every week
+#define CHECK_UPDATE_PERIOD_SECONDS 7 * 24 * 60 * 60 // every week
 
 #define UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // fallback to updating balance every 15 minutes if the instant websocket method is unavailable
 
@@ -35,19 +35,14 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define MAX_HTTPS_CONNECTION_ATTEMPTS 3
 
 // In alphabetical order
-const char * deWeekdays[] = { "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
-const char * dkWeekdays[] = { "Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"};
-const char * esWeekdays[] = { "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"};
-const char * enWeekdays[] = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
-const char * nlWeekdays[] = { "Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"};
-const char * ptWeekdays[] = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
+const char *ptWeekdays[] = {"Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
 
-
-typedef enum {
-    STR2INT_SUCCESS,
-    STR2INT_OVERFLOW,
-    STR2INT_UNDERFLOW,
-    STR2INT_INCONVERTIBLE
+typedef enum
+{
+  STR2INT_SUCCESS,
+  STR2INT_OVERFLOW,
+  STR2INT_UNDERFLOW,
+  STR2INT_INCONVERTIBLE
 } str2int_errno;
 
 String websocketApiUrl = "/api/v1/ws/";
