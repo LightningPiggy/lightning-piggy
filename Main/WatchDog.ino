@@ -79,15 +79,42 @@ void longsleepAfterMaxWatchdogReboots() {
 }
 
 void enable_watchdog(int seconds) {
-  // For Task watchdog:
-  // esp_task_wdt_init(seconds*1000, true);
+  int milliseconds = seconds*1000;
+  int err = 0;
 
   // for RTC watchdog:
+  // the code below was inspired by the espressive watchdog documentation and official examples
   rtc_wdt_protect_off();      //Disable RTC WDT write protection
-  rtc_wdt_set_stage(RTC_WDT_STAGE0, RTC_WDT_STAGE_ACTION_RESET_SYSTEM);
-  rtc_wdt_set_time(RTC_WDT_STAGE0, seconds*1000);
+  rtc_wdt_disable();
+
+  // Left default length_of_reset_signal because it seems fine:
+  //err = rtc_wdt_set_length_of_reset_signal(RTC_WDT_SYS_RESET_SIG, RTC_WDT_LENGTH_3_2us);
+  //if (err) Serial.println("WARNING: rtc_wdt_set_length_of_reset_signal for " + String(RTC_WDT_LENGTH_3_2us) + " returned error: " + String(err));
+
+  err = rtc_wdt_set_stage(RTC_WDT_STAGE0, RTC_WDT_STAGE_ACTION_RESET_SYSTEM);
+  if (err) Serial.println("WARNING: rtc_wdt_set_stage(RTC_WDT_STAGE0, RTC_WDT_STAGE_ACTION_RESET_SYSTEM) returned error: " + String(err));
+
+  err = rtc_wdt_set_time(RTC_WDT_STAGE0, milliseconds);
+  if (err) Serial.println("WARNING: rtc_wdt_set_time for " + String(milliseconds) + "ms returned error: " + String(err));
+
   rtc_wdt_enable();           //Start the RTC WDT timer
-  rtc_wdt_protect_on();       // Not really needed?
+  rtc_wdt_protect_on();
+
+  unsigned int * timeout_ms = (unsigned int *) malloc(sizeof(unsigned int));
+  err = rtc_wdt_get_timeout(RTC_WDT_STAGE0, timeout_ms);
+  if (err) {
+    Serial.println("WARNING: rtc_wdt_get_timeout for RTC_WDT_STAGE0 returned error: " + String(err));
+  } else {
+    unsigned int actual_timeout_ms = (*timeout_ms) * 22; // not sure why but the returned value seems ~21.95 times too low...
+    Serial.println("rtc_wdt_get_timeout after setting it to " + String(milliseconds) + "ms returned: " + String(actual_timeout_ms) + "ms");
+  }
+  free(timeout_ms);
+
+  if (rtc_wdt_is_on()) {
+    Serial.println("rtc_wdt_is_on returns true");
+  } else {
+    Serial.println("rtc_wdt_is_on returns false");
+  }
 }
 
 bool nextWatchdogRebootWillReachMax() {
