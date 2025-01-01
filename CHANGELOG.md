@@ -1,3 +1,7 @@
+**4.4.0**
+- Fix bug that caused the device to stay awake as long as it failed to connect to wifi
+
+
 **4.3.3**
 - Fix bug that caused only the QR code and status (bottom) right to be displayed after 15 minutes of uptime
 

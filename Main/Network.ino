@@ -73,9 +73,14 @@ void connectWifi() {
   Serial.println("Connecting to " + String(ssid));
   WiFi.onEvent(wifiEventCallback);
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  long startTime = millis();
+  while (WiFi.status() != WL_CONNECTED) { // there's no max attempts but the watchdog should trigger a restart
       delay(1000);
       Serial.print(".");
+      if ((millis() - startTime) > WIFI_CONNECT_TIMEOUT_SECONDS*1000) {
+        displayWifiIssue(WIFI_CONNECT_TIMEOUT_SECONDS);
+        hibernateDependingOnBattery();
+      }
   }
   Serial.print("WiFi connected! IP address: ");
   Serial.println(WiFi.localIP());

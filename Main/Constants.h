@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "4.3.3";
+String currentVersion = "4.4.0";
 
 extern const int NOT_SPECIFIED = -1; 
 
@@ -28,6 +28,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define HIBERNATE_CHECK_PERIOD_MILLIS 1000 * 30 // hibernate check every 30 seconds
 
 #define TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS 1000 * 30
+
+#define WIFI_CONNECT_TIMEOUT_SECONDS 42         // after this time, it's deemed a failure
 
 #define DEFAULT_LNBITS_PORT 443
 

@@ -226,7 +226,7 @@ int drawLines(String stringArray[], int nrOfItems, int startX, int endX, int sta
 int drawLine(String line, int xPos, int yPos, bool invert, bool alignRight) {
   int w = u8g2Fonts.getUTF8Width(line.c_str());
   int h = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent();
-  Serial.println("Drawing text " + String(line) + " at (" + String(xPos) + "," + String(yPos) + ") with size "+ String(w) + "x"+ String(h));
+  Serial.println("Drawing text '" + String(line) + "' at (" + String(xPos) + "," + String(yPos) + ") with size "+ String(w) + "x"+ String(h));
   if (!alignRight) {
     Serial.println("u8g2Fonts.setCursor(" + String(xPos) + "," + String(yPos + h) + ")");
     u8g2Fonts.setCursor(xPos, yPos + h); // bottom of the line
@@ -302,7 +302,7 @@ int displayFit(String text, int startXbig, int startYbig, int endXbig, int endYb
   int yPos;
 
   if (drawIt) {
-    Serial.println("Setting partial window: (" + String(startXbig) + "," + String(startYbig) + " with size " + String(endXbig-startXbig+1) + "x" + String(endYbig-startYbig+1));
+    Serial.println("Setting partial window: (" + String(startXbig) + "," + String(startYbig) + ") with size " + String(endXbig-startXbig+1) + "x" + String(endYbig-startYbig+1));
     setPartialWindow(startXbig, startYbig, endXbig-startXbig+1, endYbig-startYbig+1);
   }
   while (fontSize > 0) {
@@ -426,6 +426,10 @@ void displayLNURLPayments(int limit, int maxX, int startY, int maxY) {
 
 void displayWifiConnecting() {
   displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
+}
+
+void displayWifiIssue(int seconds) {
+  displayFit("I've been trying to connect to the wifi for more than " + String(seconds) + " seconds...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
 }
 
 void displayWifiStrengthBottom() {
