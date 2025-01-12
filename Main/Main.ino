@@ -1,4 +1,5 @@
 // Code for the Lightning Piggy running on the TTGO LilyGo 2.13 and 2.66 inch ePaper hardware.
+// Tested with the DEPG display variants, not with GDEM.
 //
 // Tested with:
 // - Arduino IDE version 1.8.13
