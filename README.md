@@ -10,7 +10,7 @@ Main Source code
 
 The source code in Main/Main.ino works on both the TTGO LilyGo T5 ePaper 2.13 inch DEPG0213BN display and the (discontinued and more expensive) TTGO LilyGo T5 ePaper 2.66 inch DEPG0266BN display boards.
 
-**Tested with:**
+**With Arduino IDE**
 
 - Arduino IDE version 1.8.13
 - ESP32 Board Support version 2.0.17
@@ -32,6 +32,20 @@ Where:
 Make sure the Arduino IDE has permissions to access the serial port:
 
 `sudo chmod -f 777 /dev/ttyACM* /dev/ttyUSB*`
+
+**OR with Arduino CLI**
+
+- Arduino CLI version 1.1.1-arch commit: fa6eafcbbea391eee
+- LNBits v0.12.12
+- Debian Bookworm
+- lnd version 0.18.99-beta
+- bitcoind 27.0.0
+
+Commands:
+
+```
+arduino-cli compile -u -v -t --libraries Main/libraries/ --fqbn esp32:esp32:esp32 -p /dev/ttyACM0 Main/
+```
 
 **On the lnbits webpage:**
 
