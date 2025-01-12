@@ -61,6 +61,7 @@ bool prependCurrencySymbol() {
   (strncmp(btcPriceCurrencyChar,"GBP",3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "JPY", 3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "CNY", 3) == 0) ||
+  (strncmp(btcPriceCurrencyChar, "MYR", 3) == 0) ||
   (strncmp(btcPriceCurrencyChar, "RMB", 3) == 0)) {
       return true;
   }
@@ -78,6 +79,8 @@ String getCurrentCurrencyCode() {
     return "Fr.";
   } else if (strncmp(btcPriceCurrencyChar, "GBP", 3) == 0) {
     return "£";
+  } else if (strncmp(btcPriceCurrencyChar, "MYR", 3) == 0) {
+    return "RM";
   } else if ((strncmp(btcPriceCurrencyChar, "JPY", 3) == 0) || (strncmp(btcPriceCurrencyChar, "CNY", 3) == 0) || (strncmp(btcPriceCurrencyChar, "RMB", 3) == 0)) {
     return "¥";
   } else {
@@ -175,6 +178,7 @@ String stringArrayToString(String stringArray[], int nrOfItems) {
 
 String paymentJsonToString(JsonObject areaElems) {
   if (areaElems["pending"]) return ""; // ignore pending payments
+  if (areaElems["status"] && strncmp(areaElems["status"],"success",7)) return ""; // ignore unsuccessful payments
 
   // Payment always has an amount
   long long amount = areaElems["amount"]; // long long to support amounts above 999999000 millisats

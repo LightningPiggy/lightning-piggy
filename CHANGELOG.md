@@ -1,3 +1,7 @@
+**4.4.1**
+- Add support for Malaysian Ringgit (MYR) fiat currency by prepending "RM"
+- Ignore non-successful payments
+
 **4.4.0**
 - Fix bug that caused the device to stay awake as long as it failed to connect to wifi
 
