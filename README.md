@@ -92,7 +92,8 @@ To make a new release available on the web installer:
 - Update CHANGELOG.md
 - Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
 - Compile the project using Sketch > Compile.
-- Copy /tmp/build_*/Main.ino*.bin to firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/
-- Check that ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin still matches firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/boot_app0.bin
-- Update the version number in lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x.json
+- Copy /tmp/arduino_build_491356/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/
+- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/boot_app0.bin
+- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x.json
+- pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push  ; popd
 - Revert back to default code with custom config (cp /tmp/config.h Main/config.h)

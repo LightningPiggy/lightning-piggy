@@ -25,7 +25,7 @@ const char* staticLNURLp = "REPLACETHISBYSTATICLNURLPAYMENTSVALUESTRING_REPLACET
 const char* checkUpdateHost = "m.lightningpiggy.com";
 
 // If the fiat currency (btcPriceCurrencyChar) is not configured, then no fiat values are shown
-// Example: USD, EUR, DKK, CHF, GBP, JPY, CNY, RMB,...
+// Example: USD, EUR, DKK, CHF, GBP, JPY, CNY, RMB, MYR,...
 const char* btcPriceCurrencyChar = "REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY";
 
 // The ESP32 can't keep a time when it's off because it doesn't have a battery, so it needs to be fetched from a server
