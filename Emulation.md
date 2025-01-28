@@ -118,7 +118,47 @@ sleep 0.5
 nc localhost 5555
 
 killall qemu-system-xtensa
+cd ..
 ```
+
+Now you can copy code from Arduino examples to main/main.cpp and run them to test.
+
+IMPORTANT! The association with the access point will succeed BUT you won't receive any packets (DHCP replies, ARP replies, DNS replies) unless you do `WiFi.persistent(false);` before `WiFi.begin(ssid)`. This causes esp_wifi_set_storage(WIFI_STORAGE_RAM) to be called by the underlying ESP-IDF, and without it, it won't work.
+
+A few useful ones to start:
+- arduino-esp32/libraries/WiFi/examples/WiFiClient/WiFiScan.ino # note the hardcoded wifi networks (such as "Open Wifi") so use one of those
+- arduino-esp32/libraries/WiFi/examples/WiFiClient/WiFiClient.ino # change .begin(ssid,password) to .begin(ssid) to connect to an open wifi
+- arduino-esp32/libraries/WiFi/examples/SimpleWiFiServer/SimpleWiFiServer.ino # change the listening port to 8080 to make hostfwd work (see above) 
+
+To get custom libraries to work, you need to follow the instructions.
+
+For example, for arduinoWebsockets, copy the library to a new components/ folder and add a CMakeLists.txt file:
+
+```
+# cat components/arduinoWebsockets/CMakeLists.txt 
+idf_component_register(SRCS "src/WebSocketsServer.cpp" "src/WebSocketsClient.cpp" "src/WebSockets.cpp"
+                      INCLUDE_DIRS "src/"
+                      REQUIRES arduino-esp32
+                      )
+
+project(arduinoWebsockets)
+```
+
+Then include it in the build with 'REQUIRES' in the main/CMakeLists.txt file:
+
+```
+idf_component_register(SRCS "Main.ino.cpp"
+                INCLUDE_DIRS "."
+                REQUIRES arduinoWebsockets)
+```
+
+## idf.py menuconfig
+
+You'll linker errors from  NetworkClientSecure.cpp regarding functions in ssl_client.cpp (such as stop_ssl_socket) unless you enable:
+- Component config ---> mbedTLS ---> TLS Key Exchange Methods ---> Enable pre-shared-key ciphersuites ---> Enable PSK based ciphersuite modes
+
+Optionally, consider enabling:
+- Component config ---> LWIP ---> Enable LWIP Debug ---> check parts you're interested in
 
 
 
