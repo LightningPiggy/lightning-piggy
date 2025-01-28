@@ -266,3 +266,9 @@ Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
 
 If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:1080`.
+
+# Credits
+
+This work stands on the shoulders of many giants and open source software projects, but these stand out in particular
+- Martin Johnson ([a159x36](https://github.com/a159x36)/[dzo](https://github.com/dzo)) for his QEMU-with-wifi fork
+- the Lightning Piggy team for supporting this effort
