@@ -1,4 +1,4 @@
-Emulation
+ESP32 emulation with QEMU (including WiFi!)
 ======
 
 This is *not* for the faint of heart, but emulating the ESP32, including a reverse-engineerd implementation of the closed-source ESP32 WiFi stack is possible!
