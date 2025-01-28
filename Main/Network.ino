@@ -5,13 +5,15 @@
 WebSocketsClient webSocket;
 long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS;
 
+int system_event_names_count = 26;
 const char * system_event_names[] = { "WIFI_READY", "SCAN_DONE", "STA_START", "STA_STOP", "STA_CONNECTED", "STA_DISCONNECTED", "STA_AUTHMODE_CHANGE", "STA_GOT_IP", "STA_LOST_IP", "STA_WPS_ER_SUCCESS", "STA_WPS_ER_FAILED", "STA_WPS_ER_TIMEOUT", "STA_WPS_ER_PIN", "STA_WPS_ER_PBC_OVERLAP", "AP_START", "AP_STOP", "AP_STACONNECTED", "AP_STADISCONNECTED", "AP_STAIPASSIGNED", "AP_PROBEREQRECVED", "GOT_IP6", "ETH_START", "ETH_STOP", "ETH_CONNECTED", "ETH_DISCONNECTED", "ETH_GOT_IP", "MAX"};
 const char * system_event_reasons2[] = { "UNSPECIFIED", "AUTH_EXPIRE", "AUTH_LEAVE", "ASSOC_EXPIRE", "ASSOC_TOOMANY", "NOT_AUTHED", "NOT_ASSOCED", "ASSOC_LEAVE", "ASSOC_NOT_AUTHED", "DISASSOC_PWRCAP_BAD", "DISASSOC_SUPCHAN_BAD", "UNSPECIFIED", "IE_INVALID", "MIC_FAILURE", "4WAY_HANDSHAKE_TIMEOUT", "GROUP_KEY_UPDATE_TIMEOUT", "IE_IN_4WAY_DIFFERS", "GROUP_CIPHER_INVALID", "PAIRWISE_CIPHER_INVALID", "AKMP_INVALID", "UNSUPP_RSN_IE_VERSION", "INVALID_RSN_IE_CAP", "802_1X_AUTH_FAILED", "CIPHER_SUITE_REJECTED", "BEACON_TIMEOUT", "NO_AP_FOUND", "AUTH_FAIL", "ASSOC_FAIL", "HANDSHAKE_TIMEOUT", "CONNECTION_FAIL" };
 #define reason2str(r) ((r>176)?system_event_reasons2[r-176]:system_event_reasons2[r-1])
 
 void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
   // Regular flow of events is: 0, 2, 7 (and then 3 when the device goes to sleep)
-  String wifiStatus = "WiFi Event ID " + String(eventid) + " which means: " + String(system_event_names[eventid]);
+  String wifiStatus = "WiFi Event ID " + String(eventid);
+  if (eventid > 0 && eventid < system_event_names_count) wifiStatus += " which means: " + String(system_event_names[eventid]);
   Serial.print(wifiStatus);
 
   String details = "";
@@ -72,6 +74,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
 void connectWifi() {
   Serial.println("Connecting to " + String(ssid));
   WiFi.onEvent(wifiEventCallback);
+  WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
   WiFi.begin(ssid, password);
   long startTime = millis();
   while (WiFi.status() != WL_CONNECTED) { // there's no max attempts but the watchdog should trigger a restart
@@ -158,7 +161,11 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
       connectionAttempts++;
       Serial.println("Couldn't connect to " + String(host) + " on port " + String(lnbitsPortInteger) + " (attempt " + String(connectionAttempts) + "/" + String(MAX_HTTPS_CONNECTION_ATTEMPTS) + ")");
   }
-  if (!client.connected()) return "";
+  if (!client.connected()) {
+    client.stop();
+    Serial.println("Connection failed, returning empty reply...");
+    return "";
+  }
 
   String request = "GET " + endpointUrl + " HTTP/1.1\r\n" +
                "Host: " + String(host) + "\r\n" +
@@ -229,6 +236,8 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
     }
 
   }
+  client.stop();
+
   //Serial.println("returning total chunked reply = '" + reply + "'");
   feed_watchdog(); // after successfully completing this long-running and potentially hanging operation, it's a good time to feed the watchdog
   return line;
