@@ -100,4 +100,4 @@ To make a new release available on the web installer:
 
 ESP32 emulation with QEMU (including WiFi!)
 ===================
-See Emulation.md
+See [these detailed instructions on ESP32 emulation with QEMU, including WiFi](Emulation.md).
