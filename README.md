@@ -36,10 +36,8 @@ Make sure the Arduino IDE has permissions to access the serial port:
 **OR with Arduino CLI**
 
 - Arduino CLI version 1.1.1-arch commit: fa6eafcbbea391eee
-- LNBits v0.12.12
+- LNBits v0.12.12 (tested with lnd version 0.18.99-beta and bitcoind 27.0.0)
 - Debian Bookworm
-- lnd version 0.18.99-beta
-- bitcoind 27.0.0
 
 Commands:
 
