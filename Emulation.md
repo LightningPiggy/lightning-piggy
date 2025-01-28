@@ -206,7 +206,7 @@ esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin
 # esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
  
 echo "Local port 1080 will be forwarded to port 80 on the emulated ESP32"
-~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-:8080 -nographic -serial tcp::5555,server &
+~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-:80 -nographic -serial tcp::5555,server &
 
 sleep 0.5
 
@@ -243,4 +243,4 @@ entry 0x400805e4
 Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
 
-If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:10080`.
+If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:1080`.
