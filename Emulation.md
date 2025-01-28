@@ -5,7 +5,7 @@ This is *not* for the faint of heart, but emulating the ESP32, including a rever
 
 Obviously, getting this setup is tremendously time-saving for development, and super helpful for debugging.
 
-# How to do it
+# Steps required
 
 You need to get these components working:
 1. a fork of ESP32's fork of QEMU that has (experimental) WiFi patches that add basic support for the reverse engineered ESP32 WiFi stack
