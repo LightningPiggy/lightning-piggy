@@ -214,7 +214,7 @@ Optionally, consider enabling:
 
 ## 4. Script to combine the binaries and run on QEMU
 
-Use something like [this script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
+Use something like [this run_in_qemu_emulator.sh script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
 
 When running it, you should see something like:
 
