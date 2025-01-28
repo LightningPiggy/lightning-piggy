@@ -35,12 +35,13 @@ The tradeoff's aren't very clear here, but a159x36's fork works and seems the mo
 
 To build it, you need to install some dependencies:
 
+```
 sudo apt install build-essential
 sudo apt install libgcrypt20 libglib2.0-0 libpixman-1-0 libsdl2-2.0-0 libslirp0
 sudo apt install libgcrypt20-dev # otherwise you'll get an error about "RSA"
+```
 
-
-something like:
+Then clone and built it with:
 
 ```
 git clone https://github.com/a159x36/qemu
