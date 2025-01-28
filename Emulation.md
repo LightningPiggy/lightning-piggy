@@ -214,7 +214,7 @@ Optionally, consider enabling:
 
 ## 4. Script to combine the binaries and run on QEMU
 
-Use something like [this run_in_qemu_emulator.sh script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
+Use something like this [run_in_qemu_emulator.sh script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
 
 When running it, you should see something like:
 
@@ -239,7 +239,7 @@ entry 0x400805e4
 Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
 
-If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:1080`.
+If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to [http://localhost:1080](http://localhost:1080).
 
 # Credits
 
