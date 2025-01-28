@@ -304,6 +304,9 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
         case WStype_FRAGMENT_BIN_START:
         case WStype_FRAGMENT:
         case WStype_FRAGMENT_FIN:
+        case WStype_BIN:
+        case WStype_PING:
+        case WStype_PONG:
             Serial.printf("[WSc] other fragment!\n");
             break;
     }
