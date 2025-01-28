@@ -7,7 +7,7 @@ Needless to say, getting this set up reduces the typical code-compile-flash-test
 
 Emulating the wifi stack is not officially supported by Espressive because it relies on a reverse-engineered implementation of the closed-source ESP32 WiFi stack.
 
-It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, and finally, to get lightning-piggy working in the emulator.
+It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, and finally, to get lightning-piggy (first ESP-IDF, then Arduino build) working in the emulator.
 
 The following documentation puts all the pieces together in one logical process, and should be a huge time-saver for anyone who needs to get this working as well.
 
