@@ -5,6 +5,23 @@ This is *not* for the faint of heart, but emulating the ESP32, including a rever
 
 Obviously, getting this setup is tremendously time-saving for development, and super helpful for debugging.
 
+# Overview
+
+## What works
+- Running arduino-esp32 v2.0.17 and v3.1.1 based projects
+- Running ESP-IDF v5.3.2 example projects
+- WiFi: connection to emulated open access point "Open Wifi"
+- WiFi: scanning and find a list of emulated open access points
+- Ethernet: example project from ESP-IDF v5.3.2 work
+- Networking: running a TCP server by listening on a port
+- Networking: DHCP, ARP, DNS, TCP, UDP (meaning HTTPS and websockets works)
+- TFT display emulation
+- readAnalog() - seems to return some high value
+  
+## What doesn't work (yet)
+- ePaper display emulation (requires special considerations)
+
+
 # Steps required
 
 You need to get these components working:
