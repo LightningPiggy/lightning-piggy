@@ -10,7 +10,7 @@ Obviously, getting this setup is tremendously time-saving for development, and s
 You need to get these components working:
 1. a fork of ESP32's fork of QEMU that has (experimental) WiFi patches that add basic support for the reverse engineered ESP32 WiFi stack
 2. the esptool.py from ESP-IDF
-3. the compilated binaries (.bin) of your project and the ESP32 bootloader
+3. compiled binaries (.bin) of your project and the ESP32 bootloader
 4. a script to combine the binaries and run on QEMU
 
 Additionally, you need:
@@ -18,7 +18,7 @@ Additionally, you need:
 - around 10GB of free disk space
 - basic C/C++ compilation tools (build-essential)
 - technical skills
-- courage
+- some love for the commandline ;-)
 
 ## 1. Building QEMU with WiFi
 
