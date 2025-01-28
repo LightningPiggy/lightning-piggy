@@ -8,7 +8,7 @@ Obviously, getting this setup is tremendously time-saving for development, and s
 # Overview
 
 ## What works
-- Running arduino-esp32 v2.0.17 and v3.1.1 based projects
+- Running arduino-esp32 v2.0.17 and v3.1.1 based projects (including lightning-piggy)
 - Running ESP-IDF v5.3.2 example projects
 - WiFi: connection to emulated open access point "Open Wifi"
 - WiFi: scanning and find a list of emulated open access points
