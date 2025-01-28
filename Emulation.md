@@ -3,7 +3,7 @@ ESP32 emulation with QEMU (including WiFi!)
 
 This is *not* for the faint of heart, but emulating the ESP32, including a reverse-engineerd implementation of the closed-source ESP32 WiFi stack is possible!
 
-Obviously, getting this setup is tremendously time-saving for development, and super helpful for debugging.
+Obviously, getting this set up is tremendously time-saving for development, and super helpful for debugging.
 
 Emulating the wifi stack is not officially supported by Espressive, and a bit hacky. It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, and finally, to get lightning-piggy working in the emulator.
 
