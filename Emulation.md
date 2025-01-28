@@ -237,3 +237,5 @@ entry 0x400805e4
 [   333][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
 Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
+
+If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:10080`.
