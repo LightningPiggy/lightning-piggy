@@ -97,3 +97,7 @@ To make a new release available on the web installer:
 - Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x.json
 - pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push  ; popd
 - Revert back to default code with custom config (cp /tmp/config.h Main/config.h)
+
+ESP32 emulation with QEMU (including WiFi!)
+===================
+See Emulation.md
