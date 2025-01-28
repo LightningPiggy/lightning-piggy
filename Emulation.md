@@ -218,6 +218,8 @@ Use something like the following script to combine all binaries into one bootabl
 
 ```
 #!/bin/sh
+# Run lightning-piggy in an ESP32 emulator with QEMU, including WiFi!
+# See Emulation.md
 
 SOFTWARE_DIR=/tmp/arduino_build_*
 BOOTAPP=~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin
@@ -226,16 +228,9 @@ esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin
 
 # Or for ESP-IDF builds, use something like:
 # esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
- 
+
 echo "Local port 1080 will be forwarded to port 80 on the emulated ESP32"
-~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-:80 -nographic -serial tcp::5555,server &
-
-sleep 0.5
-
-echo "Connecting to console. Press CTRL-C to stop the emulation..."
-nc localhost 5555
-
-killall qemu-system-xtensa
+~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-:80 -serial stdio
 ```
 
 When running it, you should see something like:
@@ -244,14 +239,10 @@ When running it, you should see something like:
 user@arduino:~/Arduino/lightning-piggy$ ./run_qemu.sh
 
 esptool.py v4.8.1
-SHA digest in image updated
 Wrote 0x400000 bytes to file flash_image.bin, ready to flash to offset 0x0
-Local port 10080 will be forwarded to port 80 on the emulated ESP32
-QEMU 9.0.0 monitor - type 'help' for more information
-qemu-system-xtensa: -serial tcp::5555,server: info: QEMU waiting for connection on: disconnected:tcp:0.0.0.0:5555,server=on
-Connecting to console. Press CTRL-C to stop the emulation...
+Local port 1080 will be forwarded to port 80 on the emulated ESP32
 Adding SPI flash device
-(qemu) ets Jul 29 2019 12:21:46
+ets Jul 29 2019 12:21:46
 
 rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
 configsip: 0, SPIWP:0xee
@@ -261,7 +252,7 @@ load:0x3fff0030,len:1184
 load:0x40078000,len:13232
 load:0x40080400,len:3028
 entry 0x400805e4
-[   333][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+[   348][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
 Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
 
