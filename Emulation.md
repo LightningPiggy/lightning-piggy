@@ -45,6 +45,7 @@ something like:
 ```
 git clone https://github.com/a159x36/qemu
 cd qemu/
+
 mkdir build
 cd build/
 
@@ -65,9 +66,7 @@ After building, you should have the emulator ready to go.
 Give it a test with:
 
 ```
-./qemu-system-xtensa &
-sleep 10
-pkill -f qemu
+./qemu-system-xtensa # press CTRL-C to exit
 ```
 
 ## 2. esptool.py from ESP-IDF
