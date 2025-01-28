@@ -210,3 +210,30 @@ nc localhost 5555
 
 killall qemu-system-xtensa
 ```
+
+When running it, you should see something like:
+
+```
+user@arduino:~/Arduino/lightning-piggy$ ./run_qemu.sh
+
+esptool.py v4.8.1
+SHA digest in image updated
+Wrote 0x400000 bytes to file flash_image.bin, ready to flash to offset 0x0
+Local port 10080 will be forwarded to port 80 on the emulated ESP32
+QEMU 9.0.0 monitor - type 'help' for more information
+qemu-system-xtensa: -serial tcp::5555,server: info: QEMU waiting for connection on: disconnected:tcp:0.0.0.0:5555,server=on
+Connecting to console. Press CTRL-C to stop the emulation...
+Adding SPI flash device
+(qemu) ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1184
+load:0x40078000,len:13232
+load:0x40080400,len:3028
+entry 0x400805e4
+[   333][D][esp32-hal-cpu.c:244] setCpuFrequencyMhz(): PLL: 480 / 2 = 240 Mhz, APB: 80000000 Hz
+Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
+```
