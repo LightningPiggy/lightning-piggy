@@ -9,9 +9,9 @@ Obviously, getting this setup is tremendously time-saving for development, and s
 
 You need to get these components working:
 1. a fork of ESP32's fork of QEMU that has (experimental) WiFi patches that add basic support for the reverse engineered ESP32 WiFi stack
-2. a Git clone of ESP-IDF
-3. the Arduino framework as an ESP-IDF component (to be able to build the Arduino-based Lightning Piggy project using ESP-IDF)
-4. idf.py menuconfig # needs to have the appropriate configuration
+2. the esptool.py from ESP-IDF
+3. the compilated binaries (.bin) of your project and the ESP32 bootloader
+4. a script to combine the binaries and run on QEMU
 
 Additionally, you need:
 - a Linux machine
@@ -20,7 +20,7 @@ Additionally, you need:
 - technical skills
 - courage
 
-## Building QEMU with WiFi
+## 1. Building QEMU with WiFi
 
 Espressif maintains a [fork](https://github.com/espressif/qemu) of QEMU with ESP32 support, and there are several forks that have added a reverse-engineered WiFi stack to it:
 - https://github.com/a159x36/qemu
@@ -70,7 +70,50 @@ sleep 10
 pkill -f qemu
 ```
 
-## ESP-IDF
+## 2. esptool.py from ESP-IDF
+
+You need a recent version of esptool.py from ESP-IDF for its merge_bin functionality.
+
+If you're using the Arduino IDE with arduino-esp32 installed from the Library Manager, you should find it in ~/.arduino15/packages/esp32/tools/esptool_py/4.5.1/esptool.py 
+
+Otherwise, you can install the ESP-IDF framework (explained below) and find it in the tools/ folder.
+
+## 3. Compilation of your project
+
+You can compile the project with the Arduino IDE, resulting in these files:
+- Main.ino.bootloader.bin
+- Main.ino.bin
+- Main.ino.partitions.bin
+- ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin
+
+Or you can compile the project using ESP-IDF, typically resulting in these files:
+- build/bootloader/bootloader.bin
+- build/main.bin
+- build/partition_table/partition-table.bin
+  
+### 3a Compiling with the Arduino IDE
+
+Open the project ("Main.ino") in the Arduino IDE and the other files will open as well.
+
+Follow the usual steps from the [README.md](README.md) to build it for a physical device, but instead of sending the sketch to your device using "Sketch" - "Upload", only compile it with "Sketch" - "Verify/Compile".
+
+The resulting .bin files will be in /tmp/arduino_build_*/*.bin such as:
+
+```
+user@arduino:~$ ls -al /tmp/arduino_build_*/*bin
+-rw-r--r-- 1 user user 1158480 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.bin
+-rw-r--r-- 1 user user   17536 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.bootloader.bin
+-rw-r--r-- 1 user user    3072 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.partitions.bin
+```
+
+### 3b Compiling your Arduino project with ESP-IDF
+
+To compile your Arduino project with ESP-IDF, you'll need:
+- a Git clone of ESP-IDF
+- the Arduino framework as an ESP-IDF component (to be able to build the Arduino-based Lightning Piggy project using ESP-IDF)
+- idf.py menuconfig # needs to have the appropriate configuration
+
+__Git clone of ESP-IDF__
 
 At the time of writing, the latest version of ESP-IDF that works with the Arduino framework for the ESP32 is [version 5.3.2](https://docs.espressif.com/projects/esp-idf/en/v5.3.2/esp32/get-started/index.html) so that's a good version to take.
 
@@ -89,7 +132,7 @@ cd esp-idf_v5.3.2/
 . export.sh # you need to do this once in every shell where you want to call idf.py and related tools
 ```
 
-## Arduino framework as an ESP-IDF component
+__Arduino framework as an ESP-IDF component__
 
 To be able to build Arduino projects inside of ESP-IDF, you need to add the Arduino framework as an ESP-IDF component.
 
@@ -105,20 +148,6 @@ idf.py create-project-from-example "espressif/arduino-esp32^3.1.1:hello_world"
 cd hello_world/
 
 idf.py build
-[ $result -ne 0 ] && exit 1
-
-cd build
-
-esptool.py --chip esp32 merge_bin --output flash_image.bin --fill-flash-size=2MB --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 main.bin 0x8000 partition_table/partition-table.bin
-
-~/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:8080-:8080 -nographic -serial tcp::5555,server &
-
-sleep 0.5
-
-nc localhost 5555
-
-killall qemu-system-xtensa
-cd ..
 ```
 
 Now you can copy code from Arduino examples to main/main.cpp and run them to test.
@@ -152,7 +181,7 @@ idf_component_register(SRCS "Main.ino.cpp"
                 REQUIRES arduinoWebsockets)
 ```
 
-## idf.py menuconfig
+__idf.py menuconfig__
 
 You'll linker errors from  NetworkClientSecure.cpp regarding functions in ssl_client.cpp (such as stop_ssl_socket) unless you enable:
 - Component config ---> mbedTLS ---> TLS Key Exchange Methods ---> Enable pre-shared-key ciphersuites ---> Enable PSK based ciphersuite modes
@@ -162,3 +191,22 @@ Optionally, consider enabling:
 
 
 
+## 4. Script to combine the binaries and run on QEMU
+
+Use something like the following script to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port:
+
+```
+SOFTWARE_DIR=/tmp/arduino_build_*
+
+esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output=flash_image.bin 0x1000 "$SOFTWARE_DIR"/Main.ino.bootloader.bin 0x8000 "$SOFTWARE_DIR"/Main.ino.partitions.bin 0xe000 ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin 0x10000 "$SOFTWARE_DIR"/Main.ino.bin
+
+echo "Local port 10080 will be forwarded to port 80 on the emulated ESP32"
+/home/user/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:18080-:18080 -nographic -serial tcp::5555,server &
+
+sleep 0.5
+
+echo "Connecting to console. Press CTRL-C to stop the emulation..."
+nc localhost 5555
+
+killall qemu-system-xtensa
+```
