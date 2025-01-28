@@ -89,10 +89,36 @@ cd esp-idf_v5.3.2/
 . export.sh # you need to do this once in every shell where you want to call idf.py and related tools
 ```
 
+## Arduino framework as an ESP-IDF component
 
+To be able to build Arduino projects inside of ESP-IDF, you need to add the Arduino framework as an ESP-IDF component.
 
+We might be able to avoid this step in the future by building with the Arduino IDE, and converting the resulting .bin files into a bootable image with merge_bin.
 
+But as that didn't work out of the box, the way to crack this was first getting ESP-IDF WiFi examples working in QEMU, then getting Arduino WiFi examples working in QEMU, and finally getting the Lightning Piggy's Arduino code working in QEMU. 
 
+Useful documentation is at:
+- https://docs.espressif.com/projects/arduino-esp32/en/latest/esp-idf_component.html
+
+```
+idf.py create-project-from-example "espressif/arduino-esp32^3.1.1:hello_world"
+cd hello_world/
+
+idf.py build
+[ $result -ne 0 ] && exit 1
+
+cd build
+
+esptool.py --chip esp32 merge_bin --output flash_image.bin --fill-flash-size=2MB --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 main.bin 0x8000 partition_table/partition-table.bin
+
+~/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:8080-:8080 -nographic -serial tcp::5555,server &
+
+sleep 0.5
+
+nc localhost 5555
+
+killall qemu-system-xtensa
+```
 
 
 
