@@ -185,14 +185,12 @@ void setFont(int fontSize) {
 int fitMaxText(String text, int maxWidth) {
   //long startTime = millis();
   int maxLength = 0;
-  int16_t x1, y1;
   uint16_t w, h;
 
   // first get height of one big character
-  //display.getTextBounds("$", 0, 0, &x1, &y1, &w, &h);
   w = u8g2Fonts.getUTF8Width("$");
   h = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent();
-  Serial.println("Got big character bounds: " + String(x1) + "," + String(y1) + ","+ String(w) + "," + String(h) + " for text: $");
+  Serial.println("Got big character bounds:  width " +  String(w) + " and height " + String(h) + " for text: $");
   uint16_t maxHeight = h * 1.5; // ensure it's really big, but smaller than 2 lines
   //Serial.println("maxHeight = " + String(maxHeight));
   h = 0;
@@ -201,7 +199,6 @@ int fitMaxText(String text, int maxWidth) {
     String textToFit = text.substring(0, maxLength+2); // end is exclusive
     w = u8g2Fonts.getUTF8Width(textToFit.c_str());
     h = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent();
-    //Serial.println("Got text bounds: " + String(x1) + "," + String(y1) + ","+ String(w) + "," + String(h) + " for text: " + textToFit);
     maxLength++;
   }
 
