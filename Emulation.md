@@ -5,6 +5,10 @@ This is *not* for the faint of heart, but emulating the ESP32, including a rever
 
 Obviously, getting this setup is tremendously time-saving for development, and super helpful for debugging.
 
+Emulating the wifi stack is not officially supported by Espressive, and a bit hacky. It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, lightning-piggy working.
+
+The following documentation puts all the pieces together in one logical process, and should be a huge time-saver for whoever needs something similar.
+
 # Overview
 
 ## What works
