@@ -46,6 +46,8 @@ void setup() {
 
     setup_watchdog(); // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
 
+    setup_config();
+
     setup_display();
     displayVoltageWarning();
     showBootSlogan();

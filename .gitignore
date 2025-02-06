@@ -1,0 +1,6 @@
+config_partition.bin
+flash_image.bin*
+
+trash/
+
+Main/config.h_*
