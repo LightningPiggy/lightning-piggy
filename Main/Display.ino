@@ -64,9 +64,15 @@ void setup_display() {
     u8g2Fonts.begin(display1); // connect u8g2 procedures to Adafruit GFX
   } else {
     display2.init(115200, true, 2, false);
-    displayToUse = DISPLAY_TYPE_266DEPG;
-    display2.setRotation(1); // display is used in landscape mode
-    u8g2Fonts.begin(display2); // connect u8g2 procedures to Adafruit GFX
+    beforeTime = millis();
+    display2.clearScreen();
+    if ((millis() - beforeTime) > 1500) {
+      displayToUse = DISPLAY_TYPE_266DEPG;
+      display2.setRotation(1); // display is used in landscape mode
+      u8g2Fonts.begin(display2); // connect u8g2 procedures to Adafruit GFX
+    } else {
+      Serial.println("Did not find good display, perhaps this is the T-Display emulator?!");
+    }
   }
 
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);

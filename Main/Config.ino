@@ -1,5 +1,16 @@
+/**
+ * Configured values can be set by:
+ * - the new method: modifying the /config.json file in LittleFS (this is done using the web server on the device)
+ * - the old method: replacing the REPLACETHISBY... values in the binary (this is done using the webinstaller in a webbrowser, while the device is connecting with a USB cable)
+ */
+
 #include "FS.h"
 #include <LittleFS.h>
+
+char* ssid = NULL;
+char* password = NULL;
+
+String paramFileString = "";
 
 String staticConfig = R"(
 [
@@ -27,10 +38,11 @@ String readFile(String name) {
 
     String fileContent = file.readString();
 
-    Serial.println("File Content:");
-    Serial.println(fileContent);
+    Serial.println("File Content:" + fileContent);
 
     file.close();
+
+    return fileContent;
 }
 
 bool writeFile(const char* filename, const String& content) {
@@ -51,6 +63,50 @@ bool writeFile(const char* filename, const String& content) {
     }
 }
 
+String getJsonValue(JsonDocument &doc, const char *name) {
+  for (JsonObject elem : doc.as<JsonArray>()) {
+    if (strcmp(elem["name"], name) == 0) {
+      String value = elem["value"].as<String>();
+      Serial.println("Found config value: '" + value + "'");
+      return value;
+    }
+  }
+  return "";
+}
+
+void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue) {
+    String value = getJsonValue(doc, key);
+    if (value == "") {
+      Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for binaryReplacedValue...");
+      if (isConfigured(binaryReplacedValue)) {
+        Serial.println("Found binaryReplacedValue, using that: '" + String(binaryReplacedValue) + "'");
+        value = binaryReplacedValue;
+      } else {
+        Serial.println("no binaryReplacedValue is set, config value is empty");
+      }
+    }
+    free(*output);  // Free old memory to prevent leaks
+    *output = strndup(value.c_str(), maxLength - 1);  // Allocate new memory and duplicate into it
+}
+
+bool parseConfig(String paramFileString) {
+    StaticJsonDocument<6000> doc;
+    DeserializationError error = deserializeJson(doc, paramFileString);
+    if (error) {
+        Serial.print("deserializeJson() failed: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    tryGetJsonValue(doc, "config_wifi_ssid_1", &ssid, MAX_CONFIG_LENGTH, REPLACE_ssid);
+    tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH, REPLACE_password);
+
+    Serial.printf("SSID: %s\n", ssid);
+    Serial.printf("Password: %s\n", password);
+
+    return true;
+}
+
 void setup_config() {
 
   Serial.println("Attempting to mount LittleFS filesystem...");
@@ -68,11 +124,33 @@ void setup_config() {
     }
   }
   Serial.println("LittleFS mounted!");
-  
-  Serial.println(readFile("/config.json"));
+
+  paramFileString = readFile("/config.json");
+  parseConfig(paramFileString);
 
   writeFile("/config_new.json", staticConfig);
   Serial.println(readFile("/config_new.json"));
 
   Serial.println("LittleFS setup done.");
+}
+
+// Returns true if the value is configured, otherwise false.
+bool isConfigured(const char * configValue) {
+  if ((strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) || (strlen(configValue) == 0)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+int getConfigValueAsInt(char* configValue, int defaultValue) {
+  int configInt = defaultValue;
+  if (isConfigured(configValue)) {
+    if (str2int(&configInt, (char*)configValue, 10) != STR2INT_SUCCESS) {
+      Serial.println("WARNING: failed to convert config value ('" + String(configValue) + "') to integer, ignoring...");
+    } else {
+      Serial.println("Returning config value as int: " + String(configInt));
+    }
+  }
+  return configInt;
 }
