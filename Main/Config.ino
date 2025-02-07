@@ -7,10 +7,10 @@
 #include "FS.h"
 #include <LittleFS.h>
 
-char* ssid = NULL;
-char* password = NULL;
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
-String paramFileString = "";
+const char* PARAM_MESSAGE PROGMEM = "message";
 
 String staticConfig = R"(
 [
@@ -28,6 +28,24 @@ String staticConfig = R"(
   }
 ]
 )";
+
+const char* htmlContent PROGMEM = R"(
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample HTML</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This is HTML.</p>
+</body>
+</html>
+)";
+
+String paramFileString = "";
+
+AsyncWebServer server(80);
+
 
 String readFile(String name) {
     File file = LittleFS.open(name, "r");
@@ -128,8 +146,7 @@ void setup_config() {
   paramFileString = readFile("/config.json");
   parseConfig(paramFileString);
 
-  writeFile("/config_new.json", staticConfig);
-  Serial.println(readFile("/config_new.json"));
+  //writeFile("/config_new.json", staticConfig); Serial.println(readFile("/config_new.json"));
 
   Serial.println("LittleFS setup done.");
 }
@@ -153,4 +170,48 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
     }
   }
   return configInt;
+}
+
+void setup_webserver() {
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", htmlContent);
+  });
+
+  // Send a GET request to <IP>/get?message=<message>
+  server.on("/get", HTTP_GET, [](AsyncWebServerRequest* request) {
+    String message;
+    if (request->hasParam(PARAM_MESSAGE)) {
+      message = request->getParam(PARAM_MESSAGE)->value();
+    } else {
+      message = "No message sent";
+    }
+    request->send(200, "text/plain", "Hello, GET: " + message);
+  });
+
+  // Send a POST request to <IP>/post with a form field message set to <message>
+  server.on("/post", HTTP_POST, [](AsyncWebServerRequest* request) {
+    String message;
+    if (request->hasParam(PARAM_MESSAGE, true)) {
+      message = request->getParam(PARAM_MESSAGE, true)->value();
+    } else {
+      message = "No message sent";
+    }
+    request->send(200, "text/plain", "Hello, POST: " + message);
+  });
+
+   // catch any request, and send a 404 Not Found response
+  // except for /game_log which is handled by onRequestBody
+  server.onNotFound([](AsyncWebServerRequest* request) {
+    if (request->url() == "/game_log")
+      return; // response object already creted by onRequestBody
+
+    request->send(404, "text/plain", "Not found");
+  });
+}
+
+void start_webserver() {
+  Serial.println("Starting webserver!");
+  Serial.printf("Before, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
+  server.begin();
+  Serial.printf("After, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
 }

@@ -1,4 +1,8 @@
+#include "esp_wifi.h"
+#include "esp_mac.h"
+
 #include <WiFiClientSecure.h>
+
 
 #define BUFFSIZE 1024
 
@@ -68,7 +72,17 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
   }
 
   Serial.println(details);
+}
 
+static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
+  if (event_id == WIFI_EVENT_AP_STACONNECTED) {
+    wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+    //Serial.println("station " + String(MAC2STR(event->mac)) + " join, AID=" + String(event->aid));
+    printf("station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
+  } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
+    wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
+    printf("station "MACSTR" leave, AID=%d, reason=%d", MAC2STR(event->mac), event->aid, event->reason);
+  }
 }
 
 void connectWifi() {
@@ -337,4 +351,75 @@ void disconnectWebsocket() {
     } else {
       Serial.println("Websocket is not connected, not disconnecting.");
     }
+}
+
+esp_netif_t* softap_netif;
+
+void wifi_init_softap(void)
+{
+    int delaytime = 10; // 5 might be too short (0816 and crash) so go with 10. 10 crashed so go for 15?
+    int counter = 0;
+    Serial.println(counter++); delay(delaytime);
+    ESP_ERROR_CHECK(esp_netif_init()); delay(delaytime); // if he hangs a long time after this, that seems to be a good sign...
+    Serial.println(counter++); delay(delaytime);
+    //ESP_ERROR_CHECK(esp_event_loop_create_default()); // this crashes if STA was used before
+    //Serial.println(counter++);delay(delaytime);
+    Serial.println("skipped esp_event_loop_create_default for now!");
+    // esp_event_loop_create_default(); with an error check instead of abort() would also work but it doesn't seem necessary, probably in arduino context
+
+    esp_event_loop_create_default();
+    Serial.println(counter++);delay(delaytime);
+    softap_netif = esp_netif_create_default_wifi_ap(); // causes conflict with other WiFi.softAP()
+    Serial.println(counter++);delay(delaytime);
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    Serial.println(counter++);delay(delaytime);
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    Serial.println(counter++);delay(delaytime);
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
+    Serial.println(counter++);delay(delaytime);
+
+    Serial.println(counter++);delay(delaytime);
+    wifi_config_t wifi_config;
+    memset(&wifi_config, 0, sizeof(wifi_config)); // Ensuring all fields are initialized
+    Serial.println(counter++);delay(delaytime);
+
+    strncpy(reinterpret_cast<char*>(wifi_config.ap.ssid), ACCESS_POINT_SSID, sizeof(wifi_config.ap.ssid) - 1);
+    Serial.println(counter++);delay(delaytime);
+    wifi_config.ap.ssid_len = strlen(ACCESS_POINT_SSID);
+    Serial.println(counter++);delay(delaytime);
+    wifi_config.ap.channel = ACCESS_POINT_CHANNEL;
+    Serial.println(counter++);delay(delaytime);
+    strncpy(reinterpret_cast<char*>(wifi_config.ap.password), ACCESS_POINT_PASS, sizeof(wifi_config.ap.password) - 1);
+    Serial.println(counter++);delay(delaytime);
+    wifi_config.ap.max_connection = ACCESS_POINT_MAX_STA_CONN;
+    Serial.println(counter++);delay(delaytime);
+    wifi_config.ap.pmf_cfg.required = true;
+    Serial.println(counter++);delay(delaytime);
+
+    if (strlen(ACCESS_POINT_PASS) == 0) {
+        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+    Serial.println(counter++);delay(delaytime);
+    } else {
+        wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
+    Serial.println(counter++);delay(delaytime);
+    }
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    Serial.println(counter++);delay(delaytime);
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+    Serial.println(counter++);delay(delaytime);
+    ESP_ERROR_CHECK(esp_wifi_start());
+    Serial.println(counter++);delay(delaytime);
+
+    Serial.println("wifi_init_softap finished. SSID: '" + String(ACCESS_POINT_SSID) + ", password '" + String(ACCESS_POINT_PASS) + "', channel: " + String(ACCESS_POINT_CHANNEL));
+    Serial.println(counter++);delay(delaytime);
+}
+
+
+void wifi_ap_stop() {
+ Serial.println("stopping AP");
+ esp_netif_destroy_default_wifi(softap_netif);
+  //WiFi.disconnect(true); // for now this is just the wifi disconnect
 }

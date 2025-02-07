@@ -3,6 +3,35 @@
 
 String currentVersion = "5.0.0";
 
+/**
+ * The piggy can be in different 'modes':
+ * ================
+ * - init: no wifi connection has been attempted => if no config then go to starting-ap, otherwise go to starting-sta
+ * - starting-sta: attempt to connect to station
+ * - connected-sta: connected to station => do regular piggy flow
+ *     - tilted
+ * - failed-sta: failed to connect to station => show warning and how to trigger config mode and go to sleep
+ * - starting-ap: attempt to start AP + webserver and then go to started-ap
+ * - started-ap: AP is up-and-running: wait until user trigger /reboot or /starting-sta
+ * - failed-ap: AP failed to come up => show warning and go to sleep
+ * 
+ * Each mode has an associated display which makes it clear to the user which mode it is in.
+ */
+
+#define PIGGYMODE_INIT 0
+#define PIGGYMODE_STARTING_STA 1
+#define PIGGYMODE_STARTED_STA 2
+#define PIGGYMODE_FAILED_STA 3
+#define PIGGYMODE_STARTING_AP 4
+#define PIGGYMODE_STARTED_AP 5
+#define PIGGYMODE_FAILED_AP 6
+
+// Configuration through access point:
+#define ACCESS_POINT_SSID          "LightningPiggy Configuration"
+#define ACCESS_POINT_PASS          ""
+#define ACCESS_POINT_CHANNEL       1
+#define ACCESS_POINT_MAX_STA_CONN  4
+
 extern const int NOT_SPECIFIED = -1; 
 
 const char * NOTCONFIGURED = "REPLACETHISBY";
@@ -55,5 +84,6 @@ String websocketApiUrl = "/api/v1/ws/";
 
 #define DISPLAY_TYPE_213DEPG 1
 #define DISPLAY_TYPE_266DEPG 2
+
 
 #endif // #ifndef CONSTANTS_H
