@@ -10,37 +10,62 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-const char* PARAM_MESSAGE PROGMEM = "message";
-
-String staticConfig = R"(
-[
-  {
-    "name": "config_wifi_ssid_1",
-    "value": "New Wifi",
-    "label": "WiFi SSID",
-    "type": "text"
-  },
-  {
-    "name": "config_wifi_password_1",
-    "value": "",
-    "label": "WiFi Password",
-    "type": "text"
-  }
-]
-)";
-
-const char* htmlContent PROGMEM = R"(
+// index page:
+const char* htmlContent PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sample HTML</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Config Editor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        textarea { width: 90%; height: 200px; font-family: monospace; }
+        button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
+        #response { margin-top: 20px; color: green; }
+    </style>
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <p>This is HTML.</p>
+
+    <h2>Configuration Editor</h2>
+    <p>Enter JSON Configuration:</p>
+    <textarea id="jsonInput">Fetching /config.json - please wait...</textarea>
+    <br>
+    <button onclick="saveConfig()">Save Configuration</button>
+    <p id="response"></p>
+
+    <script>
+        function loadConfig() {
+            fetch("/config.json")
+            .then(response => response.ok ? response.text() : Promise.reject("Failed to load config"))
+            .then(data => document.getElementById("jsonInput").value = data)
+            .catch(error => {
+                document.getElementById("jsonInput").value = '{ "error": "Failed to load config" }';
+                console.error("Error loading config:", error);
+            });
+        }
+
+        function saveConfig() {
+            let jsonData = document.getElementById("jsonInput").value;
+            fetch("/saveconfig", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: jsonData
+            })
+            .then(response => response.text())
+            .then(data => document.getElementById("response").innerText = "Response: " + data)
+            .catch(error => {
+                document.getElementById("response").innerText = "Error: " + error;
+                console.error("Error:", error);
+            });
+        }
+
+        window.onload = loadConfig;
+    </script>
+
 </body>
 </html>
-)";
+)rawliteral";
 
 String paramFileString = "";
 
@@ -146,8 +171,6 @@ void setup_config() {
   paramFileString = readFile("/config.json");
   parseConfig(paramFileString);
 
-  //writeFile("/config_new.json", staticConfig); Serial.println(readFile("/config_new.json"));
-
   Serial.println("LittleFS setup done.");
 }
 
@@ -173,40 +196,38 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 }
 
 void setup_webserver() {
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", htmlContent);
   });
 
-  // Send a GET request to <IP>/get?message=<message>
-  server.on("/get", HTTP_GET, [](AsyncWebServerRequest* request) {
-    String message;
-    if (request->hasParam(PARAM_MESSAGE)) {
-      message = request->getParam(PARAM_MESSAGE)->value();
-    } else {
-      message = "No message sent";
-    }
-    request->send(200, "text/plain", "Hello, GET: " + message);
+  server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", paramFileString);
   });
 
-  // Send a POST request to <IP>/post with a form field message set to <message>
-  server.on("/post", HTTP_POST, [](AsyncWebServerRequest* request) {
-    String message;
-    if (request->hasParam(PARAM_MESSAGE, true)) {
-      message = request->getParam(PARAM_MESSAGE, true)->value();
-    } else {
-      message = "No message sent";
-    }
-    request->send(200, "text/plain", "Hello, POST: " + message);
+  server.on("/config.json", HTTP_PUT, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", "PUT received OK");
   });
 
-   // catch any request, and send a 404 Not Found response
-  // except for /game_log which is handled by onRequestBody
+  server.on("/saveconfig", HTTP_PUT, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", "saveconfig OK");
+  }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+      static String body;  // Accumulate data chunks
+
+      if (index == 0) body = "";  // Reset on new request
+
+      body += String((char*)data).substring(0, len);  // Append chunk
+
+      if (index + len == total) {  // All data received
+          Serial.println("Received PUT data: '" + body + "'");
+          paramFileString = body;
+          writeFile("/config.json", body);
+      }
+  });
+
   server.onNotFound([](AsyncWebServerRequest* request) {
-    if (request->url() == "/game_log")
-      return; // response object already creted by onRequestBody
-
     request->send(404, "text/plain", "Not found");
   });
+
 }
 
 void start_webserver() {
