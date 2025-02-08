@@ -3,11 +3,12 @@
 
 #include <WiFiClientSecure.h>
 
-
 #define BUFFSIZE 1024
 
-WebSocketsClient webSocket;
 long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS;
+
+esp_netif_t* softap_netif;
+WebSocketsClient webSocket;
 
 int system_event_names_count = 26;
 const char * system_event_names[] = { "WIFI_READY", "SCAN_DONE", "STA_START", "STA_STOP", "STA_CONNECTED", "STA_DISCONNECTED", "STA_AUTHMODE_CHANGE", "STA_GOT_IP", "STA_LOST_IP", "STA_WPS_ER_SUCCESS", "STA_WPS_ER_FAILED", "STA_WPS_ER_TIMEOUT", "STA_WPS_ER_PIN", "STA_WPS_ER_PBC_OVERLAP", "AP_START", "AP_STOP", "AP_STACONNECTED", "AP_STADISCONNECTED", "AP_STAIPASSIGNED", "AP_PROBEREQRECVED", "GOT_IP6", "ETH_START", "ETH_STOP", "ETH_CONNECTED", "ETH_DISCONNECTED", "ETH_GOT_IP", "MAX"};
@@ -78,14 +79,15 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
   if (event_id == WIFI_EVENT_AP_STACONNECTED) {
     wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
     //Serial.println("station " + String(MAC2STR(event->mac)) + " join, AID=" + String(event->aid));
-    printf("station " MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
+    Serial.printf("station " MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
   } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
     wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
-    printf("station " MACSTR" leave, AID=%d, reason=%d", MAC2STR(event->mac), event->aid, event->reason);
+    Serial.printf("station " MACSTR" leave, AID=%d, reason=%d", MAC2STR(event->mac), event->aid, event->reason);
   }
 }
 
-void connectWifi() {
+bool connectWifi() {
+  wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
   Serial.println("Connecting to " + String(ssid));
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
@@ -94,13 +96,15 @@ void connectWifi() {
   while (WiFi.status() != WL_CONNECTED) { // there's no max attempts but the watchdog should trigger a restart
       delay(1000);
       Serial.print(".");
-      if ((millis() - startTime) > WIFI_CONNECT_TIMEOUT_SECONDS*1000) {
-        displayWifiIssue(WIFI_CONNECT_TIMEOUT_SECONDS);
-        hibernateDependingOnBattery();
-      }
+      if ((millis() - startTime) > WIFI_CONNECT_TIMEOUT_SECONDS*1000) break;
   }
-  Serial.print("WiFi connected! IP address: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("WiFi connected. IP address: "); Serial.println(WiFi.localIP());
+    return true;
+  } else {
+    Serial.print("WARNING: WiFi connection failed!");
+    return false;
+  }
 }
 
 void disconnectWifi() {
@@ -186,7 +190,7 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
                "User-Agent: " + getFullVersion() + "\r\n" +
                "Content-Type: application/json\r\n" +
                "Connection: close\r\n";
-  if (sendApiKey) request += "X-Api-Key: " + String(invoiceKey) + "\r\n";
+  if (sendApiKey) request += "X-Api-Key: " + String(lnbitsInvoiceKey) + "\r\n";
   request += "\r\n";
 
   feed_watchdog();
@@ -269,7 +273,7 @@ void connectWebsocket() {
   }
   lastWebsocketConnectionAttempt = millis();
   // wss://demo.lnpiggy.com/api/v1/ws/<invoice read key>
-  String url = websocketApiUrl + String(invoiceKey);
+  String url = websocketApiUrl + String(lnbitsInvoiceKey);
   int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
   Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
   webSocket.onEvent(webSocketEvent);
@@ -353,10 +357,9 @@ void disconnectWebsocket() {
     }
 }
 
-esp_netif_t* softap_netif;
-
 void wifi_init_softap(void)
 {
+    disconnectWifi(); // make sure STA mode is stopped, otherwise it might go into AP+STA mode
     int delaytime = 10; // 5 might be too short (0816 and crash) so go with 10. 10 crashed so go for 15?
     int counter = 0;
     Serial.println(counter++); delay(delaytime);
@@ -417,9 +420,8 @@ void wifi_init_softap(void)
     Serial.println(counter++);delay(delaytime);
 }
 
-
+// This should be harmless if the AP is not started
 void wifi_ap_stop() {
- Serial.println("stopping AP");
- esp_netif_destroy_default_wifi(softap_netif);
-  //WiFi.disconnect(true); // for now this is just the wifi disconnect
+  Serial.println("Stopping Access Point...");
+  esp_netif_destroy_default_wifi(softap_netif);
 }

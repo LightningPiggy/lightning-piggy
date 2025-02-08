@@ -1,6 +1,6 @@
 /**
  * Configured values can be set by:
- * - the new method: modifying the /config.json file in LittleFS (this is done using the web server on the device)
+ * - the new method: modifying the CONFIG_FILE in LittleFS (this is done using the web server on the device)
  * - the old method: replacing the REPLACETHISBY... values in the binary (this is done using the webinstaller in a webbrowser, while the device is connecting with a USB cable)
  */
 
@@ -33,6 +33,10 @@ const char* htmlContent PROGMEM = R"rawliteral(
     <br>
     <button onclick="saveConfig()">Save Configuration</button>
     <p id="response"></p>
+    Other actions:<br/>
+    <a href="/connect-wifi-station" title="If this fails, the device will go back into Access Point mode.">Try to connect to WiFi Station</a><br/>
+    <a href="/restart" title="Restart the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.">Restart device</a><br/>
+    <a href="/delete-config" title="Delete the configuration, so it will go back to hard-coded values or defaults.">Delete Config</a><br/>
 
     <script>
         function loadConfig() {
@@ -47,7 +51,7 @@ const char* htmlContent PROGMEM = R"rawliteral(
 
         function saveConfig() {
             let jsonData = document.getElementById("jsonInput").value;
-            fetch("/saveconfig", {
+            fetch("/config.json", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: jsonData
@@ -106,6 +110,16 @@ bool writeFile(const char* filename, const String& content) {
     }
 }
 
+bool deleteFile(const char* filename) {
+  Serial.printf("Deleting file: '%s' ", filename);
+  if (LittleFS.remove(filename)) {
+    Serial.println("- OK");
+    return true;
+  }
+  Serial.println("- FAILED!");
+  return false;
+}
+
 String getJsonValue(JsonDocument &doc, const char *name) {
   for (JsonObject elem : doc.as<JsonArray>()) {
     if (strcmp(elem["name"], name) == 0) {
@@ -144,8 +158,16 @@ bool parseConfig(String paramFileString) {
     tryGetJsonValue(doc, "config_wifi_ssid_1", &ssid, MAX_CONFIG_LENGTH, REPLACE_ssid);
     tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH, REPLACE_password);
 
-    Serial.printf("SSID: %s\n", ssid);
-    Serial.printf("Password: %s\n", password);
+    tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH, REPLACE_lnbitsHost);
+    tryGetJsonValue(doc, "config_lnbits_https_port", &lnbitsPort, MAX_CONFIG_LENGTH, REPLACE_lnbitsPort);
+    tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH, REPLACE_lnbitsInvoiceKey);
+
+    Serial.println("Parsed config:");
+    Serial.printf("config_wifi_ssid_1: %s\n", ssid);
+    Serial.printf("config_wifi_password_1: %s\n", password);
+    Serial.printf("config_lnbits_host: %s\n", lnbitsHost);
+    Serial.printf("config_lnbits_https_port: %s\n", lnbitsPort);
+    Serial.printf("config_lnbits_invoice_key: %s\n", lnbitsInvoiceKey);
 
     return true;
 }
@@ -168,7 +190,7 @@ void setup_config() {
   }
   Serial.println("LittleFS mounted!");
 
-  paramFileString = readFile("/config.json");
+  paramFileString = readFile(CONFIG_FILE);
   parseConfig(paramFileString);
 
   Serial.println("LittleFS setup done.");
@@ -196,20 +218,37 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 }
 
 void setup_webserver() {
+  Serial.println("Starting webserver. TODO: add authentication!");
+  
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", htmlContent);
   });
 
-  server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest* request) {
+  server.on(CONFIG_FILE, HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", paramFileString);
   });
 
-  server.on("/config.json", HTTP_PUT, [](AsyncWebServerRequest* request) {
-    request->send(200, "text/html", "PUT received OK");
+  server.on("/connect-wifi-station", HTTP_GET, [](AsyncWebServerRequest* request) {
+    //request->send(200, "text/html", "Trying to connect to WiFi station. If this fails, the device will go back into Access Point mode.");
+    piggyMode = PIGGYMODE_STARTING_STA;
   });
 
-  server.on("/saveconfig", HTTP_PUT, [](AsyncWebServerRequest *request){
-      request->send(200, "text/plain", "saveconfig OK");
+  server.on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", "Restarting the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.");
+    Serial.println("Restarting...");
+    ESP.restart();
+  });
+
+  server.on("/delete-config", HTTP_GET, [](AsyncWebServerRequest* request) {
+    if (deleteFile(CONFIG_FILE)) {
+      request->send(200, "text/html", "Configuration file deleted.");
+    } else {
+      request->send(200, "text/html", "WARNING: Failed to delete configuration file!");
+    }
+  });  
+
+  server.on(CONFIG_FILE, HTTP_PUT, [](AsyncWebServerRequest *request){
+      request->send(200, "text/plain", "Configuration file saved.");
   }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
       static String body;  // Accumulate data chunks
 
@@ -220,7 +259,8 @@ void setup_webserver() {
       if (index + len == total) {  // All data received
           Serial.println("Received PUT data: '" + body + "'");
           paramFileString = body;
-          writeFile("/config.json", body);
+          writeFile(CONFIG_FILE, body);
+          parseConfig(paramFileString);
       }
   });
 
@@ -235,4 +275,8 @@ void start_webserver() {
   Serial.printf("Before, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
   server.begin();
   Serial.printf("After, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
+}
+
+void stop_webserver() {
+  server.end();
 }

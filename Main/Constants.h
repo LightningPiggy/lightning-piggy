@@ -32,6 +32,8 @@ String currentVersion = "5.0.0";
 #define ACCESS_POINT_CHANNEL       1
 #define ACCESS_POINT_MAX_STA_CONN  4
 
+#define CONFIG_FILE "/config.json"
+
 extern const int NOT_SPECIFIED = -1; 
 
 const char * NOTCONFIGURED = "REPLACETHISBY";

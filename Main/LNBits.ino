@@ -30,7 +30,7 @@ int getWalletBalance() {
   String walletName = doc["name"];
 
   if (walletName == "null") {
-    Serial.println("ERROR: could not find wallet details on lnbits host " + String(lnbitsHost) + " with invoice/read key " + String(invoiceKey) + " so something's wrong! Did you make a typo?");
+    Serial.println("ERROR: could not find wallet details on lnbits host " + String(lnbitsHost) + " with invoice/read key " + String(lnbitsInvoiceKey) + " so something's wrong! Did you make a typo?");
     return NOT_SPECIFIED;
   } else {
     Serial.print("Wallet name: " + walletName);

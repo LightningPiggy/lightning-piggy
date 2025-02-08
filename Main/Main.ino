@@ -37,6 +37,9 @@ int piggyMode = PIGGYMODE_INIT;
 
 char* ssid = NULL;
 char* password = NULL;
+char* lnbitsHost = NULL;
+char* lnbitsPort = NULL;
+char* lnbitsInvoiceKey = NULL;
 
 void setup() {
     Serial.begin(115200);
@@ -76,13 +79,18 @@ void loop() {
   } else if (piggyMode == PIGGYMODE_STARTING_STA) {
       displayWifiConnecting();
       #ifndef DEBUG
-      connectWifi();
-      short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
-      displayWifiStrengthBottom();
-      #endif
-      //start_webserver(); // not really necessary, but useful for debugging?
-      displayFetching();
-      piggyMode = PIGGYMODE_STARTED_STA;
+      stop_webserver();
+      delay(1000);
+      if (connectWifi()) {
+        start_webserver(); // TODO: make this dependent on a configuration, default off
+        short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
+        displayWifiStrengthBottom();
+        #endif
+        displayFetching();
+        piggyMode = PIGGYMODE_STARTED_STA;
+      } else {
+        piggyMode = PIGGYMODE_FAILED_STA;
+      }
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
     loop_interrupts();
     loop_websocket();
@@ -105,9 +113,13 @@ void loop() {
     if (!hibernateDependingOnBattery()) delay(200);
     // Remain in this mode because we're waiting for websocket updates
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-    //Serial.println("TODO: show PIGGYMODE_FAILED_STA on display");
+      displayWifiIssue(WIFI_CONNECT_TIMEOUT_SECONDS);
+      // TODO: record the time of this display message, and after a while, go to AP mode?
+      hibernateDependingOnBattery();
+      piggyMode = PIGGYMODE_STARTING_AP; // If it hasn't gone to sleep, start the Access Point for configuration
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
+      stop_webserver();
       apstart_time = millis();
       wifi_init_softap();
     } else if (millis() - apstart_time < 16 * 1000) {
