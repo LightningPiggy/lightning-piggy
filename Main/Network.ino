@@ -87,6 +87,8 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 }
 
 bool connectWifi() {
+  if (!isConfigured(ssid)) return false;
+
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
   Serial.println("Connecting to " + String(ssid));
   WiFi.onEvent(wifiEventCallback);

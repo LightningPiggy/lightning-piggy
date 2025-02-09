@@ -71,7 +71,7 @@ void setup() {
 
 void loop() {
   if (piggyMode == PIGGYMODE_INIT) {
-    if (strnlen(ssid, MAX_CONFIG_LENGTH) > 0) {
+    if (ssid != NULL && strnlen(ssid, MAX_CONFIG_LENGTH) > 0) { // TODO: call some sort of "hasMinimalConfig" instead that also checks for minimal wallet connection settings
       piggyMode = PIGGYMODE_STARTING_STA;
     } else {
       piggyMode = PIGGYMODE_STARTING_AP;

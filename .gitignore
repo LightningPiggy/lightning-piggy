@@ -4,3 +4,5 @@ flash_image.bin*
 trash/
 
 Main/config.h_*
+
+config_partition/config.json

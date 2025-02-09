@@ -23,11 +23,10 @@ esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin
 
 [ $? -ne 0 ] && echo "ERROR: couldn't merge .bin files" && exit 1
 
-echo "Local port 1080 will be forwarded to port 80 on the emulated ESP32"
+echo "Both http://localhost:1080/ and http://localhost:1081/ are forwarded to the device. The former for Access Point mode, the latter in Station/Client mode."
 
-# STA (wifi client) mode
-#~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-:80 -serial stdio
-
-# AP (wifi access point) mode:
-~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-192.168.4.1:80,net=192.168.4.0/24,host=192.168.4.2 -serial stdio
+# For GDB, add: -gdb tcp::3333 -S
+# and then start gdb with "idf.py gdb"
+# See https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/qemu.html#debugging
+~/sources/qemu_a159x36/build/qemu-system-xtensa -M esp32 -m 4M -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true -nic user,model=esp32_wifi,hostfwd=tcp:127.0.0.1:1080-192.168.4.1:80,net=192.168.4.0/24,host=192.168.4.2,hostfwd=tcp:127.0.0.1:1081-192.168.4.15:80 -serial stdio
 

@@ -198,7 +198,7 @@ void setup_config() {
 
 // Returns true if the value is configured, otherwise false.
 bool isConfigured(const char * configValue) {
-  if ((strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) || (strlen(configValue) == 0)) {
+  if (configValue == NULL || strnlen(ssid, MAX_CONFIG_LENGTH) == 0 || strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) {
     return false;
   } else {
     return true;
@@ -235,6 +235,7 @@ void setup_webserver() {
 
   server.on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", "Restarting the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.");
+    disconnectWifi();
     Serial.println("Restarting...");
     ESP.restart();
   });
