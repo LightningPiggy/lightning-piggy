@@ -1,0 +1,129 @@
+[
+  {
+    "name": "config_wifi_ssid_1",
+    "value": "",
+    "label": "Wireless Network Name",
+    "hint": "The SSID or 'name' of the wifi to connect to.",
+    "type": "text"
+  },
+  {
+    "name": "config_wifi_password_1",
+    "value": "",
+    "label": "Wireless Network Password",
+    "hint": "The wifi key or 'password' of the wifi to connect to. Leave empty if it's an open wifi.",
+    "type": "text"
+  },
+  {
+    "name": "config_lnbits_host",
+    "value": "",
+    "label": "LNBits Server Name",
+    "hint": "The server on which you've created an LNBits wallet. Example: demo.lnpiggy.com or your own LNBits server's hostname.",
+    "type": "text"
+  },
+  {
+    "name": "config_lnbits_https_port",
+    "value": "",
+    "label": "LNBits HTTPS Port",
+    "hint": "If LNBits is not on the default port 443, specify the HTTPS/SSL port here.",
+    "type": "integer"
+  },
+  {
+    "name": "config_lnbits_invoice_key",
+    "value": "",
+    "label": "LNBits Invoice/Read Key",
+    "hint": "Copy-paste the invoice/read key from your LNBits wallet.",
+    "type": "text"
+  },
+  {
+    "name": "config_static_receive_code",
+    "value": "",
+    "label": "LNBits Static Receive Code",
+    "hint": "Example: LNURL1DP68... or user@demo.lnpiggy.com. If empty, it will be fetched from the LNBits backend, but that es time's a bit slower.",
+    "type": "text"
+  },
+  {
+    "name": "config_fiat_currency",
+    "value": "",
+    "label": "Fiat currency",
+    "hint": "Example: USD, EUR, DKK, JPY, GBP, CNY, RMB,... Leave empty not to show any fiat amount.",
+    "type": "text"
+  },
+  {
+    "name": "config_balance_bias",
+    "value": "",
+    "label": "Balance Bias",
+    "hint": "Number of satoshis to add to the balance to account for other wallets or on-chain funds. May be negative.",
+    "type": "integer"
+  },
+  {
+    "name": "config_thousands_separator",
+    "value": "",
+    "label": "Thousands separator",
+    "hint": "Example: . or , or ' '. Leave empty to use the locale's default.",
+    "type": "text"
+  },
+  {
+    "name": "config_decimal_separator",
+    "value": "",
+    "label": "Decimal separator",
+    "hint": "Example: . or , or ' '. Leave empty to use the locale's default.",
+    "type": "text"
+  },
+  {
+    "name": "config_show_boot_wisdom",
+    "value": "",
+    "label": "Show boot wisdom",
+    "hint": "Set to YES to show a bit of wisdom, such as a quote, when the device starts up.",
+    "type": "text"
+  },
+  {
+    "name": "config_boot_salutation",
+    "value": "",
+    "label": "Boot salutation",
+    "hint": "How to greet the user at startup. Example: 'Some wisdom from your favorite uncle:'.",
+    "type": "text"
+  },
+  {
+    "name": "config_locale",
+    "value": "",
+    "label": "Language (locale)",
+    "hint": "Example: en, da, de, de_CH, es, nl. See language codes from https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes",
+    "type": "text"
+  },
+  {
+    "name": "config_time_zone",
+    "value": "",
+    "label": "Timezone",
+    "hint": "Example: America/New_York, Africa/Johannesburg, Europe/Copenhagen. Leave empty not to show last update time. See http://worldtimeapi.org/timezones",
+    "type": "text"
+  },
+  {
+    "name": "config_always_run_webserver",
+    "value": "",
+    "label": "Always run webserver",
+    "hint": "Instead of only running the webserver while in Configuration Mode, also run it while in regular wifi client 'station' mode.",
+    "type": "text"
+  },
+  {
+    "name": "config_update_host",
+    "value": "",
+    "label": "Update server",
+    "hint": "Server to check for updates.",
+    "type": "text"
+  },
+  {
+    "name": "config_time_server",
+    "value": "",
+    "label": "Time server",
+    "hint": "The time server will be accessed through the HTTPS API. Example: worldtimeapi.org",
+    "type": "text"
+  },
+  {
+    "name": "config_time_server_path",
+    "value": "",
+    "label": "Time server path",
+    "hint": "Which path to append to the time server, before appending the Timezone. Example: /api/timezone/ would become https://worldtimeapi.org/api/timezone/America/New_York",
+    "type": "text"
+  },
+]
+
