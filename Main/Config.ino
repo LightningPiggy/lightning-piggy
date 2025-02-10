@@ -309,3 +309,14 @@ void start_webserver() {
 void stop_webserver() {
   server.end();
 }
+
+// Check if enough items are configured to attempt regular startup.
+bool hasMinimalConfig() {
+  Serial.println("Checking for minimal configuration...");
+  if (isConfigured(ssid) && isConfigured(lnbitsHost) && isConfigured(lnbitsInvoiceKey)) {
+    Serial.println("All mandatory configuration items are set.");
+    return true;
+  }
+  Serial.println("WARNING: missing mandatory configuration items!");
+  return false;
+}
