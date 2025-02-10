@@ -37,9 +37,27 @@ int piggyMode = PIGGYMODE_INIT;
 
 char* ssid = NULL;
 char* password = NULL;
+
 char* lnbitsHost = NULL;
-char* lnbitsPort = NULL;
 char* lnbitsInvoiceKey = NULL;
+
+char* lnbitsPort = NULL;
+char* staticLNURLp = NULL;
+
+char* btcPriceCurrencyChar = NULL;
+char* balanceBias = NULL;
+char* thousandsSeparator = NULL;
+char* decimalSeparator = NULL;
+char* bootSloganPrelude = NULL;
+char* showSloganAtBoot = NULL;
+
+char* timezone = NULL;
+char* localeSetting = NULL;
+
+char* alwaysRunWebserver = NULL;
+char* checkUpdateHost = NULL;
+char* timeServer = NULL;
+char* timeServerPath = NULL;
 
 void setup() {
     Serial.begin(115200);
@@ -57,10 +75,14 @@ void setup() {
 
     setup_display();
     displayVoltageWarning();
-    showBootSlogan();
-    showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
 
     setup_config();
+
+    if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
+      showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
+    } else {
+      showBootSlogan();
+    }
 
     setup_webserver();
 
@@ -82,7 +104,7 @@ void loop() {
       stop_webserver();
       delay(1000);
       if (connectWifi()) {
-        start_webserver(); // TODO: make this dependent on a configuration, default off
+        if (strncmp(alwaysRunWebserver,"YES", 3) != 0) start_webserver();
         short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
         displayWifiStrengthBottom();
         #endif

@@ -131,15 +131,17 @@ String getJsonValue(JsonDocument &doc, const char *name) {
   return "";
 }
 
-void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue) {
+void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue, const char * defaultValue = NULL) {
     String value = getJsonValue(doc, key);
     if (value == "") {
-      Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for binaryReplacedValue...");
+      Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for binaryReplacedValue and defaultValue...");
       if (isConfigured(binaryReplacedValue)) {
         Serial.println("Found binaryReplacedValue, using that: '" + String(binaryReplacedValue) + "'");
         value = binaryReplacedValue;
+      } else if (defaultValue != NULL) {
+        value = defaultValue;
       } else {
-        Serial.println("no binaryReplacedValue is set, config value is empty");
+        Serial.println("no binaryReplacedValue is set, no defaultValue is set, so config item remains empty");
       }
     }
     free(*output);  // Free old memory to prevent leaks
@@ -152,22 +154,48 @@ bool parseConfig(String paramFileString) {
     if (error) {
         Serial.print("deserializeJson() failed: ");
         Serial.println(error.c_str());
-        return false;
+        Serial.println("Still continuing because binaryReplacedValue or defaultValue might quality.");
     }
 
+    // Mandatory:
+    // ==========
     tryGetJsonValue(doc, "config_wifi_ssid_1", &ssid, MAX_CONFIG_LENGTH, REPLACE_ssid);
     tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH, REPLACE_password);
-
     tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH, REPLACE_lnbitsHost);
-    tryGetJsonValue(doc, "config_lnbits_https_port", &lnbitsPort, MAX_CONFIG_LENGTH, REPLACE_lnbitsPort);
     tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH, REPLACE_lnbitsInvoiceKey);
 
     Serial.println("Parsed config:");
     Serial.printf("config_wifi_ssid_1: %s\n", ssid);
     Serial.printf("config_wifi_password_1: %s\n", password);
     Serial.printf("config_lnbits_host: %s\n", lnbitsHost);
-    Serial.printf("config_lnbits_https_port: %s\n", lnbitsPort);
     Serial.printf("config_lnbits_invoice_key: %s\n", lnbitsInvoiceKey);
+
+    // Optional
+    // ========
+
+    // Wallet:
+    tryGetJsonValue(doc, "config_lnbits_https_port", &lnbitsPort, MAX_CONFIG_LENGTH, REPLACE_lnbitsPort);
+    tryGetJsonValue(doc, "config_static_receive_code", &staticLNURLp, MAX_CONFIG_LENGTH, REPLACE_staticLNURLp);
+
+    // Display:
+    tryGetJsonValue(doc, "config_fiat_currency", &btcPriceCurrencyChar, MAX_CONFIG_LENGTH, REPLACE_btcPriceCurrencyChar);
+    tryGetJsonValue(doc, "config_balance_bias", &balanceBias, MAX_CONFIG_LENGTH, REPLACE_balanceBias);
+    tryGetJsonValue(doc, "config_thousands_separator", &thousandsSeparator, MAX_CONFIG_LENGTH, REPLACE_thousandsSeparator, defaultThousandsSeparator);
+    tryGetJsonValue(doc, "config_decimal_separator", &decimalSeparator, MAX_CONFIG_LENGTH, REPLACE_decimalSeparator, defaultDecimalSeparator);
+    tryGetJsonValue(doc, "config_boot_salutation", &bootSloganPrelude, MAX_CONFIG_LENGTH, REPLACE_bootSloganPrelude);
+    tryGetJsonValue(doc, "config_show_boot_wisdom", &showSloganAtBoot, MAX_CONFIG_LENGTH, REPLACE_showSloganAtBoot, "NO");
+
+    // Device:
+    tryGetJsonValue(doc, "config_locale", &localeSetting, MAX_CONFIG_LENGTH, REPLACE_localeSetting);
+    tryGetJsonValue(doc, "config_time_zone", &timezone, MAX_CONFIG_LENGTH, REPLACE_timezone);
+
+    // Advanced:
+    tryGetJsonValue(doc, "config_always_run_webserver", &alwaysRunWebserver, MAX_CONFIG_LENGTH, REPLACE_alwaysRunWebserver, "NO");
+    tryGetJsonValue(doc, "config_update_host", &checkUpdateHost, MAX_CONFIG_LENGTH, REPLACE_updateHost, defaultCheckUpdateHost);
+    tryGetJsonValue(doc, "config_time_server", &timeServer, MAX_CONFIG_LENGTH, REPLACE_timeServer, defaultTimeServer);
+    tryGetJsonValue(doc, "config_time_server_path", &timeServerPath, MAX_CONFIG_LENGTH, REPLACE_timeServerPath, defaultTimeServerPath);
+
+    Serial.printf("config_lnbits_https_port: %s\n", lnbitsPort);
 
     return true;
 }
@@ -198,7 +226,7 @@ void setup_config() {
 
 // Returns true if the value is configured, otherwise false.
 bool isConfigured(const char * configValue) {
-  if (configValue == NULL || strnlen(ssid, MAX_CONFIG_LENGTH) == 0 || strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) {
+  if (configValue == NULL || strnlen(configValue, MAX_CONFIG_LENGTH) == 0 || strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) {
     return false;
   } else {
     return true;

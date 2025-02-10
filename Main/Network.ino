@@ -418,7 +418,7 @@ void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_start());
     Serial.println(counter++);delay(delaytime);
 
-    Serial.println("wifi_init_softap finished. SSID: '" + String(ACCESS_POINT_SSID) + ", password '" + String(ACCESS_POINT_PASS) + "', channel: " + String(ACCESS_POINT_CHANNEL));
+    Serial.println("wifi_init_softap finished. SSID: '" + String(ACCESS_POINT_SSID) + "', password '" + String(ACCESS_POINT_PASS) + "', channel: " + String(ACCESS_POINT_CHANNEL));
     Serial.println(counter++);delay(delaytime);
 }
 

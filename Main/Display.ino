@@ -556,11 +556,6 @@ void showFiatValues(int balance, int maxX) {
 
 
 void showBootSlogan() {
-  if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
-    Serial.println("Not showing slogan at boot because showSloganAtBoot is not 'YES'.");
-    return;
-  }
-
   int timeToWait = 0;
 
   if (isConfigured(bootSloganPrelude)) {

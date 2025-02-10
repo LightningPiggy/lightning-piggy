@@ -73,7 +73,7 @@
     "name": "config_show_boot_wisdom",
     "value": "",
     "label": "Show boot wisdom",
-    "hint": "Set to YES to show a bit of wisdom, such as a quote, when the device starts up.",
+    "hint": "Set to YES to show a bit of wisdom (such as a quote) when the device starts up, instead of the logo.",
     "type": "text"
   },
   {

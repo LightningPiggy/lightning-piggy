@@ -87,5 +87,11 @@ String websocketApiUrl = "/api/v1/ws/";
 #define DISPLAY_TYPE_213DEPG 1
 #define DISPLAY_TYPE_266DEPG 2
 
+const char* defaultTimeServer = "worldtimeapi.org";
+const char* defaultTimeServerPath = "/api/timezone/";
+const char* defaultCheckUpdateHost = "m.lightningpiggy.com";
+
+const char* defaultThousandsSeparator = ",";
+const char* defaultDecimalSeparator = ".";
 
 #endif // #ifndef CONSTANTS_H
