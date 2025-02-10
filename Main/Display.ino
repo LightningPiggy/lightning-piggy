@@ -280,8 +280,7 @@ int displayFit(String text, int startXbig, int startYbig, int endXbig, int endYb
     return startYbig;
   }
 
-  int16_t x1, y1;
-  uint16_t w, h;
+  uint16_t h;
   int startX = startXbig;
   int startY = startYbig;
   int endX = endXbig;
@@ -452,7 +451,6 @@ void displayFetching() {
 // returns the y value after showing all the status info
 void displayStatus(int xBeforeLNURLp, bool showsleep) {
   setFont(0);
-  int lineHeight = u8g2Fonts.getFontAscent()-u8g2Fonts.getFontDescent(); // there's no fontDescent in these status lines 
   int qrPixels = displayWidth() - xBeforeLNURLp; // square
   Serial.println("qrPixels = " + String(qrPixels));
 
@@ -563,11 +561,10 @@ void showBootSlogan() {
     return;
   }
 
-  int displayY = 2;
   int timeToWait = 0;
 
   if (isConfigured(bootSloganPrelude)) {
-    displayY = displayFit(String(bootSloganPrelude), 0, 0, displayWidth(), balanceHeight, 3);
+    displayFit(String(bootSloganPrelude), 0, 0, displayWidth(), balanceHeight, 3);
     timeToWait = 1000; // since the prelude is always the same, there's no need to wait a long time to allow reading it
   }
 
