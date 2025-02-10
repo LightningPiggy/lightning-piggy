@@ -144,7 +144,7 @@ void loop() {
       stop_webserver();
       apstart_time = millis();
       wifi_init_softap();
-    } else if (millis() - apstart_time < 16 * 1000) {
+    } else if (millis() - apstart_time < 17 * 1000) {
       // Wait until the AP is ready
       Serial.print("*"); delay(200);
     } else {

@@ -74,7 +74,7 @@ const char* htmlContent PROGMEM = R"rawliteral(
 String paramFileString = "";
 
 AsyncWebServer server(80);
-
+AsyncAuthenticationMiddleware digestAuth;
 
 String readFile(String name) {
     File file = LittleFS.open(name, "r");
@@ -246,27 +246,34 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 }
 
 void setup_webserver() {
-  Serial.println("Starting webserver. TODO: add authentication!");
+  Serial.println("Starting webserver...");
+
+  digestAuth.setUsername("piggy");
+  digestAuth.setPassword("oinkoink");
+  digestAuth.setRealm(ACCESS_POINT_SSID);
+  digestAuth.setAuthFailureMessage("Authentication failed");
+  digestAuth.setAuthType(AsyncAuthType::AUTH_DIGEST);
+  digestAuth.generateHash();
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", htmlContent);
-  });
+  }).addMiddleware(&digestAuth);
 
   server.on(CONFIG_FILE, HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", paramFileString);
-  });
+  }).addMiddleware(&digestAuth);
 
   server.on("/connect-wifi-station", HTTP_GET, [](AsyncWebServerRequest* request) {
     //request->send(200, "text/html", "Trying to connect to WiFi station. If this fails, the device will go back into Access Point mode.");
     piggyMode = PIGGYMODE_STARTING_STA;
-  });
+  }).addMiddleware(&digestAuth);
 
   server.on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", "Restarting the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.");
     disconnectWifi();
     Serial.println("Restarting...");
     ESP.restart();
-  });
+  }).addMiddleware(&digestAuth);
 
   server.on("/delete-config", HTTP_GET, [](AsyncWebServerRequest* request) {
     if (deleteFile(CONFIG_FILE)) {
@@ -274,7 +281,7 @@ void setup_webserver() {
     } else {
       request->send(200, "text/html", "WARNING: Failed to delete configuration file!");
     }
-  });  
+  }).addMiddleware(&digestAuth);
 
   server.on(CONFIG_FILE, HTTP_PUT, [](AsyncWebServerRequest *request){
       request->send(200, "text/plain", "Configuration file saved.");
@@ -291,7 +298,7 @@ void setup_webserver() {
           writeFile(CONFIG_FILE, body);
           parseConfig(paramFileString);
       }
-  });
+  }).addMiddleware(&digestAuth);
 
   server.onNotFound([](AsyncWebServerRequest* request) {
     request->send(404, "text/plain", "Not found");
