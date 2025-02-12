@@ -15,12 +15,74 @@
 #include <GxEPD2_BW.h>
 #include <U8g2_for_Adafruit_GFX.h>
 
+//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
+
+#ifdef EMULATE_DISPLAY_TYPE_213DEPG
+
+#include <TFT_eSPI.h>
+TFT_eSPI tft = TFT_eSPI();
+
+// Adapter class to make TFT_eSPI compatible with Adafruit_GFX
+class TFT_eSPI_Adapter : public Adafruit_GFX {
+public:
+    TFT_eSPI &tft;
+    TFT_eSPI_Adapter(TFT_eSPI &display) : Adafruit_GFX(display.width(), display.height()), tft(display) {}
+
+    void drawPixel(int16_t x, int16_t y, uint16_t color) override {
+        tft.drawPixel(x, y, color);
+    }
+
+    void setPartialWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+      fillRect(x,y,w,h,GxEPD_WHITE);
+    }
+
+    void firstPage() {
+    }
+
+    bool nextPage() {
+      return false;
+    }
+
+    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+      tft.fillRect(x, y, w, h, color);
+    }
+
+    // Converts a 1-bit-per-pixel horizontal bitmap and draws it
+    void drawImage(const unsigned char*& bitmap, int& x, int& y, int& w, int& h, bool& transparent) {
+      uint16_t fgColor = TFT_WHITE;  // Foreground color (white by default)
+      uint16_t bgColor = TFT_BLACK;  // Background color (black by default)
+
+      for (int row = 0; row < h; row++) {
+          for (int col = 0; col < w; col++) {
+              int byteIndex = (row * ((w + 7) / 8)) + (col / 8);  // Locate byte in memory
+              int bitIndex = 7 - (col % 8);  // Extract bit (MSB first)
+
+              bool pixelOn = (bitmap[byteIndex] >> bitIndex) & 0x01;  // 1 = foreground, 0 = background
+
+              if (pixelOn || !transparent) {
+                  uint16_t color = pixelOn ? fgColor : bgColor;
+                  //tft.drawPixel(x + col, y + row, color);
+                  tft.drawPixel(y + row, x + (w - 1 - col), color); // X and Y are swapped, and the image is mirrored
+              }
+          }
+      }
+  }
+};
+
+TFT_eSPI_Adapter display1(tft);
+TFT_eSPI_Adapter display2 = display1;
+
+# else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
+
 #define MAX_DISPLAY_BUFFER_SIZE 65536ul
 #define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8))
 // Both display drivers are compiled in, and the right one is detected and used at runtime:
 //GxEPD2_BW<GxEPD2_213_B74, MAX_HEIGHT(GxEPD2_213_B74)> display1(GxEPD2_213_B74(/*CS=*/ 5, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
 GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)> display1(GxEPD2_213_BN(/*CS=*/ 5, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
 GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)> display2(GxEPD2_266_BN(/*CS=*/ 5, /*DC=*/ 19, /*RST=*/ 4, /*BUSY=*/ 34));
+
+#endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
+
 
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
@@ -36,7 +98,7 @@ int blackBackgroundHorizontalMargin=2;
 String lines[10];
 int nroflines = 0;
 
-int displayToUse = -NOT_SPECIFIED;
+int displayToUse = DISPLAY_TYPE_213DEPG;
 int balanceHeight; // [0,balanceHeight] is the vertical zone of the balance region plus the line underneath it.
 int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat region.
 
@@ -53,27 +115,40 @@ int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat
 09:08:20.507 -> clearScreen operation took 60ms => wrong display
  */
 void setup_display() {
+  
+#ifdef EMULATE_DISPLAY_TYPE_213DEPG
+
+  tft.init();
+  tft.setRotation(1);
+  tft.fillScreen(TFT_WHITE);
+  for (int i=0;i<displayWidth();i=i+5) {
+    tft.fillRect(i,0,1,displayHeight(),TFT_BLUE);
+  }
+  for (int i=0;i<displayHeight();i=i+5) {
+    tft.fillRect(0,i,displayWidth(),1,TFT_RED);
+  }
+
+  u8g2Fonts.begin(display1);
+
+# else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
+
   display1.init(115200, true, 2, false);
   long beforeTime = millis();
   display1.clearScreen();
   Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
   if ((millis() - beforeTime) > 1500) {
     Serial.println("clearScreen took a long time so found the right display: 1!");
-    displayToUse = DISPLAY_TYPE_213DEPG;
     display1.setRotation(1); // display is used in landscape mode
     u8g2Fonts.begin(display1); // connect u8g2 procedures to Adafruit GFX
   } else {
     display2.init(115200, true, 2, false);
-    beforeTime = millis();
     display2.clearScreen();
-    if ((millis() - beforeTime) > 1500) {
-      displayToUse = DISPLAY_TYPE_266DEPG;
-      display2.setRotation(1); // display is used in landscape mode
-      u8g2Fonts.begin(display2); // connect u8g2 procedures to Adafruit GFX
-    } else {
-      Serial.println("Did not find good display, perhaps this is the T-Display emulator?!");
-    }
+    displayToUse = DISPLAY_TYPE_266DEPG;
+    display2.setRotation(1); // display is used in landscape mode
+    u8g2Fonts.begin(display2); // connect u8g2 procedures to Adafruit GFX
   }
+
+#endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
@@ -91,9 +166,8 @@ void setPartialWindow(int x, int y, int h, int w) {
     display1.setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2.setPartialWindow(x, y, h, w);
-  } else {
-    Serial.println("ERROR: there's no display to use detected!");
   }
+  Serial.println("ERROR: there's no display to use detected!");
 }
 
 void displayFirstPage() {
@@ -111,9 +185,8 @@ bool displayNextPage() {
     return display1.nextPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return display2.nextPage();
-  } else {
-    Serial.println("ERROR: there's no display to use detected!");
   }
+  Serial.println("ERROR: there's no display to use detected!");
   return false;
 }
 
@@ -142,9 +215,8 @@ int displayHeight() {
     return 122;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return 152;
-  } else {
-    Serial.println("ERROR: there's no display to use detected!");
   }
+  Serial.println("ERROR: there's no display to use detected!");
   return 0;
 }
 
@@ -153,9 +225,8 @@ int displayWidth() {
     return 250;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return 296;
-  } else {
-    Serial.println("ERROR: there's no display to use detected!");
   }
+  Serial.println("ERROR: there's no display to use detected!");
   return 0;
 }
 
