@@ -24,13 +24,15 @@ String currentVersion = "5.0.0";
 #define PIGGYMODE_FAILED_STA 3
 #define PIGGYMODE_STARTING_AP 4
 #define PIGGYMODE_STARTED_AP 5
-#define PIGGYMODE_FAILED_AP 6
 
 // Configuration through access point:
 #define ACCESS_POINT_SSID          "LightningPiggy Configuration"
 #define ACCESS_POINT_PASS          ""
 #define ACCESS_POINT_CHANNEL       1
 #define ACCESS_POINT_MAX_STA_CONN  4
+
+#define WEBCONFIG_USERNAME "piggy"
+#define WEBCONFIG_PASSWORD "oinkoink"
 
 #define CONFIG_FILE "/config.json"
 
@@ -93,5 +95,10 @@ const char* defaultCheckUpdateHost = "m.lightningpiggy.com";
 
 const char* defaultThousandsSeparator = ",";
 const char* defaultDecimalSeparator = ".";
+
+#define smallestFontHeight 16
+#define MAX_FONT 5
+
+#define MAX_TEXT_LINES 20
 
 #endif // #ifndef CONSTANTS_H

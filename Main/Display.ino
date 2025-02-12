@@ -90,14 +90,12 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
 long lastRefreshedVoltage = -UPDATE_VOLTAGE_PERIOD_MILLIS;  // this makes it update when first run
 
-int smallestFontHeight = 16;
-
 int statusAreaVoltageHeight = -1; // this value is cached after it's calculated so it can be reused later to updated only the voltage
 
 int blackBackgroundVerticalMargin=2;
 int blackBackgroundHorizontalMargin=2;
 
-String lines[10];
+String lines[MAX_TEXT_LINES];
 int nroflines = 0;
 
 int displayToUse = DISPLAY_TYPE_213DEPG;
@@ -117,6 +115,12 @@ int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat
 09:08:20.507 -> clearScreen operation took 60ms => wrong display
  */
 void setup_display() {
+
+  Serial.println("Reserving heap memory for text lines...");
+  for (int i = 0; i < MAX_TEXT_LINES; i++) {
+    lines[i].reserve(100);  // Adjust size as needed
+  }
+  Serial.println("done.");
   
 #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
@@ -168,8 +172,9 @@ void setPartialWindow(int x, int y, int h, int w) {
     display1.setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2.setPartialWindow(x, y, h, w);
+  } else {
+    Serial.println("ERROR: there's no display to use detected!");
   }
-  Serial.println("ERROR: there's no display to use detected!");
 }
 
 void displayFirstPage() {
@@ -252,7 +257,7 @@ void setFont(int fontSize) {
     u8g2Fonts.setFont(u8g2_font_helvR14_te);
   } else if (fontSize == 4) {
     u8g2Fonts.setFont(u8g2_font_helvR18_te);
-  } else if (fontSize == 5) {
+  } else if (fontSize == MAX_FONT) {
     u8g2Fonts.setFont(u8g2_font_helvR24_tf);
   } else {
     Serial.println("ERROR: font size " + String(fontSize) + " is not supported, setting max size");
@@ -386,7 +391,7 @@ int displayFit(String text, int startXbig, int startYbig, int endXbig, int endYb
 
     yPos = startY;
     int textPos = 0;
-    while (textPos < text.length()) {
+    while (textPos < text.length() && nroflines < MAX_TEXT_LINES) {
       // Try to fit everything that still needs displaying:
       String textWithoutAlreadyPrintedPart = text.substring(textPos);
       int chars = fitMaxText(textWithoutAlreadyPrintedPart, endX);
@@ -487,24 +492,16 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
  * @param limit
  */
 void displayLNURLPayments(int limit, int maxX, int startY, int maxY) {
-  int smallestFontHeight = 8;
+  int marginAtBottom = 8;
   setPartialWindow(0, startY, maxX, maxY);
   displayFirstPage();
   do {
     int yPos = startY;
-    for (int i=0;i<min(getNroflnurlPayments(),limit) && yPos+smallestFontHeight < maxY;i++) {
+    for (int i=0;i<min(getNroflnurlPayments(),limit) && yPos+marginAtBottom < maxY;i++) {
       Serial.println("Displaying payment: " + getLnurlPayment(i));
       yPos = displayFit(getLnurlPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
     }
   } while (displayNextPage());
-}
-
-void displayWifiConnecting() {
-  displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
-}
-
-void displayWifiIssue(int seconds) {
-  displayFit("I've been trying to connect to the wifi for more than " + String(seconds) + " seconds...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
 }
 
 void displayWifiStrengthBottom() {
@@ -515,10 +512,6 @@ void displayWifiStrength(int y) {
   int wifiStrengthPercent = strengthPercent(getStrength(5));
   String wifiString = "Wifi:" + String(wifiStrengthPercent) + "%";
   displayFit(wifiString, displayWidth()-8*7, y, displayWidth(), displayHeight(), 1, false, true);
-}
-
-void displayFetching() {
-  displayFit("Fetching " + String(lnbitsHost), 0, displayHeight()-smallestFontHeight, displayWidth()-8*7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
 }
 
 // returns the y value after showing all the status info

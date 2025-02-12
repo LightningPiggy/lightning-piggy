@@ -3,17 +3,20 @@
 
 #include <WiFiClientSecure.h>
 
-#define BUFFSIZE 1024
+#define HTTP_BUFFER_SIZE 1024
 
 long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS;
 
 esp_netif_t* softap_netif;
 WebSocketsClient webSocket;
 
+String lastWifiError = "";
+
 int system_event_names_count = 26;
 const char * system_event_names[] = { "WIFI_READY", "SCAN_DONE", "STA_START", "STA_STOP", "STA_CONNECTED", "STA_DISCONNECTED", "STA_AUTHMODE_CHANGE", "STA_GOT_IP", "STA_LOST_IP", "STA_WPS_ER_SUCCESS", "STA_WPS_ER_FAILED", "STA_WPS_ER_TIMEOUT", "STA_WPS_ER_PIN", "STA_WPS_ER_PBC_OVERLAP", "AP_START", "AP_STOP", "AP_STACONNECTED", "AP_STADISCONNECTED", "AP_STAIPASSIGNED", "AP_PROBEREQRECVED", "GOT_IP6", "ETH_START", "ETH_STOP", "ETH_CONNECTED", "ETH_DISCONNECTED", "ETH_GOT_IP", "MAX"};
 const char * system_event_reasons2[] = { "UNSPECIFIED", "AUTH_EXPIRE", "AUTH_LEAVE", "ASSOC_EXPIRE", "ASSOC_TOOMANY", "NOT_AUTHED", "NOT_ASSOCED", "ASSOC_LEAVE", "ASSOC_NOT_AUTHED", "DISASSOC_PWRCAP_BAD", "DISASSOC_SUPCHAN_BAD", "UNSPECIFIED", "IE_INVALID", "MIC_FAILURE", "4WAY_HANDSHAKE_TIMEOUT", "GROUP_KEY_UPDATE_TIMEOUT", "IE_IN_4WAY_DIFFERS", "GROUP_CIPHER_INVALID", "PAIRWISE_CIPHER_INVALID", "AKMP_INVALID", "UNSUPP_RSN_IE_VERSION", "INVALID_RSN_IE_CAP", "802_1X_AUTH_FAILED", "CIPHER_SUITE_REJECTED", "BEACON_TIMEOUT", "NO_AP_FOUND", "AUTH_FAIL", "ASSOC_FAIL", "HANDSHAKE_TIMEOUT", "CONNECTION_FAIL" };
 #define reason2str(r) ((r>176)?system_event_reasons2[r-176]:system_event_reasons2[r-1])
+
 
 void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
   // Regular flow of events is: 0, 2, 7 (and then 3 when the device goes to sleep)
@@ -35,8 +38,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
     }
 
     if (reason != WIFI_REASON_ASSOC_LEAVE) { // ignore intentional disconnections (such as before deepsleep)
-	    // Write the disconnection reason to the display for troubleshooting
-	    displayFit(details, 0, 0, displayWidth(), 40, 1);
+     lastWifiError = details;
     }
 
     // Reboot or longsleep after unrecoverable errors OR if it's been trying for a long time already.
@@ -90,6 +92,7 @@ bool connectWifi() {
 
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
   Serial.println("Connecting to " + String(ssid));
+  lastWifiError = "";
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
   WiFi.begin(ssid, password);
@@ -98,6 +101,11 @@ bool connectWifi() {
       delay(1000);
       Serial.print(".");
       if ((millis() - startTime) > WIFI_CONNECT_TIMEOUT_SECONDS*1000) break;
+      if (lastWifiError != "") {
+        // Write the disconnection reason to the display for troubleshooting
+        displayFit(lastWifiError, 0, 0, displayWidth(), 40, 1);
+        lastWifiError = "";
+      }
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("WiFi connected. IP address: "); Serial.println(WiFi.localIP());
@@ -229,8 +237,8 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 
       int bytesRead = 0;
       while (bytesRead < bytesToRead && (millis() < maxTime)) { // stop if less than max bytes are read
-        uint8_t buff[BUFFSIZE] = {0}; // zero initialize buffer to have 0x00 at the end
-        int readNow = min(bytesToRead - bytesRead,BUFFSIZE-1); // leave one byte for the 0x00 at the end
+        uint8_t buff[HTTP_BUFFER_SIZE] = {0}; // zero initialize buffer to have 0x00 at the end
+        int readNow = min(bytesToRead - bytesRead,HTTP_BUFFER_SIZE-1); // leave one byte for the 0x00 at the end
         //Serial.println("Reading bytes: " + String(readNow));
         int thisBytesRead = client.read(buff, readNow);
         //Serial.println("thisBytesRead = " + String(thisBytesRead));

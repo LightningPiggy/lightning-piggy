@@ -32,6 +32,7 @@ int lastBalance = -NOT_SPECIFIED;
 bool forceRefreshBalanceAndPayments = false;
 int xBeforeLNURLp;
 long apstart_time  = 0;
+long lastHeap = 0;
 
 int piggyMode = PIGGYMODE_INIT;
 
@@ -99,7 +100,7 @@ void loop() {
       piggyMode = PIGGYMODE_STARTING_AP;
     }
   } else if (piggyMode == PIGGYMODE_STARTING_STA) {
-      displayWifiConnecting();
+      displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
       #ifndef DEBUG
       stop_webserver();
       delay(1000);
@@ -108,7 +109,7 @@ void loop() {
         short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
         displayWifiStrengthBottom();
         #endif
-        displayFetching();
+        displayFit("Fetching " + String(lnbitsHost), 0, displayHeight()-smallestFontHeight, displayWidth()-8*7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
         piggyMode = PIGGYMODE_STARTED_STA;
       } else {
         piggyMode = PIGGYMODE_FAILED_STA;
@@ -132,16 +133,15 @@ void loop() {
     }
   
     if (!isWebsocketConnected()) connectWebsocket();
-    if (!hibernateDependingOnBattery()) delay(200);
     // Remain in this mode because we're waiting for websocket updates
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-      displayWifiIssue(WIFI_CONNECT_TIMEOUT_SECONDS);
-      // TODO: record the time of this display message, and after a while, go to AP mode?
-      hibernateDependingOnBattery();
-      piggyMode = PIGGYMODE_STARTING_AP; // If it hasn't gone to sleep, start the Access Point for configuration
+    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + " seconds. A new wifi Access Point will be created so you can check the configuration...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+    delay(10000);
+    piggyMode = PIGGYMODE_STARTING_AP;
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
       stop_webserver();
+      displayFit("Starting wireless Access Point for configuration. This can take 20 seconds, please wait...", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
       apstart_time = millis();
       wifi_init_softap();
     } else if (millis() - apstart_time < 17 * 1000) {
@@ -151,14 +151,19 @@ void loop() {
       start_webserver();
       apstart_time = 0; // mark server as started
       piggyMode = PIGGYMODE_STARTED_AP;
+      displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
-    //Serial.println("TODO: show PIGGYMODE_STARTED_AP on display");
-  } else if (piggyMode == PIGGYMODE_FAILED_AP) {
-    //Serial.println("TODO: show PIGGYMODE_FAILED_AP on display");
+    // Nothing to do, just wait until the mode is changed.
+  }
+
+  if (millis() - lastHeap >= 2000) {
+    Serial.printf("Free heap memory: %" PRIu32 " bytes\n", ESP.getFreeHeap());
+    lastHeap = millis();
   }
   
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
+  if (!hibernateDependingOnBattery()) delay(200);
 }
 
 void nextRefreshBalanceAndPayments() {

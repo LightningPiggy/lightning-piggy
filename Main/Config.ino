@@ -248,8 +248,8 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 void setup_webserver() {
   Serial.println("Starting webserver...");
 
-  digestAuth.setUsername("piggy");
-  digestAuth.setPassword("oinkoink");
+  digestAuth.setUsername(WEBCONFIG_USERNAME);
+  digestAuth.setPassword(WEBCONFIG_PASSWORD);
   digestAuth.setRealm(ACCESS_POINT_SSID);
   digestAuth.setAuthFailureMessage("Authentication failed");
   digestAuth.setAuthType(AsyncAuthType::AUTH_DIGEST);
