@@ -19,6 +19,8 @@
 
 #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
+#define TFT_WIDTH  135 // should be 122 but then the display is offset
+#define TFT_HEIGHT 250
 #include <TFT_eSPI.h>
 TFT_eSPI tft = TFT_eSPI();
 
