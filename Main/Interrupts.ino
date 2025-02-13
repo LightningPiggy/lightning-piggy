@@ -1,3 +1,5 @@
+#define BUTTON_PIN GPIO_NUM_39
+#define HOLD_TIME 5000  // 5000 ms (5 seconds)
 
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -9,8 +11,9 @@ long minTimeBetweenTilts = 2000;
 long lastTilted = NOT_SPECIFIED;
 bool tiltMessageShown = false;
 
-volatile unsigned long userButtonPushMicros  = 0;
-volatile unsigned long userButtonReleaseMicros  = 0;
+volatile unsigned long pressStartTime = 0;
+volatile bool buttonPressed = false;
+volatile bool actionTriggered = false;
 
 void IRAM_ATTR interruptHandler() {
   portENTER_CRITICAL_ISR(&mux);
@@ -18,12 +21,13 @@ void IRAM_ATTR interruptHandler() {
   portEXIT_CRITICAL_ISR(&mux);
 }
 
-void IRAM_ATTR interruptHandlerUserButton() {
-  if (digitalRead(GPIO_NUM_39) == HIGH) {
-        userButtonReleaseMicros = micros();
-    } else {
-        userButtonPushMicros = micros();
-    }
+void IRAM_ATTR buttonISR() {
+  if (digitalRead(BUTTON_PIN) == LOW) {  // Button pressed
+    buttonPressed = true;  // Set flag
+  } else {  // Button released
+    buttonPressed = false;
+    actionTriggered = false;  // Reset action so it can trigger again
+  }
 }
 
 
@@ -33,8 +37,8 @@ void setup_interrupts() {
   attachInterrupt(GPIO_NUM_32, interruptHandler, HIGH);
 
   Serial.println("configuring pin GPIO_NUM_39 as interrupt...");
-  pinMode(GPIO_NUM_39, INPUT_PULLUP);
-  attachInterrupt(GPIO_NUM_39, interruptHandlerUserButton, CHANGE);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, CHANGE);
 }
 
 void loop_interrupts() {
@@ -62,12 +66,18 @@ void loop_interrupts() {
     }
   }
 
-  unsigned long pushDuration = userButtonReleaseMicros - userButtonPushMicros;
-  if (pushDuration > 3*1000*1000 && pushDuration < 30*1000*1000) {
-    displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-    piggyMode = PIGGYMODE_STARTING_AP;
-    userButtonPushMicros = 0;
-    userButtonReleaseMicros = 0;
-  }
+  if (buttonPressed) {  // Check if the button is being held
+    if (pressStartTime == 0) {
+      pressStartTime = millis();  // Record when the button was first pressed
+    }
 
+    if (!actionTriggered && millis() - pressStartTime >= HOLD_TIME) {
+      Serial.println("Button held for 5 seconds! Action triggered.");
+      actionTriggered = true;  // Prevent repeated triggering
+      displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+      piggyMode = PIGGYMODE_STARTING_AP;
+    }
+  } else {
+    pressStartTime = 0;  // Reset timer when the button is released
+  }
 }
