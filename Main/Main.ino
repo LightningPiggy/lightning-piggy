@@ -74,25 +74,30 @@ void setup() {
 
     setup_watchdog(); // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
 
+    setup_interrupts();
+
     setup_display();
     displayVoltageWarning();
 
     setup_config();
 
+    loop_interrupts(); // handle keypress
     if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
       showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
     } else {
       showBootSlogan();
     }
+    loop_interrupts(); // handle keypress
 
     setup_webserver();
-
-    setup_interrupts();
+    loop_interrupts(); // handle keypress
 
     watchdogWasntTriggered();
 }
 
 void loop() {
+  loop_interrupts(); // handle keypress
+
   if (piggyMode == PIGGYMODE_INIT) {
     if (hasMinimalConfig()) {
       piggyMode = PIGGYMODE_STARTING_STA;
@@ -104,7 +109,7 @@ void loop() {
       #ifndef DEBUG
       stop_webserver();
       delay(1000);
-      if (connectWifi()) {
+      if (connectWifi()) { // this takes a while, would be better to do this asynchronous
         if (strncmp(alwaysRunWebserver,"YES", 3) != 0) start_webserver();
         short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
         displayWifiStrengthBottom();
@@ -124,11 +129,14 @@ void loop() {
       disconnectWebsocket();
   
       xBeforeLNURLp = showLNURLpQR(getLNURLp());
+      loop_interrupts();
       xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
       displayStatus(xBeforeLNURLp, false);  // takes ~2000ms, which is too much to do with the websocket
+      loop_interrupts();
       displayBalanceAndPayments(xBeforeLNURLp, forceRefreshBalanceAndPayments);
+      loop_interrupts();
       forceRefreshBalanceAndPayments = false;
-  
+      loop_interrupts();
       checkShowUpdateAvailable();
     }
   
@@ -161,8 +169,9 @@ void loop() {
     Serial.printf("Free heap memory: %" PRIu32 " bytes\n", ESP.getFreeHeap());
     lastHeap = millis();
   }
-  
+
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
+  loop_interrupts(); // handle keypress before sleeping
   if (!hibernateDependingOnBattery()) delay(200);
 }
 
