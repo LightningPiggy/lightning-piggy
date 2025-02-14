@@ -54,6 +54,9 @@ public:
       uint16_t fgColor = TFT_WHITE;  // Foreground color (white by default)
       uint16_t bgColor = TFT_BLACK;  // Background color (black by default)
 
+      // drawing an image pixel-by-pixel with the emulator is slow, so let's draw only 1/5 pixels to make it 5 times faster :-)
+      int transparency = 200; // 0 = full opaque, all pixels drawn. 127 = half opaque, half transparent, half pixels drawn, 255 = full transparent, no pixels drawn
+
       for (int row = 0; row < h; row++) {
           for (int col = 0; col < w; col++) {
               int byteIndex = (row * ((w + 7) / 8)) + (col / 8);  // Locate byte in memory
@@ -61,14 +64,17 @@ public:
 
               bool pixelOn = (bitmap[byteIndex] >> bitIndex) & 0x01;  // 1 = foreground, 0 = background
 
-              if (pixelOn || !transparent) {
-                  uint16_t color = pixelOn ? fgColor : bgColor;
-                  //tft.drawPixel(x + col, y + row, color);
-                  tft.drawPixel(y + row, x + (w - 1 - col), color); // X and Y are swapped, and the image is mirrored
+              // Apply dithering: Compare random value [0,255] with opacity
+              if ((rand() % 256) >= transparency) {
+                  if (pixelOn || !transparent) {
+                      uint16_t color = pixelOn ? fgColor : bgColor;
+                      //tft.drawPixel(x + col, y + row, color);
+                      tft.drawPixel(y + row, x + (w - 1 - col), color); // X and Y are swapped, and the image is mirrored
+                  }
               }
           }
       }
-  }
+    }
 };
 
 TFT_eSPI_Adapter display1(tft);
