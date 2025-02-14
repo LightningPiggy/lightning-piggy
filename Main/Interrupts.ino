@@ -68,16 +68,22 @@ void loop_interrupts() {
 
   if (buttonPressed) {  // Check if the button is being held
     if (pressStartTime == 0) {
+      Serial.println("Recording pressStartTime");
       pressStartTime = millis();  // Record when the button was first pressed
     }
 
     if (!actionTriggered && millis() - pressStartTime >= HOLD_TIME) {
       Serial.println("Button held for 5 seconds! Action triggered.");
       actionTriggered = true;  // Prevent repeated triggering
-      displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-      piggyMode = PIGGYMODE_STARTING_AP;
+      if (piggyMode != PIGGYMODE_STARTING_AP && piggyMode != PIGGYMODE_STARTED_AP) {
+        displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+        piggyMode = PIGGYMODE_STARTING_AP;
+      } else {
+        displayFit("User button was pushed while already in configuration mode, going back to station mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+        piggyMode = PIGGYMODE_STARTING_STA;
+      }
     }
-  } else {
+  } else { // button not pressed
     pressStartTime = 0;  // Reset timer when the button is released
   }
 }
