@@ -2,6 +2,8 @@
 // for faster startup and testing of display code etc.
 //#define DEBUG
 
+//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
+
 // The REPLACETHISBY... values get replaced with the user provided values by the Web Serial Installer for Lightning Piggy.
 // But you can also replace them manually yourself here if you don't plan on using the Web Installer.
 

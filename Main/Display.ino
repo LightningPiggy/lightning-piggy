@@ -15,8 +15,6 @@
 #include <GxEPD2_BW.h>
 #include <U8g2_for_Adafruit_GFX.h>
 
-//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
-
 #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
 #define TFT_WIDTH  135 // should be 122 but then the display is offset
