@@ -41,3 +41,7 @@ python3 server.py
 Then browse to:
 
 http://localhost:5000/
+
+Or to test the inlined version, browse to:
+
+http://localhost:5000/index_inlined.html

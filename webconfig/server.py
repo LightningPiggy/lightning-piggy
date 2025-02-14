@@ -39,19 +39,6 @@ def put_config():
         logging.error(f"Error saving config.json: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-#@app.route("/css/all.min.css", methods=["GET"])
-@app.route("/css/font-awesome-6.4.2-all.min.css", methods=["GET"])
-def css():
-    return send_from_directory(".", "css/all.min.css")
-
-@app.route("/webfonts/fa-solid-900.woff2", methods=["GET"])
-def font1():
-    return send_from_directory(".", "webfonts/fa-solid-900.woff2")
-
-@app.route("/webfonts/fa-solid-900.tff", methods=["GET"])
-def font2():
-    return send_from_directory(".", "webfonts/fa-solid-900.tff")
-
 @app.route("/tailwind_output.css", methods=["GET"])
 def tailwind_css():
     return send_from_directory(".", "tailwind_output.css")
