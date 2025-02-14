@@ -6,3 +6,9 @@ trash/
 Main/config.h_*
 
 config_partition/config.json
+
+webconfig/index.html.gzip.h
+webconfig/index_inlined.html
+webconfig/tailwind_output.css
+
+
