@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!--
+    Author: Dr.Shift
+    As a present to the wonderful Lightning Piggy Project
+    Built on 883456 (Blockhigh)
+  -->
+  <meta name="author" content="Dr.Shift - As a present to the wonderful Lightning Piggy Project - Built on 883456 (Blockhigh)" />
+
+  <!-- For production, we compiled Tailwind CSS locally instead of using the CDN -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lightning Piggy Configuration</title>
+
+  <!-- Offline Tailwind CSS -->
+  <link rel="stylesheet" href="tailwind_output.css">
+
+</head>
+<body class="p-4">
+
+  <div class="container mx-auto max-w-3xl">
+    <!-- Hero Section with Logo -->
+    <section class="flex flex-col items-center justify-center mb-8">
+      <img
+        src="https://www.lightningpiggy.com/content/images/2024/01/BY_-_Lightning_Piggy_character.svg"
+        alt="Lightning Piggy Logo"
+        class="w-32 h-32 mb-4"
+      />
+      <h1 class="text-3xl font-bold text-center" style="color: var(--primary);">
+        Lightning Piggy Configuration
+      </h1>
+      <p class="mt-2 text-center text-gray-700">
+        Configure your device settings easily on your mobile!
+      </p>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="flex justify-center items-center h-32">
+      <svg
+        class="animate-spin h-10 w-10 text-[var(--primary)] spinner"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373
+             0 0 5.373 0 12h4z"
+        ></path>
+      </svg>
+    </div>
+
+    <!-- Form Container (built dynamically) -->
+    <form id="configForm" class="space-y-6 hidden" novalidate></form>
+
+    <!-- Save Button Container (with extra spacing) -->
+    <div class="flex justify-center mt-8">
+      <button
+        type="submit"
+        id="saveButton"
+        class="save-btn w-auto text-lg font-bold px-6 py-3 rounded shadow-lg transition-all transform hover:scale-105"
+        disabled
+      >
+        <span
+          id="saveSpinner"
+          class="hidden inline-block animate-spin h-5 w-5 mr-2 border-2 border-t-transparent border-white rounded-full"
+        ></span>
+        Save
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    // --- UI Metadata Arrays ---
+    const config_strings = [
+      ["config_wifi_ssid_1", "Wireless Network Name", "The SSID or 'name' of the wifi to connect to."],
+      ["config_wifi_password_1", "Wireless Network Password", "The wifi key or 'password' to connect. Leave empty if it's an open wifi."],
+      ["config_lnbits_host", "LNBits Server Name", "The server on which you've created an LNBits wallet. Example: demo.lnpiggy.com."],
+      ["config_lnbits_https_port", "LNBits HTTPS Port", "If LNBits is not on the default port 443, specify here."],
+      ["config_lnbits_invoice_key", "LNBits Invoice/Read Key", "Copy-paste the invoice/read key from your LNBits wallet."],
+      ["config_static_receive_code", "LNBits Static Receive Code", "If empty, it will be fetched from the LNBits backend (may be a bit slower)."],
+      ["config_fiat_currency", "Fiat Currency", "Example: USD, EUR, DKK, etc. Leave empty to hide fiat amounts."],
+      ["config_balance_bias", "Balance Bias", "Satoshis to add (or subtract if negative) to adjust your balance."],
+      ["config_thousands_separator", "Thousands Separator", "Example: . or , or a space. Leave empty to use locale default."],
+      ["config_decimal_separator", "Decimal Separator", "Example: . or , or a space. Leave empty to use locale default."],
+      ["config_show_boot_wisdom", "Show Boot Wisdom", "Set to YES to display a quote at startup instead of the logo."],
+      ["config_boot_salutation", "Boot Salutation", "Greeting at startup. Example: 'Some wisdom from your favorite uncle:'."],
+      ["config_locale", "Language (Locale)", "Allowed: en, da, de, de_CH, es, nl."],
+      ["config_time_zone", "Timezone", "Example: America/New_York, Africa/Johannesburg, Europe/Copenhagen."],
+      ["config_always_run_webserver", "Always Run Webserver", "Whether to run the webserver in station mode too (YES/NO)."],
+      ["config_update_host", "Update Server", "Server to check for updates."],
+      ["config_time_server", "Time Server", "The time server to query (e.g. worldtimeapi.org)."],
+      ["config_time_server_path", "Time Server Path", "Path to append to the time server (e.g. /api/timezone/)."]
+    ];
+
+    // We want LNBits HTTPS Port & Balance Bias to be integers
+    const config_items_integer = [ "config_lnbits_https_port", "config_balance_bias" ];
+    // We want these to be YES/NO only
+    const config_items_yes_no = [ "config_show_boot_wisdom", "config_always_run_webserver" ];
+    // We want these to be mandatory
+    const config_items_mandatory = [ "config_wifi_ssid_1", "config_lnbits_host", "config_lnbits_invoice_key" ];
+
+    // Mapping categories to configuration names
+    const config_categories = {
+      "Network Connection": ["config_wifi_ssid_1", "config_wifi_password_1"],
+      "Wallet Connection": ["config_lnbits_host", "config_lnbits_invoice_key", "config_lnbits_https_port", "config_static_receive_code"],
+      "Display Settings": ["config_fiat_currency", "config_balance_bias", "config_thousands_separator", "config_decimal_separator", "config_show_boot_wisdom", "config_boot_salutation"],
+      "Device Configuration": ["config_locale", "config_time_zone"],
+      "Advanced Settings": ["config_always_run_webserver", "config_update_host", "config_time_server", "config_time_server_path"]
+    };
+
+    // Allowed locales mapping for dropdown (code: full name)
+    const allowed_locales = {
+      "en": "English",
+      "da": "Danish",
+      "de": "German",
+      "de_CH": "Swiss German",
+      "es": "Spanish",
+      "nl": "Dutch"
+    };
+
+    // Font Awesome icons for each category
+    const categoryIcons = {
+      "Network Connection": `<span class="wifi-icon w-6 h-6 text-white fill-current"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" class="wifi-svg"><path d="M54.2 202.9C123.2 136.7 216.8 96 320 96s196.8 40.7 265.8 106.9c12.8 12.2 33 11.8 45.2-.9s11.8-33-.9-45.2C549.7 79.5 440.4 32 320 32S90.3 79.5 9.8 156.7C-2.9 169-3.3 189.2 8.9 202s32.5 13.2 45.2 .9zM320 256c56.8 0 108.6 21.1 148.2 56c13.3 11.7 33.5 10.4 45.2-2.8s10.4-33.5-2.8-45.2C459.8 219.2 393 192 320 192s-139.8 27.2-190.5 72c-13.3 11.7-14.5 31.9-2.8 45.2s31.9 14.5 45.2 2.8c39.5-34.9 91.3-56 148.2-56zm64 160a64 64 0 1 0 -128 0 64 64 0 1 0 128 0z"/></svg></span>`,
+      "Wallet Connection": `<span class="wallet-icon w-5 h-5 text-white fill-current"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L80 128c-8.8 0-16-7.2-16-16s7.2-16 16-16l368 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L64 32zM416 272a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></span>`,
+      "Display Settings": `<span class="desktop-icon w-5 h-5 text-white fill-current"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 224L64 288 64 64l448 0z"/></svg></span>`,
+      "Device Configuration": `<span class="cog-icon w-5 h-5 text-white fill-current"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg></span>`,
+      "Advanced Settings": `<span class="tools-icon w-5 h-5 text-white fill-current"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M78.6 5C69.1-2.4 55.6-1.5 47 7L7 47c-8.5 8.5-9.4 22-2.1 31.6l80 104c4.5 5.9 11.6 9.4 19 9.4l54.1 0 109 109c-14.7 29-10 65.4 14.3 89.6l112 112c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109 0-54.1c0-7.5-3.5-14.5-9.4-19L78.6 5zM19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L233.7 374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9 396.1zM512 144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9 63.9c-3 3-7.1 4.7-11.3 4.7L352 176c-8.8 0-16-7.2-16-16l0-57.4c0-4.2 1.7-8.3 4.7-11.3l63.9-63.9c8.1-8.1 5.2-21.8-6-24.2C388.7 1.1 378.5 0 368 0C288.5 0 224 64.5 224 144l0 .8 85.3 85.3c36-9.1 75.8 .5 104 28.7L429 274.5c49-23 83-72.8 83-130.5zM56 432a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/></svg></span>`
+    };
+
+    // Build a lookup for labels and hints
+    const configStringsMap = {};
+    config_strings.forEach(([name, label, hint]) => {
+      configStringsMap[name] = { label, hint };
+    });
+
+    // --- Function to Build the Form Dynamically ---
+    function buildForm() {
+      const form = document.getElementById("configForm");
+      form.innerHTML = ""; // Clear any existing content
+
+      // Which sections are open by default?
+      const openCategories = ["Network Connection", "Wallet Connection"];
+
+      for (const [category, items] of Object.entries(config_categories)) {
+        // Create a card for the category
+        const card = document.createElement("div");
+        card.className = "card";
+
+        // Create the collapsible header
+        const header = document.createElement("div");
+        header.className = "section-header";
+        header.setAttribute("data-toggle", "collapse");
+
+        // ID for this collapsible section
+        const sectionId = category.replace(/\s+/g, '');
+        header.setAttribute("data-target", "#" + sectionId);
+
+        // Check if the section should be open or hidden by default
+        const isOpenByDefault = openCategories.includes(category);
+
+        header.innerHTML = `
+          <span class="text-white font-semibold flex items-center gap-2">
+            ${categoryIcons[category] || ""}
+            ${category}
+          </span>
+          <svg
+            class="w-5 h-5 text-white transition-transform ${isOpenByDefault ? 'rotate-180' : ''}"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        `;
+        card.appendChild(header);
+
+        // Create the section container
+        const section = document.createElement("div");
+        section.id = sectionId;
+        // If open by default, no "hidden" class; otherwise, add "hidden"
+        section.className = isOpenByDefault ? "p-6 space-y-4" : "p-6 space-y-4 hidden";
+
+        // For each config item in this category, create a field
+        items.forEach(name => {
+          const { label, hint } = configStringsMap[name] || { label: name, hint: "" };
+          const fieldDiv = document.createElement("div");
+          fieldDiv.className = "mb-4";
+
+          // Create the label with tooltip
+          const labelEl = document.createElement("label");
+          labelEl.setAttribute("for", name);
+          labelEl.className = "block text-sm font-medium text-gray-700 flex items-center";
+          labelEl.innerHTML = `
+            ${label}
+            <span class="tooltip-container ml-1">
+              <span class="inline-block text-gray-500 w-4 h-4 fill-current"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class=""> <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/> </svg> </span>
+              <span class="tooltip-text">${hint}</span>
+            </span>
+          `;
+          fieldDiv.appendChild(labelEl);
+
+          let inputEl;
+          // YES/NO dropdown
+          if (config_items_yes_no.includes(name)) {
+            inputEl = document.createElement("select");
+            inputEl.innerHTML = `<option value="">Select...</option>
+                                 <option value="YES">YES</option>
+                                 <option value="NO">NO</option>`;
+          }
+          // For locale, build a dropdown
+          else if (name === "config_locale") {
+            inputEl = document.createElement("select");
+            inputEl.innerHTML = `<option value="">Select language...</option>`;
+            for (const [code, fullName] of Object.entries(allowed_locales)) {
+              inputEl.innerHTML += `<option value="${code}">${fullName} (${code})</option>`;
+            }
+          }
+          // For time zone, create a dropdown (populated later)
+          else if (name === "config_time_zone") {
+            inputEl = document.createElement("select");
+            inputEl.innerHTML = `<option value="">Select time zone...</option>`;
+          }
+          // For integer-only fields, use type="text"
+          else if (config_items_integer.includes(name)) {
+            inputEl = document.createElement("input");
+            inputEl.type = "text"; // Do a custom integer validation
+          }
+          // Otherwise, plain text
+          else {
+            inputEl = document.createElement("input");
+            inputEl.type = "text";
+          }
+
+          // Set common attributes
+          inputEl.id = name;
+          inputEl.name = name;
+          inputEl.placeholder = label;
+          inputEl.className =
+            "mt-1 block w-full border-2 rounded-md shadow-sm p-2 focus:outline-none focus:border-[var(--primary)]";
+          if (config_items_mandatory.includes(name)) {
+            inputEl.classList.add("mandatory");
+          }
+          fieldDiv.appendChild(inputEl);
+
+          // Error element
+          const errorEl = document.createElement("p");
+          errorEl.className = "error text-red-500 text-xs mt-1 hidden";
+          fieldDiv.appendChild(errorEl);
+
+          section.appendChild(fieldDiv);
+        });
+
+        card.appendChild(section);
+        form.appendChild(card);
+      }
+    }
+
+    // --- Populate the Timezone Dropdown ---
+    function populateTimeZones() {
+      const tzSelect = document.getElementById("config_time_zone");
+      if (!tzSelect) return;
+      let timeZones = [];
+      if (Intl && typeof Intl.supportedValuesOf === "function") {
+        try {
+          timeZones = Intl.supportedValuesOf("timeZone");
+        } catch (e) {
+          console.error("Error retrieving time zones, using fallback list.", e);
+        }
+      }
+      if (!timeZones || timeZones.length === 0) {
+        // Fallback if we can't get a real list
+        timeZones = [
+          "America/New_York",
+          "Africa/Johannesburg",
+          "Europe/Copenhagen",
+          "Europe/London",
+          "Asia/Tokyo",
+          "Australia/Sydney"
+        ];
+      }
+      timeZones.sort().forEach((tz) => {
+        const option = document.createElement("option");
+        option.value = tz;
+        option.textContent = tz;
+        tzSelect.appendChild(option);
+      });
+    }
+
+    // --- Validation Functions ---
+    function validateField(field) {
+      const name = field.name;
+      const value = field.value.trim();
+      let valid = true;
+      let errorMessage = "";
+
+      // If mandatory, must not be empty
+      if (config_items_mandatory.includes(name) && value === "") {
+        valid = false;
+        errorMessage = "This field is mandatory.";
+      }
+
+      // If integer-only, check regex
+      if (valid && config_items_integer.includes(name) && value !== "") {
+        // Strict integer check (optional leading '-' + digits)
+        if (!/^-?\d+$/.test(value)) {
+          valid = false;
+          errorMessage = "Must be an integer.";
+        }
+      }
+
+      // If yes/no, must be "YES" or "NO"
+      if (valid && config_items_yes_no.includes(name) && value !== "") {
+        if (!["YES", "NO"].includes(value)) {
+          valid = false;
+          errorMessage = "Must be YES or NO.";
+        }
+      }
+
+      // Locale must be one of the allowed
+      if (valid && name === "config_locale" && value !== "") {
+        if (!Object.keys(allowed_locales).includes(value)) {
+          valid = false;
+          errorMessage = "Invalid locale.";
+        }
+      }
+
+      // Show or hide error message
+      let errorEl = field.parentElement.querySelector(".error");
+      if (!errorEl) {
+        errorEl = document.createElement("p");
+        errorEl.className = "error text-red-500 text-xs mt-1";
+        field.parentElement.appendChild(errorEl);
+      }
+      if (!valid) {
+        errorEl.textContent = errorMessage;
+        errorEl.classList.remove("hidden");
+        field.classList.add("border-red-500");
+      } else {
+        errorEl.textContent = "";
+        errorEl.classList.add("hidden");
+        field.classList.remove("border-red-500");
+      }
+
+      return valid;
+    }
+
+    function validateForm() {
+      let isValid = true;
+      document.querySelectorAll("input, select").forEach((field) => {
+        if (!validateField(field)) {
+          isValid = false;
+        }
+      });
+      return isValid;
+    }
+
+    // --- Toast Notification Function ---
+    // type: "success" (green), "validation_error" (red), "upload_error" (black), or "info" (blue)
+    function showToast(message, type = "info") {
+      const toastContainer = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+
+      let backgroundColor = "#2563EB"; // default info color: blue
+      let iconSVG = `<svg
+        class="h-6 w-6 text-blue-200 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M12
+             20a8 8 0 100-16 8 8 0 000
+             16z"
+        />
+      </svg>`;
+
+      if (type === "success") {
+        backgroundColor = "#16A34A";
+        iconSVG = `<svg
+          class="h-6 w-6 text-green-200 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>`;
+      } else if (type === "validation_error") {
+        backgroundColor = "#DC2626";
+        iconSVG = `<svg
+          class="h-6 w-6 text-red-200 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12
+               12"
+          />
+        </svg>`;
+      } else if (type === "upload_error") {
+        backgroundColor = "#000000";
+        iconSVG = `<svg
+          class="h-6 w-6 text-white mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12
+               12"
+          />
+        </svg>`;
+      }
+
+      toast.style.backgroundColor = backgroundColor;
+      toast.className =
+        "toast flex items-center px-6 py-3 text-white rounded-lg shadow-md text-lg transition-transform transform hover:scale-105";
+      toast.innerHTML = iconSVG + `<span>${message}</span>`;
+
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = "slideOut 0.5s ease forwards";
+        setTimeout(() => toast.remove(), 500);
+      }, 5000);
+    }
+
+    // --- Setup Collapsible Sections ---
+    function setupCollapsible() {
+      document.querySelectorAll("[data-toggle='collapse']").forEach((header) => {
+        header.addEventListener("click", () => {
+          const targetId = header.getAttribute("data-target");
+          const target = document.querySelector(targetId);
+          const svgs = header.querySelectorAll("svg"); // Get all SVGs inside header
+          const icon = svgs[svgs.length - 1]; // Select the last one
+          //const icon = header.querySelector("svg:last-child");
+          // Toggle hidden class for the content
+          target.classList.toggle("hidden");
+          // Flip the arrow
+          icon.classList.toggle("rotate-180");
+        });
+      });
+    }
+
+    // --- Setup Event Listeners for Real-Time Validation ---
+    function setupValidationListeners() {
+      const saveBtn = document.getElementById("saveButton");
+      document.querySelectorAll("input, select").forEach((field) => {
+        const revalidate = () => {
+          validateField(field);
+          saveBtn.disabled = !validateForm();
+        };
+        field.addEventListener("input", revalidate);
+        field.addEventListener("change", revalidate);
+        field.addEventListener("blur", revalidate);
+      });
+    }
+
+    // --- Load Configuration from /config.json as TEXT & parse ---
+    function loadConfiguration() {
+      fetch("/config.json")
+        //.then((response) => response.ok ? response.text() : Promise.reject("Failed to load config"))
+        .then((response) => response.ok ? response.text() : "")
+        .then((rawText) => {
+          // rawText is the entire /config.json from the server as text
+          // Attempt to parse it as JSON
+          let parsed;
+          try {
+            parsed = JSON.parse(rawText); // Expecting an array of objects, e.g. [{name, value}, ...]
+          } catch (err) {
+            console.error("Parsing config JSON failed:", err);
+            throw new Error("JSON parse error");
+          }
+
+          // Fill the form fields
+          parsed.forEach((item) => {
+            const field = document.getElementsByName(item.name)[0];
+            if (field) {
+              field.value = (typeof item.value !== "undefined") ? item.value : "";
+            }
+          });
+
+        // Hide spinner, show form
+        document.getElementById("loadingSpinner").classList.add("hidden");
+        document.getElementById("configForm").classList.remove("hidden");
+
+        // Validate after loading
+        document.getElementById("saveButton").disabled = !validateForm();
+
+        })
+        .catch((err) => {
+          console.error("Error loading configuration:", err);
+          //const spinner = document.getElementById("loadingSpinner");
+          //spinner.innerHTML = "<p class='text-red-500'>Failed to load configuration.</p>";
+
+          // Hide spinner, show form
+          document.getElementById("loadingSpinner").classList.add("hidden");
+          document.getElementById("configForm").classList.remove("hidden");
+
+          // Validate after loading
+          document.getElementById("saveButton").disabled = !validateForm();
+        });
+    }
+
+    // --- Save Configuration via PUT as raw text ---
+    function saveConfiguration() {
+      // Final check
+      if (!validateForm()) {
+        showToast("Some fields are invalid. Please correct and try again.", "validation_error");
+        return;
+      }
+
+      // Build array from form
+      const configItems = [];
+      document.querySelectorAll("input, select").forEach((field) => {
+        configItems.push({
+          name: field.name,
+          value: field.value.trim()
+        });
+      });
+
+      const rawJson = JSON.stringify(configItems, null, 2); // raw text
+
+      showToast("Saving configuration...", "info");
+      const saveSpinner = document.getElementById("saveSpinner");
+      saveSpinner.classList.remove("hidden");
+      const saveBtn = document.getElementById("saveButton");
+      saveBtn.disabled = true;
+
+      fetch("/config.json", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: rawJson
+      })
+      .then((response) => response.text())
+      .then((data) => {
+        // The server might return "Configuration file saved." or something similar
+        saveSpinner.classList.add("hidden");
+        saveBtn.disabled = false;
+        showToast("Configuration saved successfully!", "success");
+	/*
+        setTimeout(() => {
+          showToast("Coffee Time! The Piggy may restart to apply changes...", "info");
+        }, 800);
+	*/
+      })
+      .catch((err) => {
+        console.error("Error saving configuration:", err);
+        saveSpinner.classList.add("hidden");
+        saveBtn.disabled = false;
+        showToast("Failed to save configuration.", "upload_error");
+      });
+    }
+
+    // --- Initialization ---
+    document.addEventListener("DOMContentLoaded", function () {
+      buildForm();               // Build the dynamic form
+      setupCollapsible();        // Collapsible sections
+      populateTimeZones();       // Timezone dropdown
+      setupValidationListeners(); // Real-time validation
+      loadConfiguration();       // Load config from /config.json via GET -> text -> parse JSON
+
+      // Hook up the Save button
+      document.getElementById("saveButton").addEventListener("click", function (e) {
+        e.preventDefault();
+        saveConfiguration();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -11,65 +11,7 @@
 #include <ESPAsyncWebServer.h>
 
 // index page:
-const char* htmlContent PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Config Editor</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
-        textarea { width: 90%; height: 200px; font-family: monospace; }
-        button { margin-top: 10px; padding: 10px 20px; font-size: 16px; }
-        #response { margin-top: 20px; color: green; }
-    </style>
-</head>
-<body>
-
-    <h2>Configuration Editor</h2>
-    <p>Enter JSON Configuration:</p>
-    <textarea id="jsonInput">Fetching /config.json - please wait...</textarea>
-    <br>
-    <button onclick="saveConfig()">Save Configuration</button>
-    <p id="response"></p>
-    Other actions:<br/>
-    <a href="/connect-wifi-station" title="If this fails, the device will go back into Access Point mode.">Try to connect to WiFi Station</a><br/>
-    <a href="/restart" title="Restart the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.">Restart device</a><br/>
-    <a href="/delete-config" title="Delete the configuration, so it will go back to hard-coded values or defaults.">Delete Config</a><br/>
-
-    <script>
-        function loadConfig() {
-            fetch("/config.json")
-            .then(response => response.ok ? response.text() : Promise.reject("Failed to load config"))
-            .then(data => document.getElementById("jsonInput").value = data)
-            .catch(error => {
-                document.getElementById("jsonInput").value = '{ "error": "Failed to load config" }';
-                console.error("Error loading config:", error);
-            });
-        }
-
-        function saveConfig() {
-            let jsonData = document.getElementById("jsonInput").value;
-            fetch("/config.json", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: jsonData
-            })
-            .then(response => response.text())
-            .then(data => document.getElementById("response").innerText = "Response: " + data)
-            .catch(error => {
-                document.getElementById("response").innerText = "Error: " + error;
-                console.error("Error:", error);
-            });
-        }
-
-        window.onload = loadConfig;
-    </script>
-
-</body>
-</html>
-)rawliteral";
+#include "../webconfig/index.html.gzip.h"
 
 String paramFileString = "";
 
@@ -256,7 +198,9 @@ void setup_webserver() {
   digestAuth.generateHash();
   
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-    request->send(200, "text/html", htmlContent);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_gzip, index_gzip_length);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
   }).addMiddleware(&digestAuth);
 
   server.on(CONFIG_FILE, HTTP_GET, [](AsyncWebServerRequest* request) {

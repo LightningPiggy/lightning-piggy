@@ -1,0 +1,144 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+      --primary: #EC008C;
+      --secondary: #F0BCD7;
+    }
+    body {
+      background-color: var(--secondary);
+    }
+
+    /* Spinner styling */
+    .spinner {
+      border-top-color: transparent;
+    }
+
+    /* Tooltip styles */
+    .tooltip-container {
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip-container .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      width: 220px;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      position: absolute;
+      z-index: 10;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .tooltip-container:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Toast container (centered at bottom) */
+    #toast-container {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* Save Button Styling (flat colours) */
+    .save-btn {
+      background-color: silver;
+      color: black;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .save-btn:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+    /* Disabled button styles: visually grayed out, no hover, 'not-allowed' cursor */
+    .save-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Card styling */
+    .card {
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 1rem;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Section header styling (flat background) */
+    .section-header {
+      background-color: var(--primary);
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Input styling */
+    input,
+    select {
+      transition: all 0.3s ease;
+    }
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(236, 0, 140, 0.2);
+    }
+
+    /* Mandatory field outline */
+    .mandatory {
+      border-color: var(--primary) !important;
+    }
+
+    /* Error styling on invalid fields */
+    .border-red-500 {
+      border-width: 2px;
+    }
+
+    /* Toast styling (flat background with slower fade out) */
+    .toast {
+      animation: slideIn 0.3s ease forwards;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+    }
