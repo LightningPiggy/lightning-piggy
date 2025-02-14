@@ -19,6 +19,7 @@ String currentVersion = "5.0.0";
  */
 
 #define PIGGYMODE_INIT 0
+#define PIGGYMODE_SLEEP_BOOTSLOGAN 6
 #define PIGGYMODE_STARTING_STA 1
 #define PIGGYMODE_STARTED_STA 2
 #define PIGGYMODE_FAILED_STA 3

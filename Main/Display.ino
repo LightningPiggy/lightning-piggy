@@ -108,6 +108,7 @@ int displayToUse = DISPLAY_TYPE_213DEPG;
 int balanceHeight; // [0,balanceHeight] is the vertical zone of the balance region plus the line underneath it.
 int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat region.
 
+int waitForSloganReadUntil = 0;
 
 /* Detecting the display works by timing the clearScreen operation.
 09:08:03.074 -> init operation took 23ms
@@ -573,11 +574,11 @@ bool displayVoltageWarning() {
     if (voltage > 0 && voltage < 3.8) {
       String lowBatString = " ! LOW BATTERY (" + String(voltage) + "V) ! ";
       displayFit(lowBatString, 0, displayHeight()-12-18, displayWidth(), displayHeight()-12,2, true);
+      waitForSloganReadUntil = millis() + 5000;
       return true;
     } else {
       return false;
     }
-    delay(5000);
 }
 
 // This shows something like:
@@ -644,5 +645,9 @@ void showBootSlogan() {
   // Limit to a maximum
   timeToWait = min(timeToWait, MAX_BOOTSLOGAN_SECONDS*1000);
   Serial.println("Waiting " + String(timeToWait) + "ms (of max. " + String(MAX_BOOTSLOGAN_SECONDS) + "s) to allow the bootslogan to be read...");
-  delay(timeToWait);
+  waitForSloganReadUntil = millis() + timeToWait;
+}
+
+bool doneWaitingForBootSlogan() {
+  return (millis() > waitForSloganReadUntil);
 }

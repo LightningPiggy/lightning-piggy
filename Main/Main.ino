@@ -72,25 +72,11 @@ void setup() {
     print_reset_reasons();
     print_wakeup_reason();
 
-    setup_watchdog(); // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
-
-    setup_interrupts();
-
-    setup_display();
-    displayVoltageWarning();
-
-    setup_config();
-
-    loop_interrupts(); // handle keypress
-    if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
-      showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
-    } else {
-      showBootSlogan();
-    }
-    loop_interrupts(); // handle keypress
-
-    setup_webserver();
-    loop_interrupts(); // handle keypress
+    setup_watchdog();   // do this as soon as possible, to workaround potential hangs, but not before turing on the power LED and printing debug info
+    setup_display();    // initialize display
+    setup_config();     // load config file from filesystem (could be done later but makes sense to do it early)
+    setup_webserver();  // prepare (don't start) webserver
+    setup_interrupts(); // prepare button and tilt sensor handling
 
     watchdogWasntTriggered();
 }
@@ -99,21 +85,30 @@ void loop() {
   loop_interrupts(); // handle keypress
 
   if (piggyMode == PIGGYMODE_INIT) {
-    if (hasMinimalConfig()) {
-      piggyMode = PIGGYMODE_STARTING_STA;
-    } else {
-      piggyMode = PIGGYMODE_STARTING_AP;
-    }
+    if (!displayVoltageWarning()) {
+      if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
+        showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
+      } else {
+        showBootSlogan();
+      }
+    } // if displayVoltageWarning() then no logo or slogan
+    piggyMode = PIGGYMODE_SLEEP_BOOTSLOGAN;
+  } else if (piggyMode == PIGGYMODE_SLEEP_BOOTSLOGAN) {
+    if (doneWaitingForBootSlogan()) {
+      if (hasMinimalConfig()) {
+        piggyMode = PIGGYMODE_STARTING_STA;
+      } else {
+        piggyMode = PIGGYMODE_STARTING_AP;
+      }
+    } // else do nothing but wait
   } else if (piggyMode == PIGGYMODE_STARTING_STA) {
       displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
-      #ifndef DEBUG
       stop_webserver();
       delay(1000);
       if (connectWifi()) { // this takes a while, would be better to do this asynchronous
         if (strncmp(alwaysRunWebserver,"YES", 3) != 0) start_webserver();
         short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
         displayWifiStrengthBottom();
-        #endif
         displayFit("Fetching " + String(lnbitsHost), 0, displayHeight()-smallestFontHeight, displayWidth()-8*7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
         piggyMode = PIGGYMODE_STARTED_STA;
       } else {
