@@ -1,11 +1,13 @@
 ESP32 emulation with QEMU (including WiFi!)
 ======
 
-This is *not* for the faint of heart, but emulating the ESP32, including a reverse-engineerd implementation of the closed-source ESP32 WiFi stack is possible!
+This is *not* for the faint of heart, but emulating an ESP32 *with WiFi* is possible!
 
-Obviously, getting this setup is tremendously time-saving for development, and super helpful for debugging.
+Needless to say, getting this set up reduces the typical code-compile-flash-test cycle by an order of magnitiude, and is super helpful for debugging.
 
-Emulating the wifi stack is not officially supported by Espressive, and a bit hacky. It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, and finally, to get lightning-piggy working in the emulator.
+Emulating the wifi stack is not officially supported by Espressive because it relies on a reverse-engineered implementation of the closed-source ESP32 WiFi stack.
+
+It took around 3 days to figure it all out, investigate the issues, find workarounds for the weird bugs, simplify the process, get the code examples working, and finally, to get lightning-piggy (first ESP-IDF, then Arduino build) working in the emulator.
 
 The following documentation puts all the pieces together in one logical process, and should be a huge time-saver for anyone who needs to get this working as well.
 
@@ -214,7 +216,7 @@ Optionally, consider enabling:
 
 ## 4. Script to combine the binaries and run on QEMU
 
-Use something like [this script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
+Use something like this [run_in_qemu_emulator.sh script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
 
 When running it, you should see something like:
 
@@ -239,7 +241,7 @@ entry 0x400805e4
 Starting Lightning Piggy 4.5.0|LILYGOT5V213|DEPG0213BN|Jan 28 2025 14:05:10
 ```
 
-If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to `http://localhost:1080`.
+If the emulated device is listening on a port (like the SimpleWiFiServer.ino example), you can connect to it by browsing to [http://localhost:1080](http://localhost:1080).
 
 # Credits
 
