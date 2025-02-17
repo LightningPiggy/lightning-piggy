@@ -13,7 +13,7 @@ The source code in Main/Main.ino works on both the TTGO LilyGo T5 ePaper 2.13 in
 **With Arduino IDE**
 
 - Arduino IDE version 1.8.13
-- ESP32 Board Support version 2.0.17
+- ESP32 Board Support version 3.1.1
 - Preferences -> Compiler warnings: Default
 - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 
@@ -24,7 +24,7 @@ Where:
 - Tools -> Flash Frequency: 80Mhz
 - Tools -> Flash Mode: QIO
 - Tools -> Flash Size: 4MB (32Mb)
-- Tools -> Partition Scheme: Default 4MB with spiffs (1.2MB APP, 1.5MB SPIFFS)
+- Tools -> Partition Scheme: Custom (uses Main/partitions.csv)
 - Tools -> Core Debug Level: Warn
 - Tools -> PSRAM: Disabled
 - Tools -> Port: /dev/ttyACM0
@@ -60,7 +60,7 @@ arduino-cli compile -u -v -t --libraries Main/libraries/ --fqbn esp32:esp32:esp3
 - set a "Success message", like: Thanks for sending sats to my piggy
 
 **Known issues:**
-- There's an issue with the 2.13 inch GDEM0213B74 display, somehow the display becomes blank after updateWindow() calls.
+- There's an issue with the 2.13 inch GDEM0213B74 display, somehow the display becomes blank after updateWindow() calls. But we use the DEPG display, which is not affected.
 
 How to install
 ==============
@@ -86,15 +86,14 @@ To make a new release available on the web installer:
 
 - Open /Main/Main.ino using Arduino Studio.
 - Update version number in Constants.h
-- Make sure config.h has no unintended development changes (cp Main/config.h /tmp; git checkout Main/config.h)
+- Make sure there are no uncommitted development changes (git diff; git diff --staged)
 - Update CHANGELOG.md
 - Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
 - Compile the project using Sketch > Compile.
-- Copy /tmp/arduino_build_491356/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/
-- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x/boot_app0.bin
-- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_4.x.json
+- Copy /tmp/arduino_build_*/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x/
+- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/3.1.1/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x/boot_app0.bin
+- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x.json
 - pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push  ; popd
-- Revert back to default code with custom config (cp /tmp/config.h Main/config.h)
 
 ESP32 emulation with QEMU (including WiFi!)
 ===================

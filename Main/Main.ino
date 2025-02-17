@@ -3,7 +3,7 @@
 //
 // Tested with:
 // - Arduino IDE version 1.8.13
-// - ESP32 Board Support version 2.0.17
+// - ESP32 Board Support version 3.1.1
 // - Preferences -> Compiler warnings: Default
 // - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 // - Tools -> Upload Speed: 921600
@@ -11,7 +11,7 @@
 // - Tools -> Flash Frequency: 80Mhz
 // - Tools -> Flash Mode: QIO
 // - Tools -> Flash Size: 4MB (32Mb)
-// - Tools -> Partition Scheme: Default 4MB with spiffs (1.2MB APP, 1.5MB SPIFFS)
+// - Tools -> Partition Scheme: Custom (uses Main/partitions.csv)
 // - Tools -> Core Debug Level: Warn
 // - Tools -> PSRAM: Disabled
 // - Tools -> Port: /dev/ttyACM0
