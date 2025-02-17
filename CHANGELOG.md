@@ -1,3 +1,7 @@
+**5.0.0**
+- Add easy configuration method without reflashing every time. The device can become a wifi hotspot that users connect to for modifing the configuration options.
+This "Configuration Mode" is started when the configuration is missing, when wifi connection fails, or by a long-press on the General Purpose (GPIO39) button.
+
 **4.4.1**
 - Add support for Malaysian Ringgit (MYR) fiat currency by prepending "RM"
 - Ignore non-successful payments

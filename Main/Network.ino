@@ -87,7 +87,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
   }
 }
 
-bool connectWifi() {
+bool connectWifi() { // TODO: make this into connectWifiAsync
   if (!isConfigured(ssid)) return false;
 
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
@@ -247,8 +247,8 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
           String stringBuff = (char*)buff;
           line += stringBuff;
         } else {
-          Serial.println("No bytes available from HTTPS, waiting a bit...");
-          delay(42);
+          //Serial.println("No bytes available from HTTPS, waiting a bit...");
+          //delay(42);
         }
         //Serial.println("chunked total reply = '" + reply + "'");
       }
@@ -360,7 +360,7 @@ void disconnectWebsocket() {
     if (webSocket.isConnected()) {
       Serial.println("Websocket is connected, disconnecting...");
       webSocket.disconnect();
-      delay(100);
+      //delay(100);
     } else {
       Serial.println("Websocket is not connected, not disconnecting.");
     }

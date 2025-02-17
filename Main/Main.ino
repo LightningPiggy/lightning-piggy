@@ -149,7 +149,7 @@ void loop() {
       wifi_init_softap();
     } else if (millis() - apstart_time < 17 * 1000) {
       // Wait until the AP is ready
-      Serial.print("*"); delay(200);
+      //Serial.print("*"); delay(200);
     } else {
       start_webserver();
       apstart_time = 0; // mark server as started
@@ -167,7 +167,7 @@ void loop() {
 
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
   loop_interrupts(); // handle keypress before sleeping
-  if (!hibernateDependingOnBattery()) delay(200);
+  hibernateDependingOnBattery(); // go to sleep if that's necessary
 }
 
 void nextRefreshBalanceAndPayments() {
