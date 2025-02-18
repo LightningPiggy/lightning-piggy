@@ -164,7 +164,7 @@ void loop() {
       start_webserver();
       apstart_time = 0; // mark server as started
       piggyMode = PIGGYMODE_STARTED_AP;
-      displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+      displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser.", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
     loop_dns();
