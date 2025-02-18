@@ -1,3 +1,6 @@
+**5.0.4**
+- Don't ignore "Always Run Webserver" setting
+
 **5.0.3**
 - Fetch fiat prices from Coingecko instead of Coindesk (because it's down)
 - Add more websocket debugging output
