@@ -6,26 +6,20 @@ String currentVersion = "5.0.2";
 /**
  * The piggy can be in different 'modes':
  * ================
- * - init: no wifi connection has been attempted => if no config then go to starting-ap, otherwise go to starting-sta
- * - starting-sta: attempt to connect to station
- * - connected-sta: connected to station => do regular piggy flow
- *     - tilted
- * - failed-sta: failed to connect to station => show warning and how to trigger config mode and go to sleep
- * - starting-ap: attempt to start AP + webserver and then go to started-ap
- * - started-ap: AP is up-and-running: wait until user trigger /reboot or /starting-sta
- * - failed-ap: AP failed to come up => show warning and go to sleep
- * 
- * Each mode has an associated display which makes it clear to the user which mode it is in.
  */
 
-#define PIGGYMODE_INIT 0
-#define PIGGYMODE_SLEEP_BOOTSLOGAN 6
-#define PIGGYMODE_STARTING_STA 1
-#define PIGGYMODE_WAITING_STA 7
-#define PIGGYMODE_STARTED_STA 2
-#define PIGGYMODE_FAILED_STA 3
-#define PIGGYMODE_STARTING_AP 4
-#define PIGGYMODE_STARTED_AP 5
+#define PIGGYMODE_INIT 0             // no wifi connection has been attempted => if no config then go to starting-ap, otherwise go to starting-sta
+#define PIGGYMODE_SLEEP_BOOTSLOGAN 6 // waiting for bootslogan or logo to be seen
+#define PIGGYMODE_STARTING_STA 1     // start wifi connection to station
+#define PIGGYMODE_WAITING_STA 7      // wait for wifi connection to station
+#define PIGGYMODE_STARTED_STA 2      // websocket handling and triggering refresh if it's time
+#define PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE 8
+#define PIGGYMODE_STARTED_STA_REFRESH_STATUS 9
+#define PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS 10
+#define PIGGYMODE_STARTED_STA_CHECKUPDATE 11
+#define PIGGYMODE_FAILED_STA 3       // failed to connect to station => show warning and how to trigger config mode and go to sleep
+#define PIGGYMODE_STARTING_AP 4      // attempt to start AP + webserver and then go to started-ap
+#define PIGGYMODE_STARTED_AP 5       // AP is up-and-running: wait until user trigger /reboot
 
 // Configuration through access point:
 #define ACCESS_POINT_SSID          "LightningPiggy Configuration"

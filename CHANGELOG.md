@@ -1,6 +1,8 @@
 **5.0.2**
 - Reduce long press for configuration mode from 5 to 3 seconds
 - Improve long press responsiveness during wifi connection
+- Improve long press responsiveness during display draw
+- Enable "Captive Portal" DNS to guide the user to the webpage in Configuration Mode
 
 **5.0.1**
 - Add "Restart" button to configuration webpage

@@ -94,6 +94,7 @@ bool connectWifiAsync() {
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
   Serial.println("Connecting to " + String(ssid));
   lastWifiError = "";
+  wifiStartTime = millis();
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
   WiFi.begin(ssid, password);
@@ -105,12 +106,16 @@ bool keepWaitingWifi() {
   if (wifiConnected()) {
     Serial.print("WiFi connected. IP address: "); Serial.println(WiFi.localIP());
     return false;
-  } else if (millis() - wifiStartTime > WIFI_CONNECT_TIMEOUT_SECONDS*1000) {
-    if (lastWifiError != "") {
-      // Write the disconnection reason to the display for troubleshooting
-      displayFit(lastWifiError, 0, 0, displayWidth(), 40, 1);
-      lastWifiError = "";
-    }
+  } // else wifi not connected:
+
+  if (lastWifiError != "") {
+    // Write the disconnection reason to the display for troubleshooting
+    displayFit(lastWifiError, 0, 0, displayWidth(), 40, 1);
+    lastWifiError = "";
+  }
+
+  if (millis() - wifiStartTime > WIFI_CONNECT_TIMEOUT_SECONDS*1000) {
+    Serial.println("WARNING: Wifi connection did not succeed before timeout!");
     return false;
   }
 

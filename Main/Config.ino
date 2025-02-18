@@ -8,6 +8,7 @@
 #include <LittleFS.h>
 
 #include <AsyncTCP.h>
+#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 
 // index page:
@@ -15,8 +16,12 @@
 
 String paramFileString = "";
 
+IPAddress apIP(192, 168, 4, 1);  // Hardcoded IP for the ESP32 SoftAP
+
+DNSServer dnsServer;
 AsyncWebServer server(80);
 AsyncAuthenticationMiddleware digestAuth;
+
 
 String readFile(String name) {
     File file = LittleFS.open(name, "r");
@@ -251,10 +256,16 @@ void setup_webserver() {
 }
 
 void start_webserver() {
-  Serial.println("Starting webserver!");
+  Serial.println("Starting captive DNS server...");
+  dnsServer.start(53, "*", apIP);
+  Serial.println("Starting webserver...");
   Serial.printf("Before, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
   server.begin();
   Serial.printf("After, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
+}
+
+void loop_webserver() {
+  dnsServer.processNextRequest();  // Handle DNS requests
 }
 
 void stop_webserver() {

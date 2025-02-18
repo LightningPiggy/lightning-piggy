@@ -34,6 +34,7 @@ int xBeforeLNURLp;
 long apstart_time  = 0;
 long lastHeap = 0;
 
+int previousPiggyMode = 0;
 int piggyMode = PIGGYMODE_INIT;
 
 char* ssid = NULL;
@@ -106,7 +107,11 @@ void loop() {
       displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
       stop_webserver();
       delay(1000);
-      if (!connectWifiAsync()) piggyMode = PIGGYMODE_FAILED_STA;
+      if (!connectWifiAsync()) {
+        piggyMode = PIGGYMODE_FAILED_STA;
+      } else {
+        piggyMode = PIGGYMODE_WAITING_STA;
+      }
   } else if (piggyMode == PIGGYMODE_WAITING_STA) {
     if (!keepWaitingWifi()) {
       if (wifiConnected()) {
@@ -116,31 +121,34 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
-    loop_interrupts();
     loop_websocket();
   
     // If there is no balance OR it has been a long time since it was refreshed, then refresh it
     if (lastBalance == -NOT_SPECIFIED || (millis() - lastUpdatedBalance) > UPDATE_BALANCE_PERIOD_MILLIS || forceRefreshBalanceAndPayments) {
       lastUpdatedBalance = millis();
       disconnectWebsocket();
-  
-      xBeforeLNURLp = showLNURLpQR(getLNURLp());
-      loop_interrupts();
-      xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
-      displayStatus(xBeforeLNURLp, false);  // takes ~2000ms, which is too much to do with the websocket
-      loop_interrupts();
-      displayBalanceAndPayments(xBeforeLNURLp, forceRefreshBalanceAndPayments);
-      loop_interrupts();
-      forceRefreshBalanceAndPayments = false;
-      loop_interrupts();
-      checkShowUpdateAvailable();
+      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE;
+    } else {
+      if (!isWebsocketConnected()) connectWebsocket();
+      hibernateDependingOnBattery(); // go to sleep if that's necessary
+      // stay in this mode
     }
-  
-    if (!isWebsocketConnected()) connectWebsocket();
-    hibernateDependingOnBattery(); // go to sleep if that's necessary
-    // Remain in this mode because we're waiting for websocket updates
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
+      xBeforeLNURLp = showLNURLpQR(getLNURLp());
+      xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
+      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_STATUS;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_STATUS) {
+      displayStatus(xBeforeLNURLp, false);  // takes ~2000ms, which is too much to do with the websocket
+      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS) {
+      displayBalanceAndPayments(xBeforeLNURLp, forceRefreshBalanceAndPayments);
+      forceRefreshBalanceAndPayments = false;
+      piggyMode = PIGGYMODE_STARTED_STA_CHECKUPDATE;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_CHECKUPDATE) {
+      checkShowUpdateAvailable();
+      piggyMode = PIGGYMODE_STARTED_STA; // go back to idling on websocket
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 8 hours...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 8 hours. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
     hibernate(8*60*60);
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
@@ -158,15 +166,20 @@ void loop() {
       displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
+    loop_webserver();
     if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
   }
 
   if (millis() - lastHeap >= 2000) {
-    Serial.printf("Free heap memory: %" PRIu32 " bytes\n", ESP.getFreeHeap());
+    Serial.printf("Free heap memory: %" PRIu32 " bytes\r\n", ESP.getFreeHeap());
     lastHeap = millis();
   }
 
+  if (previousPiggyMode != piggyMode) {
+    Serial.println("piggyMode changed from " + String(previousPiggyMode) + " to " + piggyMode);
+    previousPiggyMode = piggyMode;
+  }
 }
 
 void nextRefreshBalanceAndPayments() {
