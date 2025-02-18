@@ -257,9 +257,9 @@ void setup_webserver() {
 
 void start_webserver() {
   Serial.println("Starting webserver...");
-  Serial.printf("Before, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
+  Serial.printf("Before, free heap: %" PRIu32 "\r\n", ESP.getFreeHeap());
   server.begin();
-  Serial.printf("After, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
+  Serial.printf("After, free heap: %" PRIu32 "\r\n", ESP.getFreeHeap());
 }
 
 void start_dns() {

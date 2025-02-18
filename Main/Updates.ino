@@ -4,14 +4,31 @@ String newVersion = ""; // used by the update checker
 
 int lastChecked = NOT_SPECIFIED;
 
+// The server will only return a new version if the current version is LOWER THAN the current version.
+// Otherwise, the server will just return the current version that the client sent in the User-Agent string.
 bool isUpdateAvailable() {
-  return (newVersion != "" && newVersion != currentVersion);
+  newVersion.trim();
+  currentVersion.trim();
+  Serial.println("currentVersion: '" + currentVersion + "' of length: " + String(currentVersion.length()));
+  Serial.println("newVersion: '" + newVersion + "' of length: " + String(newVersion.length()));
+  if (newVersion != "") {
+    Serial.println("newVersion is not empty, this is good");
+    if (newVersion != currentVersion) {
+      Serial.println("newVersion != currentVersion, this is good");
+      return true;
+    } else {
+      Serial.println("newVersion == currentVersion, no update");
+    }
+  } else {
+    Serial.println("newVersion is empty");
+  }
+  return false;
 }
 
 void checkShowUpdateAvailable() {
   if (lastChecked == NOT_SPECIFIED || (millis()-lastChecked > CHECK_UPDATE_PERIOD_SECONDS*1000)) {
     newVersion = checkNewVersion();
-    Serial.println("checkNewVersion returned: " + newVersion);
+    Serial.println("checkNewVersion returned: '" + newVersion + "' of length: " + String(newVersion.length()));
     if (newVersion != "") {
       lastChecked = millis();
       if (isUpdateAvailable()) {

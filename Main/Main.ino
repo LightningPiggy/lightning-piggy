@@ -116,6 +116,7 @@ void loop() {
     if (!keepWaitingWifi()) {
       if (wifiConnected()) {
         piggyMode = PIGGYMODE_STARTED_STA;
+        if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
       } else {
         piggyMode = PIGGYMODE_FAILED_STA;
       }
