@@ -150,7 +150,7 @@ str2int_errno str2int(int *out, char *s, int base) {
 String stringArrayToString(String stringArray[], int nrOfItems) {
   String returnValue = "String Array with " + String(nrOfItems) + " items:\n";
   for (int i=0;i<nrOfItems;i++) {
-    returnValue += "item " + String(i) + ":" + stringArray[i] + "\n";
+    returnValue += "item " + String(i) + ":" + stringArray[i] + "\r\n";
   }
   return returnValue;
 }

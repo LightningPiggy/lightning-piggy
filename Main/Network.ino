@@ -298,6 +298,7 @@ void connectWebsocket() {
 }
 
 void parseWebsocketText(String text) {
+  Serial.println("Parsing websocket text: " + text);
   String returnValue = "";
   DynamicJsonDocument doc(4096); // 4096 bytes is plenty for just the wallet details (id, name and balance info)
 
@@ -324,15 +325,31 @@ void parseWebsocketText(String text) {
 }
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
+    Serial.print("WebSocket Event Type: ");
+    Serial.print(type); // Print the type as an integer
+    Serial.println(" and length: " + String(wslength));
+
+    if (payload != nullptr && wslength > 0) { // Check if payload is not null and has data
+        Serial.print("Websocket Payload: ");
+        if (type != WStype_CONNECTED && type != WStype_TEXT) {
+          // Print payload as hex
+          for (size_t i = 0; i < wslength; i++) {
+              Serial.print("0x");
+              if (payload[i] < 0x10) Serial.print("0"); // Leading zero for single-digit hex
+              Serial.print(payload[i], HEX);
+              Serial.print(" ");
+          }
+          Serial.println(); // Newline after printing payload
+        } // else use specific payload print below
+    }
     String payloadStr = "";
     switch(type) {
         case WStype_DISCONNECTED:
-            Serial.printf("[WSc] Disconnected!\n");
-            Serial.println(" and length: " + String(wslength));
+            Serial.printf("[WSc] Disconnected!\r\n");
             Serial.println("payload : " + String((int)payload));
             break;
         case WStype_CONNECTED:
-            Serial.printf("[WSc] Connected to url: %s, waiting for incoming payments...\n",  payload);
+            Serial.printf("[WSc] Connected to url: %s, waiting for incoming payments...\r\n",  payload);
             // No need: webSocket.sendTXT("Connected"); // send message to server when Connected
             break;
         case WStype_TEXT:
@@ -341,16 +358,20 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
             parseWebsocketText(payloadStr);
             break;
         case WStype_ERROR:
-            Serial.printf("[WSc] error!\n");
+            Serial.printf("[WSc] error!\r\n");
+            break;
+        case WStype_PING:
+            Serial.println("Websocket ping.");
+            break;
+        case WStype_PONG:
+            Serial.println("Websocket pong.");
             break;
         case WStype_FRAGMENT_TEXT_START:
         case WStype_FRAGMENT_BIN_START:
         case WStype_FRAGMENT:
         case WStype_FRAGMENT_FIN:
         case WStype_BIN:
-        case WStype_PING:
-        case WStype_PONG:
-            Serial.printf("[WSc] other fragment!\n");
+            Serial.printf("[WSc] other fragment!\r\n");
             break;
     }
 }
