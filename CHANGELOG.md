@@ -1,3 +1,9 @@
+**5.0.1**
+- Add "Restart" button to configuration webpage
+- Fix boot loop caused by faulty sleep logic and failed assert()
+- Reduce wifi connection timeout from 42 to 30 seconds
+- If wifi connection fails, show error and go to sleep instead of starting Access Point configuration mode
+
 **5.0.0**
 - Add easy configuration method without reflashing every time. The device can become a wifi hotspot that users connect to for modifing the configuration options.
 This "Configuration Mode" is started when the configuration is missing, when wifi connection fails, or by a long-press on the General Purpose (GPIO39) button.

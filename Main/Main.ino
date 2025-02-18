@@ -140,9 +140,8 @@ void loop() {
     hibernateDependingOnBattery(); // go to sleep if that's necessary
     // Remain in this mode because we're waiting for websocket updates
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + " seconds. A new wifi Access Point will be created so you can check the configuration...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
-    delay(10000);
-    piggyMode = PIGGYMODE_STARTING_AP;
+    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 8 hours...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+    hibernate(8*60*60);
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
       stop_webserver();
@@ -159,7 +158,7 @@ void loop() {
       displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
-    if (millis() > AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
+    if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
   }
 
