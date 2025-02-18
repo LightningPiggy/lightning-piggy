@@ -256,15 +256,18 @@ void setup_webserver() {
 }
 
 void start_webserver() {
-  Serial.println("Starting captive DNS server...");
-  dnsServer.start(53, "*", apIP);
   Serial.println("Starting webserver...");
   Serial.printf("Before, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
   server.begin();
   Serial.printf("After, free heap: %" PRIu32 "\n", ESP.getFreeHeap());
 }
 
-void loop_webserver() {
+void start_dns() {
+  Serial.println("Starting captive DNS server...");
+  dnsServer.start(53, "*", apIP);
+}
+
+void loop_dns() {
   dnsServer.processNextRequest();  // Handle DNS requests
 }
 

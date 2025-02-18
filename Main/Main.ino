@@ -160,13 +160,14 @@ void loop() {
       // Wait until the AP is ready
       //Serial.print("*"); delay(200);
     } else {
+      start_dns();
       start_webserver();
       apstart_time = 0; // mark server as started
       piggyMode = PIGGYMODE_STARTED_AP;
       displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
-    loop_webserver();
+    loop_dns();
     if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
   }
