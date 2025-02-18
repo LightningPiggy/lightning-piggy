@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "5.0.0";
+String currentVersion = "5.0.1";
 
 /**
  * The piggy can be in different 'modes':
@@ -52,6 +52,7 @@ extern const int MAX_WATCHDOG_REBOOTS = 3;
 extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define AWAKE_SECONDS_AFTER_MANUAL_WAKEUP 3*60
+#define AWAKE_SECONDS_AS_ACCESS_POINT 5*60
 
 #define CHECK_UPDATE_PERIOD_SECONDS 7*24*60*60 // every week
 
@@ -63,7 +64,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS 1000 * 30
 
-#define WIFI_CONNECT_TIMEOUT_SECONDS 42         // after this time, it's deemed a failure
+#define WIFI_CONNECT_TIMEOUT_SECONDS 30         // after this time, it's deemed a failure
 
 #define DEFAULT_LNBITS_PORT 443
 
