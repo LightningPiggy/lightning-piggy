@@ -3,6 +3,7 @@
 - Improve long press responsiveness during wifi connection
 - Improve long press responsiveness during display draw
 - Enable "Captive Portal" DNS to guide the user to the webpage in Configuration Mode
+- Disable web authentication of Configuration Mode
 
 **5.0.1**
 - Add "Restart" button to configuration webpage
