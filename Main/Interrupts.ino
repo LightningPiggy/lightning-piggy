@@ -1,5 +1,5 @@
 #define BUTTON_PIN GPIO_NUM_39
-#define HOLD_TIME 5000  // 5000 ms (5 seconds)
+#define HOLD_TIME 3000  // 3 seconds
 
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
