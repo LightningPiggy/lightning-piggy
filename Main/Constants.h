@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "5.0.1";
+String currentVersion = "5.0.2";
 
 /**
  * The piggy can be in different 'modes':
@@ -21,6 +21,7 @@ String currentVersion = "5.0.1";
 #define PIGGYMODE_INIT 0
 #define PIGGYMODE_SLEEP_BOOTSLOGAN 6
 #define PIGGYMODE_STARTING_STA 1
+#define PIGGYMODE_WAITING_STA 7
 #define PIGGYMODE_STARTED_STA 2
 #define PIGGYMODE_FAILED_STA 3
 #define PIGGYMODE_STARTING_AP 4

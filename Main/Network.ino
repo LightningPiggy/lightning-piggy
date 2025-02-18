@@ -10,6 +10,7 @@ long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPT
 esp_netif_t* softap_netif;
 WebSocketsClient webSocket;
 
+long wifiStartTime = 0;
 String lastWifiError = "";
 
 int system_event_names_count = 26;
@@ -87,7 +88,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
   }
 }
 
-bool connectWifi() { // TODO: make this into connectWifiAsync
+bool connectWifiAsync() {
   if (!isConfigured(ssid)) return false;
 
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
@@ -96,25 +97,26 @@ bool connectWifi() { // TODO: make this into connectWifiAsync
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
   WiFi.begin(ssid, password);
-  long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED) { // there's no max attempts but the watchdog should trigger a restart
-      delay(1000);
-      Serial.print(".");
-      if ((millis() - startTime) > WIFI_CONNECT_TIMEOUT_SECONDS*1000) break;
-      if (lastWifiError != "") {
-        // Write the disconnection reason to the display for troubleshooting
-        displayFit(lastWifiError, 0, 0, displayWidth(), 40, 1);
-        lastWifiError = "";
-      }
-  }
-  if (WiFi.status() == WL_CONNECTED) {
+  return true;
+}
+
+// returns true if need to keep waiting, false if done waiting
+bool keepWaitingWifi() {
+  if (wifiConnected()) {
     Serial.print("WiFi connected. IP address: "); Serial.println(WiFi.localIP());
-    return true;
-  } else {
-    Serial.print("WARNING: WiFi connection failed!");
+    return false;
+  } else if (millis() - wifiStartTime > WIFI_CONNECT_TIMEOUT_SECONDS*1000) {
+    if (lastWifiError != "") {
+      // Write the disconnection reason to the display for troubleshooting
+      displayFit(lastWifiError, 0, 0, displayWidth(), 40, 1);
+      lastWifiError = "";
+    }
     return false;
   }
+
+  return true;  // keep waiting
 }
+
 
 void disconnectWifi() {
   WiFi.disconnect(true);

@@ -1,3 +1,7 @@
+**5.0.2**
+- Reduce long press for configuration mode from 5 to 3 seconds
+- Improve long press responsiveness during wifi connection
+
 **5.0.1**
 - Add "Restart" button to configuration webpage
 - Fix boot loop caused by faulty sleep logic and failed assert()

@@ -106,15 +106,15 @@ void loop() {
       displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
       stop_webserver();
       delay(1000);
-      if (connectWifi()) { // this takes a while, would be better to do this asynchronous
-        if (strncmp(alwaysRunWebserver,"YES", 3) != 0) start_webserver();
-        short_watchdog_timeout(); // after the long wifi connection stage, the next operations shouldn't take long
-        displayWifiStrengthBottom();
-        displayFit("Fetching " + String(lnbitsHost), 0, displayHeight()-smallestFontHeight, displayWidth()-8*7, displayHeight(), 1); // leave room for 8 characters of wifi strength bottom right
+      if (!connectWifiAsync()) piggyMode = PIGGYMODE_FAILED_STA;
+  } else if (piggyMode == PIGGYMODE_WAITING_STA) {
+    if (!keepWaitingWifi()) {
+      if (wifiConnected()) {
         piggyMode = PIGGYMODE_STARTED_STA;
       } else {
         piggyMode = PIGGYMODE_FAILED_STA;
       }
+    } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
     loop_interrupts();
     loop_websocket();
