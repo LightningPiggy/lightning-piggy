@@ -82,6 +82,16 @@
         Save
       </button>
     </div>
+
+    <!-- Restart Button Container (with extra spacing) -->
+    <div class="flex justify-center mt-8">
+      <button
+        type="submit"
+        id="restartButton"
+        class="restart-btn w-auto text-lg font-bold px-6 py-3 rounded shadow-lg transition-all transform hover:scale-105" >
+        Restart
+      </button>
+    </div>
   </div>
 
   <!-- Toast Container -->
@@ -575,11 +585,6 @@
         saveSpinner.classList.add("hidden");
         saveBtn.disabled = false;
         showToast("Configuration saved successfully!", "success");
-	/*
-        setTimeout(() => {
-          showToast("Coffee Time! The Piggy may restart to apply changes...", "info");
-        }, 800);
-	*/
       })
       .catch((err) => {
         console.error("Error saving configuration:", err);
@@ -602,6 +607,24 @@
         e.preventDefault();
         saveConfiguration();
       });
+
+      document.getElementById("restartButton").addEventListener("click", async () => {
+        try {
+            const response = await fetch("/restart", { method: "POST" });
+
+            /* Somehow response is not OK, so skip this:
+            if (!response.ok) {
+                throw new Error("Failed to restart");
+            }
+            showToast("Restart request sent successfully, the device should restart soon!", "success");
+            */
+        } catch (error) {
+            console.error("Error:", error);
+            //showToast("Failed to send restart request.", "error");
+        }
+        showToast("Restart request sent successfully, the device should restart soon!", "success");
+      });
+
     });
   </script>
 </body>

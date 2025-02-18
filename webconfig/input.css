@@ -73,6 +73,11 @@
       opacity: 0.6;
     }
 
+    .restart-btn:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
     /* Card styling */
     .card {
       background: white;

@@ -212,8 +212,8 @@ void setup_webserver() {
     piggyMode = PIGGYMODE_STARTING_STA;
   }).addMiddleware(&digestAuth);
 
-  server.on("/restart", HTTP_GET, [](AsyncWebServerRequest* request) {
-    request->send(200, "text/html", "Restarting the device and do the normal wifi connection attempt. If it fails, it will go back into Access Point mode.");
+  server.on("/restart", HTTP_POST, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", "Restarting the device...");
     disconnectWifi();
     Serial.println("Restarting...");
     ESP.restart();

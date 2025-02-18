@@ -43,6 +43,10 @@ def put_config():
 def tailwind_css():
     return send_from_directory(".", "tailwind_output.css")
 
+@app.route("/restart", methods=["POST"])
+def simulate_restart():
+    return "OK", 200
+
 @app.route("/")
 def serve_index():
     """
