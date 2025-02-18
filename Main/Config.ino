@@ -188,7 +188,7 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 }
 
 void setup_webserver() {
-  Serial.println("Starting webserver...");
+  Serial.println("Setting up webserver...");
 
   digestAuth.setUsername(WEBCONFIG_USERNAME);
   digestAuth.setPassword(WEBCONFIG_PASSWORD);

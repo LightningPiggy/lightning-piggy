@@ -1,4 +1,4 @@
-// Both task watchdog AND ESP.restart() causes same reset reason:
+// Task watchdog, ESP.restart(), assert() fails and crashes causes this reset reason:
 // rst:0xc (SW_CPU_RESET),boot:0x17 (SPI_FAST_FLASH_BOOT)
 // 20:45:32.576 -> CPU0 reset reason:
 // 20:45:32.576 -> SW_CPU_RESET
@@ -190,9 +190,10 @@ bool hibernateDependingOnBattery() {
 
   int resetReason = rtc_get_reset_reason(0);
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-  if ((resetReason == POWERON_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1)
+  // if not payment came in, then lastPaymentReceivedMillis = 0, so it stays awake after boot if it was a manual wakeup
+  if ((resetReason == POWERON_RESET || resetReason == SW_CPU_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1)
     && (millis()-lastPaymentReceivedMillis) < (AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000)) {
-    Serial.println("Device was woken up or received payment less than " + String(AWAKE_SECONDS_AFTER_MANUAL_WAKEUP) + "s ago, not sleeping yet because another payment might come in..");
+    Serial.println("Device was woken up manually or it crashed or received payment less than " + String(AWAKE_SECONDS_AFTER_MANUAL_WAKEUP) + "s ago, not sleeping yet because another payment might come in..");
     return true;
   }
 
@@ -230,8 +231,10 @@ void hibernate(int sleepTimeSeconds) {
   uint64_t deepSleepTime = (uint64_t)sleepTimeSeconds * (uint64_t)1000 * (uint64_t)1000;
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON); // RTC peripherals needs to stay on for GPIO32's pulldown to work
   // disabled to allow for wakeup_count to stay: esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_OFF);
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_ON); // make sure it's ON, otherwise the OFF will fail an assert
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_OFF);
-  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL,         ESP_PD_OPTION_OFF);
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON); // make sure it's ON, otherwise the OFF will fail an assert
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_OFF);
   esp_sleep_enable_timer_wakeup(deepSleepTime);
 
   // Enable GPIO39 (user button) wakeup

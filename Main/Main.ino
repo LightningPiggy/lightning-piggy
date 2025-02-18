@@ -82,6 +82,7 @@ void setup() {
 }
 
 void loop() {
+  feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
   loop_interrupts(); // handle keypress
 
   if (piggyMode == PIGGYMODE_INIT) {
@@ -136,6 +137,7 @@ void loop() {
     }
   
     if (!isWebsocketConnected()) connectWebsocket();
+    hibernateDependingOnBattery(); // go to sleep if that's necessary
     // Remain in this mode because we're waiting for websocket updates
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
     displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + " seconds. A new wifi Access Point will be created so you can check the configuration...", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
@@ -157,6 +159,7 @@ void loop() {
       displayFit("Wireless Access Point started. Connect to the wifi called '" + String(ACCESS_POINT_SSID) + "' and open http://192.168.4.1/ in your webbrowser with username: " + String(WEBCONFIG_USERNAME) + " and password: " + String(WEBCONFIG_PASSWORD), 0, 0, displayWidth(), displayHeight(), MAX_FONT);
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
+    if (millis() > AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
   }
 
@@ -165,9 +168,6 @@ void loop() {
     lastHeap = millis();
   }
 
-  feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
-  loop_interrupts(); // handle keypress before sleeping
-  hibernateDependingOnBattery(); // go to sleep if that's necessary
 }
 
 void nextRefreshBalanceAndPayments() {
