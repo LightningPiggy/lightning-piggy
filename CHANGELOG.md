@@ -1,3 +1,6 @@
+**5.0.3**
+- Fetch fiat prices from Coingecko instead of Coindesk (because it's down)
+
 **5.0.2**
 - Reduce long press for configuration mode from 5 to 3 seconds
 - Improve long press responsiveness during wifi connection

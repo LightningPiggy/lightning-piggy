@@ -592,7 +592,7 @@ void showFiatValues(int balance, int maxX) {
   #ifdef DEBUG
   float btcPrice = 60456;
   #else
-  float btcPrice = getBitcoinPrice();
+  float btcPrice = getBitcoinPriceCoingecko();
   #endif
 
   if (btcPrice == NOT_SPECIFIED) {
