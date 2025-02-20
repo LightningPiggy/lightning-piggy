@@ -1,6 +1,7 @@
 **5.0.5**
 - Reduce wifi connection failure sleep from 8 to 4h
 - Move to timeapi.io because worldtimeapi.org is down
+- Re-enable web authentication of Configuration Mode
 
 **5.0.4**
 - Don't ignore "Always Run Webserver" setting
