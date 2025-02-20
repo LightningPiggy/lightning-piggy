@@ -86,8 +86,14 @@ String websocketApiUrl = "/api/v1/ws/";
 #define DISPLAY_TYPE_213DEPG 1
 #define DISPLAY_TYPE_266DEPG 2
 
+const char* defaultTimeServer = "www.timeapi.io";
+const char* defaultTimeServerPath = "/api/time/current/zone?timeZone=";
+
+/* No longer works:
 const char* defaultTimeServer = "worldtimeapi.org";
 const char* defaultTimeServerPath = "/api/timezone/";
+*/
+
 const char* defaultCheckUpdateHost = "m.lightningpiggy.com";
 
 const char* defaultThousandsSeparator = ",";

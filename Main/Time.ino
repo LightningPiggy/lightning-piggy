@@ -11,6 +11,7 @@ String getTimeFromNTP() {
   return "W23:39";
   #endif
   String timeData = getEndpointData(timeServer, String(timeServerPath) + String(timezone), false);
+  Serial.println("Got timeData: " + timeData);
 
   DynamicJsonDocument doc(8192); 
 
@@ -24,11 +25,33 @@ String getTimeFromNTP() {
 
   Serial.println("Extracting weekday and time from received data");
 
+  /* worldtimeapi.org
   String datetimeAsString = doc["datetime"];
-
   int dayOfWeek = doc["day_of_week"];
   String dayOfWeekAsString = getDayOfWeekString(dayOfWeek);
   String timeString = datetimeAsString.substring(datetimeAsString.indexOf("T") + 1, datetimeAsString.indexOf("T") + 6); // Extract only the time (hh:mm)
+  */
+
+  /* timeapi.io response:
+   *  {
+        "year": 2025,
+        "month": 2,
+        "day": 20,
+        "hour": 9,
+        "minute": 9,
+        "seconds": 58,
+        "milliSeconds": 105,
+        "dateTime": "2025-02-20T09:09:58.1052938",
+        "date": "02/20/2025",
+        "time": "09:09",
+        "timeZone": "Europe/Amsterdam",
+        "dayOfWeek": "Thursday",
+        "dstActive": false
+      }
+   */
+  String timeString = doc["time"];
+  String dayOfWeek = doc["dayOfWeek"];
+  String dayOfWeekAsString = dayOfWeek.substring(0,2); // would be nice to translate it
 
   lastTime = dayOfWeekAsString + " " + timeString;
   return lastTime;
