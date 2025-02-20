@@ -304,18 +304,50 @@
       if (!timeZones || timeZones.length === 0) {
         // Fallback if we can't get a real list
         timeZones = [
+          "Pacific/Midway",
+          "America/Anchorage",
+          "America/Los_Angeles",
+          "America/Denver",
+          "America/Chicago",
           "America/New_York",
-          "Africa/Johannesburg",
-          "Europe/Copenhagen",
+          "America/Sao_Paulo",
+          "Atlantic/Azores",
           "Europe/London",
+          "Europe/Paris",
+          "Europe/Copenhagen",
+          "Africa/Johannesburg",
+          "Europe/Moscow",
+          "Asia/Dubai",
+          "Asia/Karachi",
+          "Asia/Dhaka",
+          "Asia/Bangkok",
           "Asia/Tokyo",
-          "Australia/Sydney"
+          "Australia/Sydney",
+          "Pacific/Auckland"
         ];
       }
-      timeZones.sort().forEach((tz) => {
+      const now = new Date();
+      const timeZonesWithOffset = timeZones.map((tz) => {
+        try {
+          const timeZoneOffset = new Intl.DateTimeFormat("en-US", {
+            timeZone: tz,
+            timeZoneName: "longOffset"
+          }).formatToParts(now).find(part => part.type === "timeZoneName").value;
+
+          const offsetMatch = timeZoneOffset.match(/GMT([+-]\d{2}):?(\d{2})?/);
+          const offset = offsetMatch ? parseInt(offsetMatch[1]) * 60 + (offsetMatch[2] ? parseInt(offsetMatch[2]) : 0) : 0;
+
+          return { tz, timeZoneOffset, offset };
+        } catch (e) {
+          console.error(`Error processing timezone: ${tz}`, e);
+          return { tz, timeZoneOffset: "GMT+00:00", offset: 0 };
+        }
+      });
+      timeZonesWithOffset.sort((a, b) => a.offset - b.offset);
+      timeZonesWithOffset.forEach(({ tz, timeZoneOffset }) => {
         const option = document.createElement("option");
         option.value = tz;
-        option.textContent = tz;
+        option.textContent = `${tz} (${timeZoneOffset})`;
         tzSelect.appendChild(option);
       });
     }
