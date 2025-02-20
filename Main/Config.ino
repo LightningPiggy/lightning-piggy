@@ -194,14 +194,14 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
 
 void setup_webserver() {
   Serial.println("Setting up webserver...");
-  /*
+
   digestAuth.setUsername(WEBCONFIG_USERNAME);
   digestAuth.setPassword(WEBCONFIG_PASSWORD);
   digestAuth.setRealm(ACCESS_POINT_SSID);
   digestAuth.setAuthFailureMessage("Authentication failed");
   digestAuth.setAuthType(AsyncAuthType::AUTH_DIGEST);
   digestAuth.generateHash();
-  */
+  
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_gzip, index_gzip_length);
     response->addHeader("Content-Encoding", "gzip");
