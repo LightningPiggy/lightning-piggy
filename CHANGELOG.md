@@ -1,3 +1,6 @@
+**5.0.6**
+- Fix QR encoding of lightning addresses (like oink@demo.lnpiggy.com)
+
 **5.0.5**
 - Reduce wifi connection failure sleep from 8 to 4h
 - Move to timeapi.io because worldtimeapi.org is down

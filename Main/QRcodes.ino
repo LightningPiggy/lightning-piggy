@@ -10,19 +10,20 @@ int showLNURLpQR(String qrData) {
   }
   Serial.println("Building LNURLp QR code...");
 
-  const char *qrDataChar = qrData.c_str();
-  QRCode qrcoded;
-
-  int qrVersion = getQrCodeVersion(qrData);
+  int qrVersion = getQRVersion(qrData);
   int pixSize = getQrCodePixelSize(qrVersion);
+  Serial.println("qrVersion = " + String(qrVersion) + " and pixSize = " + String(pixSize));
   uint8_t qrcodeData[qrcode_getBufferSize(qrVersion)];
-  
+
+  QRCode qrcoded;
+  const char *qrDataChar = qrData.c_str();
   qrcode_initText(&qrcoded, qrcodeData, qrVersion, 0, qrDataChar);
 
   Serial.println("Displaying LNURLp QR code...");
   int qrSideSize = pixSize * qrcoded.size;
   int qrPosX = displayWidth() - qrSideSize;
   int qrPosY = 0;
+  Serial.println("qrSideSize = " + String(qrSideSize) + " and qrPosX,qrPosY = " + String(qrPosX) + "," + String(qrPosY));
 
   //display.setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
   setPartialWindow(0, 0, displayWidth(), displayHeight()); // this is the first thing that gets displayed so blank the entire screen
@@ -43,46 +44,74 @@ int showLNURLpQR(String qrData) {
   return qrPosX;  // returns 192 on 250px wide display
 }
 
-
 /**
  * @brief Get the size of the qr code to produce
  * 
  * @param qrData 
  * @return int 
  */
-int getQrCodeVersion(String qrData) {
-  int qrVersion = 0;
-  int stringLength = qrData.length();
+#include <Arduino.h>
 
-  // Using this chart with ECC_LOW https://github.com/ricmoo/QRCode#data-capacities
-  if(stringLength <= 25) {
-    qrVersion = 1;
-  }  
-  else if(stringLength <= 47) {
-    qrVersion = 2;
-  }
-  else if(stringLength <= 77) {
-    qrVersion = 3;
-  }
-  else if(stringLength <= 114) {
-    qrVersion = 4;
-  }
-  else if(stringLength <= 154) {
-    qrVersion = 5;
-  }
-  else if(stringLength <= 195) {
-    qrVersion = 6;
-  }
-  else if(stringLength <= 367) {
-    qrVersion = 11;
-  }
-  else {
-    qrVersion = 28;
-  }
+// QR Code version capacity table for ECC_LOW
+const int qr_capacity_numeric[40] = {
+    41, 77, 127, 187, 255, 322, 370, 461, 552, 652,
+    772, 883, 1022, 1101, 1250, 1408, 1548, 1725, 1903, 2061,
+    2232, 2409, 2620, 2812, 3057, 3283, 3517, 3669, 3909, 4158,
+    4417, 4686, 4965, 5253, 5529, 5836, 6153, 6479, 6743, 7089
+};
 
-  return qrVersion;
+const int qr_capacity_alphanumeric[40] = {
+    25, 47, 77, 114, 154, 195, 224, 279, 335, 395,
+    468, 535, 619, 667, 758, 854, 938, 1046, 1153, 1249,
+    1352, 1460, 1588, 1704, 1853, 1990, 2132, 2223, 2369, 2520,
+    2677, 2840, 3009, 3183, 3351, 3537, 3729, 3927, 4087, 4296
+};
+
+const int qr_capacity_byte[40] = {
+    17, 32, 53, 78, 106, 134, 154, 192, 230, 271,
+    321, 367, 425, 458, 520, 586, 644, 718, 792, 858,
+    929, 1003, 1091, 1171, 1273, 1367, 1465, 1528, 1628, 1732,
+    1840, 1952, 2068, 2188, 2303, 2431, 2563, 2699, 2809, 2953
+};
+
+// Function to determine QR mode
+char getQRMode(const String &input) {
+    bool isNumeric = true, isAlphanumeric = true;
+
+    for (size_t i = 0; i < input.length(); i++) {
+        char c = input[i];
+        if (!(c >= '0' && c <= '9')) {
+            isNumeric = false;
+            if (!( (c >= 'A' && c <= 'Z') || strchr(" $%*+-./:", c) )) {
+                isAlphanumeric = false;
+                break;
+            }
+        }
+    }
+
+    if (isNumeric) return 'N';
+    if (isAlphanumeric) return 'A';
+    return 'B'; // Byte mode
 }
 
+int getQRVersion(const String &input) {
+    int length = input.length();
+    char mode = getQRMode(input);
+    const int *capacity_table;
+
+    switch (mode) {
+        case 'N': capacity_table = qr_capacity_numeric; break;
+        case 'A': capacity_table = qr_capacity_alphanumeric; break;
+        default:  capacity_table = qr_capacity_byte; break;
+    }
+
+    for (int version = 1; version <= 40; version++) {
+        if (length <= capacity_table[version - 1]) {
+            return version;
+        }
+    }
+    return -1; // Input too long for QR Code
+}
 
 /**
  * @brief Get the Qr Code Pixel Size object
@@ -91,59 +120,16 @@ int getQrCodeVersion(String qrData) {
  * @return int The size of the QR code pixels
  */
 int getQrCodePixelSize(int qrCodeVersion) {
-  Serial.println("getQrCodePixelSize for qrCodeVersion " + String(qrCodeVersion));
-  
-  // Using https://github.com/ricmoo/QRCode#data-capacities
-  // Get the QR code size (blocks not pixels)
-  int qrCodeHeight = 0;
-  switch(qrCodeVersion) {
-    case 1:
-      qrCodeHeight = 21;
-      break;
-    case 2:
-      qrCodeHeight = 25;
-      break;
-    case 3:
-      qrCodeHeight = 29;
-      break;
-    case 4:
-      qrCodeHeight = 33;
-      break;
-    case 5:
-      qrCodeHeight = 37;
-      break;
-    case 6:
-      qrCodeHeight = 41;
-      break;
-    case 7:
-      qrCodeHeight = 45;
-      break;
-    case 8:
-      qrCodeHeight = 49;
-      break;
-    case 9:
-      qrCodeHeight = 53;
-      break;
-    case 10:
-      qrCodeHeight = 57;
-      break;
-    case 11:
-      qrCodeHeight = 61;
-      break;
-    default:
-      qrCodeHeight = 129;
-      break;
-  }
-  int pixelHeight = floor(displayHeight() / qrCodeHeight);
-  Serial.println("qrCodeHeight pixel height is: " + String(qrCodeHeight));
-  Serial.println("Calced pixel height is: " + String(pixelHeight));
+    Serial.println("getQrCodePixelSize for qrCodeVersion " + String(qrCodeVersion));
 
-  if (displayWidth()>250) {
-    // On big displays, make the QR code 50% bigger, for esthetics.
-    return min(pixelHeight,3);
-  }
+    if (qrCodeVersion < 1 || qrCodeVersion > 40) return -1; // Invalid QR code version
 
-  // QR codes of height 1 are still scan-able, but height 2 seems to be a safe "easy scan" value.
-  // Return the minimal pixelHeight possible, to take up the least amount of space on the display:
-  return min(pixelHeight,2);
+    int qrCodeHeight = 17 + 4 * qrCodeVersion; // Formula for QR code size
+    int pixelHeight = floor(displayHeight() / qrCodeHeight);
+
+    Serial.println("qrCodeHeight pixel height is: " + String(qrCodeHeight));
+    Serial.println("Calced pixel height is: " + String(pixelHeight));
+
+    if (displayWidth() > 250) return min(pixelHeight, 3);
+    return min(pixelHeight, 2);
 }
