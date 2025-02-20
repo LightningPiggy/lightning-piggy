@@ -1,3 +1,6 @@
+**5.0.7**
+- Improve configuration page help text
+
 **5.0.6**
 - Fix QR encoding of lightning addresses (like oink@demo.lnpiggy.com)
 
