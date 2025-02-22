@@ -97,11 +97,7 @@ void loop() {
     piggyMode = PIGGYMODE_SLEEP_BOOTSLOGAN;
   } else if (piggyMode == PIGGYMODE_SLEEP_BOOTSLOGAN) {
     if (doneWaitingForBootSlogan()) {
-      if (hasMinimalConfig()) {
-        piggyMode = PIGGYMODE_STARTING_STA;
-      } else {
-        piggyMode = PIGGYMODE_STARTING_AP;
-      }
+      moveOnAfterSleepBootSlogan();
     } // else do nothing but wait
   } else if (piggyMode == PIGGYMODE_STARTING_STA) {
       displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
@@ -115,6 +111,8 @@ void loop() {
   } else if (piggyMode == PIGGYMODE_WAITING_STA) {
     if (!keepWaitingWifi()) {
       if (wifiConnected()) {
+        // Show IP address
+        displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
       } else {
@@ -187,3 +185,11 @@ void loop() {
 void nextRefreshBalanceAndPayments() {
   forceRefreshBalanceAndPayments = true;
 } 
+
+void moveOnAfterSleepBootSlogan() {
+  if (hasMinimalConfig()) {
+    piggyMode = PIGGYMODE_STARTING_STA;
+  } else {
+    piggyMode = PIGGYMODE_STARTING_AP;
+  }
+}
