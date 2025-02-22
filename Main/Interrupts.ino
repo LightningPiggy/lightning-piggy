@@ -55,7 +55,7 @@ void loop_interrupts() {
     // If it was a few seconds ago, then redraw everything.
   }
 
-  if (lastTilted != NOT_SPECIFIED) { // only handle tilts if there has been any
+  if (lastTilted != NOT_SPECIFIED && piggyMode == PIGGYMODE_STARTED_STA) { // only handle tilts if there has been any, and if we're in regular idle mode, waiting for payments to come in
     if ((millis() - lastTilted) < minTimeBetweenTilts) { // was the tilt recent?
       displayFit("I'm tilted!", 0, 0, displayWidth(), displayHeight(), 6);
       tiltMessageShown = true;
@@ -72,15 +72,22 @@ void loop_interrupts() {
       pressStartTime = millis();  // Record when the button was first pressed
     }
 
-    if (!actionTriggered && millis() - pressStartTime >= HOLD_TIME) {
-      Serial.println("Button held for 5 seconds! Action triggered.");
+    long pressDuration = millis() - pressStartTime;
+    if (!actionTriggered) {
       actionTriggered = true;  // Prevent repeated triggering
-      if (piggyMode != PIGGYMODE_STARTING_AP && piggyMode != PIGGYMODE_STARTED_AP) {
-        displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-        piggyMode = PIGGYMODE_STARTING_AP;
-      } else {
-        displayFit("User button was pushed while already in configuration mode, going back to station mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-        piggyMode = PIGGYMODE_STARTING_STA;
+      if (pressDuration > minTimeBetweenInterrupts && pressDuration < HOLD_TIME) {
+        Serial.println("Handling short button press");
+        moveOnAfterSleepBootSlogan();
+      } else if (pressDuration >= HOLD_TIME) {
+        // handle long press
+        Serial.println("Handling long button press");
+        if (piggyMode != PIGGYMODE_STARTING_AP && piggyMode != PIGGYMODE_STARTED_AP) {
+          displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+          piggyMode = PIGGYMODE_STARTING_AP;
+        } else {
+          displayFit("User button was pushed while already in configuration mode, going back to station mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+          piggyMode = PIGGYMODE_STARTING_STA;
+        }
       }
     }
   } else { // button not pressed
