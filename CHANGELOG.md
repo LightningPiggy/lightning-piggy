@@ -1,5 +1,9 @@
 **5.0.7**
 - Improve configuration page help text
+- Configuration page: add GMT offsets to timezones
+- Show IP address after connection to access point as client
+- Only refresh display when tilt sensor is triggered in idle mode while waiting for payments
+- Short press on General Purpose (IO39) button skips the wait during the logo/boot slogan display
 
 **5.0.6**
 - Fix QR encoding of lightning addresses (like oink@demo.lnpiggy.com)
