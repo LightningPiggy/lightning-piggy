@@ -53,7 +53,10 @@ Useful documentation is at:
 - https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/qemu.html
 - https://github.com/espressif/esp-toolchain-docs/blob/main/qemu/esp32/README.md
 
-The tradeoff's aren't very clear here, but a159x36's fork works and seems the most recently updated.
+For the Lightning Piggy, we started with a159x36's fork, because it works and seems the most up-to-date.
+
+Then we applied a few patches to it to make the buttons (reset and General Purpose IO39) work by pressing 1 and 2 on the keyboard.
+We also disabled a few unnecessary peripherals such as the servo.
 
 To build it, you need to install some dependencies:
 
@@ -66,7 +69,7 @@ sudo apt install libgcrypt20-dev # otherwise you'll get an error about "RSA"
 Then clone and built it with:
 
 ```
-git clone https://github.com/a159x36/qemu
+git clone https://github.com/lighting-piggy/qemu
 cd qemu/
 
 mkdir build
