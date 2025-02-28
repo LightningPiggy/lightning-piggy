@@ -48,6 +48,12 @@ void WebSocketsClient::begin(const char * host, uint16_t port, const char * url,
 #if defined(HAS_SSL)
     _fingerprint = SSL_FINGERPRINT_NULL;
     _CA_cert     = NULL;
+#ifdef ESP32
+    _CA_bundle = NULL;
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 4)
+    _CA_bundle_size = 0;
+#endif
+#endif
 #endif
 
     _client.num    = 0;
@@ -107,6 +113,7 @@ void WebSocketsClient::beginSSL(const char * host, uint16_t port, const char * u
     _client.isSSL = true;
     _fingerprint  = fingerprint;
     _CA_cert      = NULL;
+    _CA_bundle    = NULL;
 }
 
 void WebSocketsClient::beginSSL(String host, uint16_t port, String url, String fingerprint, String protocol) {
@@ -118,7 +125,28 @@ void WebSocketsClient::beginSslWithCA(const char * host, uint16_t port, const ch
     _client.isSSL = true;
     _fingerprint  = SSL_FINGERPRINT_NULL;
     _CA_cert      = CA_cert;
+    _CA_bundle    = NULL;
 }
+
+#if defined(ESP32) && ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 4)
+void WebSocketsClient::beginSslWithBundle(const char * host, uint16_t port, const char * url, const uint8_t * CA_bundle, size_t CA_bundle_size, const char * protocol) {
+    begin(host, port, url, protocol);
+    _client.isSSL   = true;
+    _fingerprint    = SSL_FINGERPRINT_NULL;
+    _CA_cert        = NULL;
+    _CA_bundle      = CA_bundle;
+    _CA_bundle_size = CA_bundle_size;
+}
+#else
+void WebSocketsClient::beginSslWithBundle(const char * host, uint16_t port, const char * url, const uint8_t * CA_bundle, const char * protocol) {
+    begin(host, port, url, protocol);
+    _client.isSSL = true;
+    _fingerprint  = SSL_FINGERPRINT_NULL;
+    _CA_cert      = NULL;
+    _CA_bundle    = CA_bundle;
+}
+#endif
+
 #else
 void WebSocketsClient::beginSSL(const char * host, uint16_t port, const char * url, const uint8_t * fingerprint, const char * protocol) {
     begin(host, port, url, protocol);
@@ -127,6 +155,7 @@ void WebSocketsClient::beginSSL(const char * host, uint16_t port, const char * u
     _CA_cert      = NULL;
 }
 
+#if defined(SSL_BARESSL)
 void WebSocketsClient::beginSslWithCA(const char * host, uint16_t port, const char * url, BearSSL::X509List * CA_cert, const char * protocol) {
     begin(host, port, url, protocol);
     _client.isSSL = true;
@@ -138,14 +167,15 @@ void WebSocketsClient::beginSslWithCA(const char * host, uint16_t port, const ch
     beginSslWithCA(host, port, url, new BearSSL::X509List(CA_cert), protocol);
 }
 
+void WebSocketsClient::setSSLClientCertKey(const char * clientCert, const char * clientPrivateKey) {
+    setSSLClientCertKey(new BearSSL::X509List(clientCert), new BearSSL::PrivateKey(clientPrivateKey));
+}
+
 void WebSocketsClient::setSSLClientCertKey(BearSSL::X509List * clientCert, BearSSL::PrivateKey * clientPrivateKey) {
     _client_cert = clientCert;
     _client_key  = clientPrivateKey;
 }
-
-void WebSocketsClient::setSSLClientCertKey(const char * clientCert, const char * clientPrivateKey) {
-    setSSLClientCertKey(new BearSSL::X509List(clientCert), new BearSSL::PrivateKey(clientPrivateKey));
-}
+#endif    // SSL_BARESSL
 
 #endif    // SSL_AXTLS
 #endif    // HAS_SSL
@@ -214,7 +244,12 @@ void WebSocketsClient::loop(void) {
         if(_client.isSSL) {
             DEBUG_WEBSOCKETS("[WS-Client] connect wss...\n");
             if(_client.ssl) {
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_SAMD_SEED) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_UNOWIFIR4)
+                // does not support delete (no destructor)
+#else
                 delete _client.ssl;
+#endif
+
                 _client.ssl = NULL;
                 _client.tcp = NULL;
             }
@@ -228,10 +263,21 @@ void WebSocketsClient::loop(void) {
                 _client.ssl->setCACert((const uint8_t *)_CA_cert, strlen(_CA_cert) + 1);
 #elif(defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)) && defined(SSL_BARESSL)
                 _client.ssl->setTrustAnchors(_CA_cert);
+#elif defined(WIO_TERMINAL) || defined(SEEED_XIAO_M0)
+                _client.ssl->setCACert(_CA_cert);
+#elif defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_NANO_33_IOT)
+                // no setCACert
 #else
 #error setCACert not implemented
 #endif
 #if defined(ESP32)
+            } else if(_CA_bundle) {
+                DEBUG_WEBSOCKETS("[WS-Client] setting CA bundle");
+#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 4)
+                _client.ssl->setCACertBundle(_CA_bundle, _CA_bundle_size);
+#else
+                _client.ssl->setCACertBundle(_CA_bundle);
+#endif
             } else if(!SSL_FINGERPRINT_IS_SET) {
                 _client.ssl->setInsecure();
 #elif defined(SSL_BARESSL)
@@ -248,7 +294,11 @@ void WebSocketsClient::loop(void) {
         } else {
             DEBUG_WEBSOCKETS("[WS-Client] connect ws...\n");
             if(_client.tcp) {
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_SAMD_SEED) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_UNOWIFIR4)
+                // does not support delete (no destructor)
+#else
                 delete _client.tcp;
+#endif
                 _client.tcp = NULL;
             }
             _client.tcp = new WEBSOCKETS_NETWORK_CLASS();
@@ -499,7 +549,11 @@ void WebSocketsClient::clientDisconnect(WSclient_t * client) {
 #if(WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP8266_ASYNC)
         client->status = WSC_NOT_CONNECTED;
 #else
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_SAMD_SEED) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_UNOWIFIR4)
+        // does not support delete (no destructor)
+#else
         delete client->tcp;
+#endif
 #endif
         client->tcp = NULL;
     }

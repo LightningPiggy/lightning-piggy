@@ -25,6 +25,14 @@
 #include "WebSockets.h"
 #include "WebSocketsServer.h"
 
+#ifdef ESP32
+#if defined __has_include
+#if __has_include("soc/wdev_reg.h")
+#include "soc/wdev_reg.h"
+#endif    // __has_include
+#endif    // defined __has_include
+#endif
+
 WebSocketsServerCore::WebSocketsServerCore(const String & origin, const String & protocol) {
     _origin                 = origin;
     _protocol               = protocol;
@@ -65,6 +73,11 @@ WebSocketsServerCore::~WebSocketsServerCore() {
 }
 
 WebSocketsServer::~WebSocketsServer() {
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_SAMD_SEED)
+    // does not support delete (no destructor)
+#else
+    delete _server;
+#endif
 }
 
 /**
@@ -82,6 +95,8 @@ void WebSocketsServerCore::begin(void) {
 
 #ifdef ESP8266
     randomSeed(RANDOM_REG32);
+#elif defined(ESP32) && defined(WDEV_RND_REG)
+    randomSeed(REG_READ(WDEV_RND_REG));
 #elif defined(ESP32)
 #define DR_REG_RNG_BASE 0x3ff75144
     randomSeed(READ_PERI_REG(DR_REG_RNG_BASE));
@@ -428,8 +443,16 @@ WSclient_t * WebSocketsServerCore::newClient(WEBSOCKETS_NETWORK_CLASS * TCPclien
     for(uint8_t i = 0; i < WEBSOCKETS_SERVER_CLIENT_MAX; i++) {
         client = &_clients[i];
 
-        // state is not connected or tcp connection is lost
-        if(!clientIsConnected(client)) {
+        // look for match to existing socket before creating a new one
+        if(clientIsConnected(client)) {
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_W5100)
+            // Check to see if it is the same socket - if so, return it
+            if(client->tcp->getSocketNumber() == TCPclient->getSocketNumber()) {
+                return client;
+            }
+#endif
+        } else {
+            // state is not connected or tcp connection is lost
             client->tcp = TCPclient;
 
 #if(WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP8266) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP32)
@@ -530,6 +553,8 @@ void WebSocketsServerCore::dropNativeClient(WSclient_t * client) {
         }
 #if(WEBSOCKETS_NETWORK_TYPE == NETWORK_ESP8266_ASYNC)
         client->status = WSC_NOT_CONNECTED;
+#elif(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA) || (WEBSOCKETS_NETWORK_TYPE == NETWORK_SAMD_SEED)
+        // does not support delete (no destructor)
 #else
         delete client->tcp;
 #endif
@@ -645,8 +670,13 @@ void WebSocketsServer::handleNewClients(void) {
     while(_server->hasClient()) {
 #endif
 
-        // store new connection
+// store new connection
+#if(WEBSOCKETS_NETWORK_TYPE == NETWORK_WIFI_NINA)
         WEBSOCKETS_NETWORK_CLASS * tcpClient = new WEBSOCKETS_NETWORK_CLASS(_server->available());
+#else
+    WEBSOCKETS_NETWORK_CLASS * tcpClient = new WEBSOCKETS_NETWORK_CLASS(_server->accept());
+#endif
+
         if(!tcpClient) {
             DEBUG_WEBSOCKETS("[WS-Client] creating Network class failed!");
             return;
