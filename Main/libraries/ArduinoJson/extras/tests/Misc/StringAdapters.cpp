@@ -1,114 +1,137 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
-#define ARDUINOJSON_ENABLE_PROGMEM 1
-#define ARDUINOJSON_ENABLE_ARDUINO_STRING 1
+#include <Arduino.h>
 
-#include "custom_string.hpp"
-#include "weird_strcmp.hpp"
-
+#include <ArduinoJson/Strings/IsString.hpp>
+#include <ArduinoJson/Strings/JsonString.hpp>
 #include <ArduinoJson/Strings/StringAdapters.hpp>
 
 #include <catch.hpp>
 
-using namespace ARDUINOJSON_NAMESPACE;
+#include "custom_string.hpp"
+#include "weird_strcmp.hpp"
 
-TEST_CASE("ZeroTerminatedRamString") {
-  SECTION("null") {
-    ZeroTerminatedRamString s = adaptString(static_cast<const char*>(0));
+using ArduinoJson::JsonString;
+using namespace ArduinoJson::detail;
+
+TEST_CASE("adaptString()") {
+  SECTION("string literal") {
+    auto s = adaptString("bravo\0alpha");
+
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 11);
+    CHECK(s.isStatic() == true);
+  }
+
+  SECTION("null const char*") {
+    auto s = adaptString(static_cast<const char*>(0));
 
     CHECK(s.isNull() == true);
     CHECK(s.size() == 0);
   }
 
-  SECTION("non-null") {
-    ZeroTerminatedRamString s = adaptString("bravo");
+  SECTION("non-null const char*") {
+    const char* p = "bravo";
+    auto s = adaptString(p);
 
     CHECK(s.isNull() == false);
     CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
+    CHECK(s.data() == p);
   }
-}
 
-TEST_CASE("SizedRamString") {
-  SECTION("null") {
-    SizedRamString s = adaptString(static_cast<const char*>(0), 10);
+  SECTION("null const char* + size") {
+    auto s = adaptString(static_cast<const char*>(0), 10);
 
     CHECK(s.isNull() == true);
+    CHECK(s.isStatic() == false);
   }
 
-  SECTION("non-null") {
-    SizedRamString s = adaptString("bravo", 5);
+  SECTION("non-null const char* + size") {
+    auto s = adaptString("bravo", 5);
 
     CHECK(s.isNull() == false);
     CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
-}
 
-TEST_CASE("FlashString") {
-  SECTION("null") {
-    FlashString s = adaptString(static_cast<const __FlashStringHelper*>(0));
+  SECTION("null Flash string") {
+    auto s = adaptString(static_cast<const __FlashStringHelper*>(0));
 
     CHECK(s.isNull() == true);
     CHECK(s.size() == 0);
+    CHECK(s.isStatic() == false);
   }
 
-  SECTION("non-null") {
-    FlashString s = adaptString(F("bravo"));
+  SECTION("non-null Flash string") {
+    auto s = adaptString(F("bravo"));
 
     CHECK(s.isNull() == false);
     CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
-}
 
-TEST_CASE("std::string") {
-  std::string orig("bravo");
-  SizedRamString s = adaptString(orig);
-
-  CHECK(s.isNull() == false);
-  CHECK(s.size() == 5);
-}
-
-TEST_CASE("Arduino String") {
-  ::String orig("bravo");
-  SizedRamString s = adaptString(orig);
-
-  CHECK(s.isNull() == false);
-  CHECK(s.size() == 5);
-}
-
-TEST_CASE("custom_string") {
-  custom_string orig("bravo");
-  SizedRamString s = adaptString(orig);
-
-  CHECK(s.isNull() == false);
-  CHECK(s.size() == 5);
-}
-
-TEST_CASE("IsString<T>") {
   SECTION("std::string") {
-    CHECK(IsString<std::string>::value == true);
+    std::string orig("bravo");
+    auto s = adaptString(orig);
+
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
 
-  SECTION("basic_string<wchar_t>") {
-    CHECK(IsString<std::basic_string<wchar_t> >::value == false);
+  SECTION("Arduino String") {
+    ::String orig("bravo");
+    auto s = adaptString(orig);
+
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
 
   SECTION("custom_string") {
-    CHECK(IsString<custom_string>::value == true);
+    custom_string orig("bravo");
+    auto s = adaptString(orig);
+
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
 
-  SECTION("const __FlashStringHelper*") {
-    CHECK(IsString<const __FlashStringHelper*>::value == true);
+  SECTION("JsonString linked") {
+    JsonString orig("hello", true);
+    auto s = adaptString(orig);
+
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 5);
+    CHECK(s.isStatic() == true);
   }
 
-  SECTION("const char*") {
-    CHECK(IsString<const char*>::value == true);
-  }
+  SECTION("JsonString copied") {
+    JsonString orig("hello", false);
+    auto s = adaptString(orig);
 
-  SECTION("const char[]") {
-    CHECK(IsString<const char[8]>::value == true);
+    CHECK(s.isNull() == false);
+    CHECK(s.size() == 5);
+    CHECK(s.isStatic() == false);
   }
+}
+
+struct EmptyStruct {};
+
+TEST_CASE("IsString<T>") {
+  CHECK(IsString<std::string>::value == true);
+  CHECK(IsString<std::basic_string<wchar_t>>::value == false);
+  CHECK(IsString<custom_string>::value == true);
+  CHECK(IsString<const __FlashStringHelper*>::value == true);
+  CHECK(IsString<const char*>::value == true);
+  CHECK(IsString<const char[8]>::value == true);
+  CHECK(IsString<::String>::value == true);
+  CHECK(IsString<::StringSumHelper>::value == true);
+  CHECK(IsString<const EmptyStruct*>::value == false);
+  CHECK(IsString<JsonString>::value == true);
 }
 
 TEST_CASE("stringCompare") {

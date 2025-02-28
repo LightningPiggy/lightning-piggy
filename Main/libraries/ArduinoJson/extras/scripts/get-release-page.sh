@@ -4,15 +4,15 @@ set -eu
 
 VERSION="$1"
 CHANGELOG="$2"
-FRONTMATTER="$3"
+ARDUINOJSON_H="$3"
 
 cat << END
 ---
-branch: v6
+branch: v7
 version: $VERSION
 date: '$(date +'%Y-%m-%d')'
-$(cat "$FRONTMATTER")
+$(extras/scripts/wandbox/publish.sh "$ARDUINOJSON_H")
 ---
 
-$(awk '/\* /{ FOUND=1; print; next } { if (FOUND) exit}' "$CHANGELOG")
+$(extras/scripts/extract_changes.awk "$CHANGELOG")
 END
