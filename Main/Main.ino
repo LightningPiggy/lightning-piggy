@@ -40,11 +40,13 @@ int piggyMode = PIGGYMODE_INIT;
 char* ssid = NULL;
 char* password = NULL;
 
+char* staticLNURLp = NULL;
+
 char* lnbitsHost = NULL;
 char* lnbitsInvoiceKey = NULL;
-
 char* lnbitsPort = NULL;
-char* staticLNURLp = NULL;
+
+char* nwcURL = NULL;
 
 char* btcPriceCurrencyChar = NULL;
 char* balanceBias = NULL;
@@ -81,6 +83,7 @@ void setup() {
 
     watchdogWasntTriggered();
 }
+
 
 void loop() {
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
@@ -120,6 +123,9 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
+    setup_nwc();
+    piggyMode = PIGGYMODE_STARTED_STA_LOOP_NWC;
+    /*
     loop_websocket();
   
     // If there is no balance OR it has been a long time since it was refreshed, then refresh it
@@ -132,6 +138,7 @@ void loop() {
       hibernateDependingOnBattery(); // go to sleep if that's necessary
       // stay in this mode
     }
+    */
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
       xBeforeLNURLp = showLNURLpQR(getLNURLp());
       xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
@@ -169,6 +176,8 @@ void loop() {
     loop_dns();
     if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_LOOP_NWC) {
+    loop_nwc();
   }
 
   if (millis() - lastHeap >= 2000) {

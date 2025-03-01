@@ -21,6 +21,8 @@ String currentVersion = "5.0.6";
 #define PIGGYMODE_STARTING_AP 4      // attempt to start AP + webserver and then go to started-ap
 #define PIGGYMODE_STARTED_AP 5       // AP is up-and-running: wait until user trigger /reboot
 
+#define PIGGYMODE_STARTED_STA_LOOP_NWC 12
+
 // Configuration through access point:
 #define ACCESS_POINT_SSID          "LightningPiggy Configuration"
 #define ACCESS_POINT_PASS          ""
@@ -37,6 +39,7 @@ extern const int NOT_SPECIFIED = -1;
 const char * NOTCONFIGURED = "REPLACETHISBY";
 const unsigned int NOTCONFIGURED_LENGTH = 13;
 #define MAX_CONFIG_LENGTH 131
+#define MAX_CONFIG_LENGTH_NWCURL 512
 
 // Maximum time to show the bootslogan
 extern const int MAX_BOOTSLOGAN_SECONDS = 15;

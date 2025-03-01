@@ -101,6 +101,8 @@ String getLNURLp() {
 
   // Get the first lnurlp
   String lnurlpData = getEndpointData(lnbitsHost, "/lnurlp/api/v1/links?all_wallets=false", true);
+  
+  Serial.println("Got lnurlpData: " + lnurlpData);
   DynamicJsonDocument doc(8192); // the size of the list of links is unknown so don't skimp here
 
   DeserializationError error = deserializeJson(doc, lnurlpData);

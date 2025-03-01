@@ -111,11 +111,14 @@ bool parseConfig(String paramFileString) {
     tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH, REPLACE_lnbitsHost);
     tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH, REPLACE_lnbitsInvoiceKey);
 
+    tryGetJsonValue(doc, "config_nwc_url", &nwcURL, MAX_CONFIG_LENGTH_NWCURL, "");
+
     Serial.println("Parsed config:");
     Serial.printf("config_wifi_ssid_1: %s\n", ssid);
     Serial.printf("config_wifi_password_1: %s\n", password);
     Serial.printf("config_lnbits_host: %s\n", lnbitsHost);
     Serial.printf("config_lnbits_invoice_key: %s\n", lnbitsInvoiceKey);
+    Serial.printf("config_nwc_url: %s\n", lnbitsInvoiceKey);
 
     // Optional
     // ========
