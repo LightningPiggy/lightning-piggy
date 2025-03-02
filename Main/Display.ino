@@ -489,14 +489,14 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
 
   startPaymentsHeight = balanceHeight+1+delta;
   // Fetch payment amounts and comments
-  fetchPaymentsAsync(MAX_PAYMENTS); // TODO: move this to main state machine
+  if (fetchPayments) fetchPaymentsAsync(MAX_PAYMENTS); // should this be moved this to main state machine?
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
 }
 
 void receivedPayments() {
-  // Display payment amounts and comments
+  Serial.println("Done receiving payments, displaying payment amounts and comments...");
   int maxYforLNURLPayments = displayHeight();
   if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
   displayPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, startPaymentsHeight, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...

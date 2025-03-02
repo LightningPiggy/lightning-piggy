@@ -127,17 +127,22 @@ void loop() {
     } else if (walletToUse() == WALLET_NWC) {
       loop_nwc();
     }
-  
-    // If there is no balance OR it has been a long time since it was refreshed, then refresh it
-    if ((millis() - lastUpdatedBalance) > UPDATE_BALANCE_PERIOD_MILLIS || getForceRefreshBalanceAndPayments()) {
+
+    // For both: refresh if getForceRefreshBalanceAndPayments()
+    // For LNbits: refresh sporadically
+    // For NWC: refresh regularly (because there's no push notifications)
+    // If it has been a long time since it was refreshed, then refresh it
+    if (getForceRefreshBalanceAndPayments() ||
+      (walletToUse() == WALLET_LNBITS && (millis() - lastUpdatedBalance) > LNBITS_UPDATE_BALANCE_PERIOD_MILLIS) ||
+      (walletToUse() == WALLET_NWC && (millis() - lastUpdatedBalance) > NWC_UPDATE_BALANCE_PERIOD_MILLIS)) {
       lastUpdatedBalance = millis();
       setNextRefreshBalanceAndPayments(false);
       if (walletToUse() == WALLET_LNBITS) disconnectWebsocket();
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE;
     } else {
-      if (!isWebsocketConnected() && walletToUse() == WALLET_LNBITS) connectWebsocket();
+      if (walletToUse() == WALLET_LNBITS) connectWebsocket();
       hibernateDependingOnBattery(); // go to sleep if that's necessary
-      // stay in this mode
+      // otherwise stay in this piggyMode
     }
 
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {

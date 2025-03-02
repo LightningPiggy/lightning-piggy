@@ -54,7 +54,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define CHECK_UPDATE_PERIOD_SECONDS 7*24*60*60 // every week
 
-#define UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // fallback to updating balance every 15 minutes if the instant websocket method is unavailable
+#define NWC_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 // NWC doesn't have notifications so update regularly
+#define LNBITS_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // LNBits should have websockets so these manual updates are only a fallback
 
 #define UPDATE_VOLTAGE_PERIOD_MILLIS 1000 * 60 * 5 // update voltage display every 5 minutes
 
