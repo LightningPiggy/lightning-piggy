@@ -108,6 +108,7 @@ int nroflines = 0;
 int displayToUse = DISPLAY_TYPE_213DEPG;
 int balanceHeight; // [0,balanceHeight] is the vertical zone of the balance region plus the line underneath it.
 int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat region.
+int startPaymentsHeight;
 
 int waitForSloganReadUntil = 0;
 int lastBalance = NOT_SPECIFIED;
@@ -486,16 +487,19 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
     displayFillRect(0, balanceHeight+delta, xBeforeLNURLp-5, 1, GxEPD_BLACK);
   } while (displayNextPage());
 
-  /* TODO: make this work for NWC:
-  // Display payment amounts and comments
-  int maxYforLNURLPayments = displayHeight();
-  if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
-  if (fetchPayments) fetchLNURLPayments(MAX_PAYMENTS);
-  displayLNURLPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, balanceHeight+1+delta, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...
-  */
+  startPaymentsHeight = balanceHeight+1+delta;
+  // Fetch payment amounts and comments
+  fetchPaymentsAsync(MAX_PAYMENTS); // TODO: move this to main state machine
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
+}
+
+void receivedPayments() {
+  // Display payment amounts and comments
+  int maxYforLNURLPayments = displayHeight();
+  if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
+  displayPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, startPaymentsHeight, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...
 }
 
 /**
@@ -503,15 +507,15 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
  *
  * @param limit
  */
-void displayLNURLPayments(int limit, int maxX, int startY, int maxY) {
+void displayPayments(int limit, int maxX, int startY, int maxY) {
   int marginAtBottom = 8;
   setPartialWindow(0, startY, maxX, maxY);
   displayFirstPage();
   do {
     int yPos = startY;
-    for (int i=0;i<min(getNroflnurlPayments(),limit) && yPos+marginAtBottom < maxY;i++) {
-      Serial.println("Displaying payment: " + getLnurlPayment(i));
-      yPos = displayFit(getLnurlPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
+    for (int i=0;i<min(getNrofPayments(),limit) && yPos+marginAtBottom < maxY;i++) {
+      Serial.println("Displaying payment: " + getPayment(i));
+      yPos = displayFit(getPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
     }
   } while (displayNextPage());
 }

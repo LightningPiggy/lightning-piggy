@@ -70,6 +70,7 @@ void fetchLNURLPayments(int limit) {
   }
 
   Serial.println("Displaying payment amounts and comments...");
+  nroflnurlPayments = 0;
   for (JsonObject areaElems : doc.as<JsonArray>()) {
     String paymentDetail = paymentJsonToString(areaElems);
     if (paymentDetail.length() > 0 && nroflnurlPayments<MAX_PAYMENTS) {

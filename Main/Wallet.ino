@@ -23,10 +23,31 @@ void getWalletBalanceAsync() {
   } // else do nothing
 }
 
-void fetchPaymentsAsync() {
+void fetchPaymentsAsync(int max_payments) {
   if (walletToUse() == WALLET_LNBITS) {
-    
-  } else {
-    
+    fetchLNURLPayments(MAX_PAYMENTS);
+    receivedPayments();
+  } else if (walletToUse() == WALLET_NWC) {
+    fetchNWCPayments(MAX_PAYMENTS);
   } // else do nothing
+}
+
+int getNrofPayments() {
+  if (walletToUse() == WALLET_LNBITS) {
+    return getNroflnurlPayments();
+  } else if (walletToUse() == WALLET_NWC) {
+    return getNrofNWCPayments();
+  } else {
+    return 0;
+  }
+}
+
+String getPayment(int nr) {
+  if (walletToUse() == WALLET_LNBITS) {
+    return getLnurlPayment(nr);
+  } else if (walletToUse() == WALLET_NWC) {
+    return getNWCPayment(nr);
+  } else {
+    return "";
+  }
 }

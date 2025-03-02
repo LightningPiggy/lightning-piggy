@@ -10,8 +10,23 @@ nostr::Transport *transport;
 unsigned long long maxtime = 0; // if maxtime is 0, then it will default to "now", so it will fetch the latest transaction, and work backwards from there
 unsigned long long requestedTime = -1;
 
+int paymentsFetched = 0;
+int paymentsToFetch = 0;
+bool reachedEndOfTransactionsList = false;
+
+String nwcPayments[MAX_PAYMENTS];
+int nrofNWCPayments = 0;
+
 bool canUseNWC() {
   return isConfigured(nwcURL);
+}
+
+int getNrofNWCPayments() {
+  return nrofNWCPayments;
+}
+
+String getNWCPayment(int index) {
+  return nwcPayments[index];
 }
 
 void getNextTransaction() {
@@ -20,10 +35,29 @@ void getNextTransaction() {
   try {
 
     nwc->listTransactions(0,maxtime,1,0,false,"incoming", [&](nostr::ListTransactionsResponse resp) {
-        Serial.println("[!] listTransactions result for maxtime " + String(maxtime) + ":");
+        size_t numTransactions = resp.transactions.size();
+        Serial.println("[!] listTransactions result for maxtime " + String(maxtime) + " has " + String(numTransactions) + " transactions: ");
+        if (numTransactions == 0) reachedEndOfTransactionsList = true;
         for (auto transaction : resp.transactions) {
           Serial.println("=> Got transaction: " + String(transaction.amount) + " msat createdAt: " + String(transaction.createdAt) + " with description: '" + transaction.description + "'");         
           maxtime = transaction.createdAt-1;
+          // Payment always has an amount
+            long long amount = transaction.amount; // long long to support amounts above 999999000 millisats
+            long amountSmaller = amount / 1000; // millisats to sats
+
+            String paymentAmount(amountSmaller);
+            String units = "sats";
+            if (amountSmaller < 2) units = "sat";
+
+            String paymentDetail = paymentAmount + " " + units;
+
+            String paymentComment(transaction.description);
+            if (paymentComment.length() == 0) {
+              paymentDetail += "!";
+            } else {
+              paymentDetail += ": " + paymentComment;
+            }
+            addNWCpayment(paymentDetail);
         }
     }, [](String err, String errMsg) { Serial.println("[!] listTransactions Error: " + err + " " + errMsg); });
 
@@ -34,9 +68,14 @@ void getNextTransaction() {
 
 void loop_nwc() {
   nwc->loop();
-  if (maxtime != requestedTime) {
-    requestedTime = maxtime;
-    getNextTransaction();
+  // if we can request the next one AND we need to fetch the next one AND we haven't reached the end:
+  if (paymentsFetched < paymentsToFetch && !reachedEndOfTransactionsList) {
+    if (maxtime != requestedTime) {
+      requestedTime = maxtime;
+      getNextTransaction();
+    } // else still waiting for the previous one, do nothing... TODO: consider a timeout so we don't keep waiting forever
+  } else { // fetched enough payments or reached end of list
+    receivedPayments();
   }
 }
 
@@ -52,6 +91,26 @@ void setup_nwc() {
 }
 
 void nwc_getBalance() {
-  nwc->getBalance([&](nostr::GetBalanceResponse resp) { Serial.println("[!] Balance: " + String(resp.balance) + " msatoshis"); receivedWalletBalance(resp.balance/1000); },
-      [](String err, String errMsg) { Serial.println("[!] Error: " + err + " " + errMsg); });
+  nwc->getBalance([&](nostr::GetBalanceResponse resp) {
+    Serial.println("[!] Balance: " + String(resp.balance) + " msatoshis");
+    receivedWalletBalance(resp.balance/1000);
+  }, [](String err, String errMsg) {
+    Serial.println("[!] Error: " + err + " " + errMsg);
+  });
+}
+
+
+void fetchNWCPayments(int max_payments) {
+  paymentsFetched = 0;
+  paymentsToFetch = max_payments;
+  reachedEndOfTransactionsList = false;
+  maxtime = 0; // start from the "now" and go backwards
+  nrofNWCPayments = 0;
+}
+
+void addNWCpayment(String toadd) {
+  nwcPayments[nrofNWCPayments] = toadd;
+  if (nrofNWCPayments<MAX_PAYMENTS) nrofNWCPayments++;
+  Serial.println("After adding NWC payment, the list contains:" + stringArrayToString(nwcPayments, nrofNWCPayments));
+
 }
