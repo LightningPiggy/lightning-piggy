@@ -27,7 +27,7 @@
 
 #define roundEight(x) (((x) + 8 - 1) & -8) // round up to multiple of 8
 
-long lastUpdatedBalance = -UPDATE_BALANCE_PERIOD_MILLIS;  // this makes it update when first run
+long lastUpdatedBalance = -LNBITS_UPDATE_BALANCE_PERIOD_MILLIS;  // this makes it update when first run
 long apstart_time  = 0;
 long lastHeap = 0;
 
