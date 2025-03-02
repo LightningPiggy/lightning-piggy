@@ -5,6 +5,10 @@ int nroflnurlPayments = 0;
 
 String cachedLNURLp = "";
 
+bool canUseLNBits() {
+  return isConfigured(lnbitsHost) && isConfigured(lnbitsInvoiceKey);
+}
+
 int getWalletBalance() {
   Serial.println("Getting wallet details...");
   const String url = "/api/v1/wallet";
@@ -97,7 +101,12 @@ String getLNURLp() {
     return cachedLNURLp;
   }
 
-  Serial.println("Getting LNURLp link list...");
+  if (walletToUse() != WALLET_LNBITS) {
+    Serial.println("Getting LNURLp link list...");
+  } else {
+    Serial.println("WARNING: No receive code is configured and it can only be fetched for LNBits");
+    return "";
+  }
 
   // Get the first lnurlp
   String lnurlpData = getEndpointData(lnbitsHost, "/lnurlp/api/v1/links?all_wallets=false", true);

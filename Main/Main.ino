@@ -28,9 +28,6 @@
 #define roundEight(x) (((x) + 8 - 1) & -8) // round up to multiple of 8
 
 long lastUpdatedBalance = -UPDATE_BALANCE_PERIOD_MILLIS;  // this makes it update when first run
-int lastBalance = -NOT_SPECIFIED;
-bool forceRefreshBalanceAndPayments = false;
-int xBeforeLNURLp;
 long apstart_time  = 0;
 long lastHeap = 0;
 
@@ -118,37 +115,39 @@ void loop() {
         displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
+        if (walletToUse() == WALLET_NWC) setup_nwc();
       } else {
         piggyMode = PIGGYMODE_FAILED_STA;
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
-    setup_nwc();
-    piggyMode = PIGGYMODE_STARTED_STA_LOOP_NWC;
-    /*
-    loop_websocket();
+
+    if (walletToUse() == WALLET_LNBITS) {
+      loop_websocket();
+    } else if (walletToUse() == WALLET_NWC) {
+      loop_nwc();
+    }
   
     // If there is no balance OR it has been a long time since it was refreshed, then refresh it
-    if (lastBalance == -NOT_SPECIFIED || (millis() - lastUpdatedBalance) > UPDATE_BALANCE_PERIOD_MILLIS || forceRefreshBalanceAndPayments) {
+    if ((millis() - lastUpdatedBalance) > UPDATE_BALANCE_PERIOD_MILLIS || getForceRefreshBalanceAndPayments()) {
       lastUpdatedBalance = millis();
-      disconnectWebsocket();
+      setNextRefreshBalanceAndPayments(false);
+      if (walletToUse() == WALLET_LNBITS) disconnectWebsocket();
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE;
     } else {
-      if (!isWebsocketConnected()) connectWebsocket();
+      if (!isWebsocketConnected() && walletToUse() == WALLET_LNBITS) connectWebsocket();
       hibernateDependingOnBattery(); // go to sleep if that's necessary
       // stay in this mode
     }
-    */
+
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
-      xBeforeLNURLp = showLNURLpQR(getLNURLp());
-      xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
+      showLNURLpQR(getLNURLp());
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_STATUS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_STATUS) {
-      displayStatus(xBeforeLNURLp, false);  // takes ~2000ms, which is too much to do with the websocket
+      displayStatus(false);  // takes ~2000ms, which is too much to do with the websocket
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS) {
-      displayBalanceAndPayments(xBeforeLNURLp, forceRefreshBalanceAndPayments);
-      forceRefreshBalanceAndPayments = false;
+      getWalletBalanceAsync();
       piggyMode = PIGGYMODE_STARTED_STA_CHECKUPDATE;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_CHECKUPDATE) {
       checkShowUpdateAvailable();
@@ -191,9 +190,6 @@ void loop() {
   }
 }
 
-void nextRefreshBalanceAndPayments() {
-  forceRefreshBalanceAndPayments = true;
-} 
 
 void moveOnAfterSleepBootSlogan() {
   if (hasMinimalConfig()) {

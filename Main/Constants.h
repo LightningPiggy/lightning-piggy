@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "5.0.6";
+String currentVersion = "5.1.0";
 
 /**
  * The piggy can be in different 'modes':
@@ -106,5 +106,9 @@ const char* defaultDecimalSeparator = ".";
 #define MAX_FONT 5
 
 #define MAX_TEXT_LINES 20
+
+#define WALLET_NONE 0
+#define WALLET_LNBITS 1
+#define WALLET_NWC 2
 
 #endif // #ifndef CONSTANTS_H

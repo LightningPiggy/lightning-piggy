@@ -110,7 +110,6 @@ bool parseConfig(String paramFileString) {
     tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH, REPLACE_password);
     tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH, REPLACE_lnbitsHost);
     tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH, REPLACE_lnbitsInvoiceKey);
-
     tryGetJsonValue(doc, "config_nwc_url", &nwcURL, MAX_CONFIG_LENGTH_NWCURL, "");
 
     Serial.println("Parsed config:");
@@ -118,7 +117,7 @@ bool parseConfig(String paramFileString) {
     Serial.printf("config_wifi_password_1: %s\n", password);
     Serial.printf("config_lnbits_host: %s\n", lnbitsHost);
     Serial.printf("config_lnbits_invoice_key: %s\n", lnbitsInvoiceKey);
-    Serial.printf("config_nwc_url: %s\n", lnbitsInvoiceKey);
+    Serial.printf("config_nwc_url: %s\n", nwcURL);
 
     // Optional
     // ========
@@ -151,7 +150,6 @@ bool parseConfig(String paramFileString) {
 }
 
 void setup_config() {
-
   Serial.println("Attempting to mount LittleFS filesystem...");
   if (!LittleFS.begin(false)) {
     Serial.println("LittleFS mount failed, formatting...");
@@ -281,7 +279,7 @@ void stop_webserver() {
 // Check if enough items are configured to attempt regular startup.
 bool hasMinimalConfig() {
   Serial.println("Checking for minimal configuration...");
-  if (isConfigured(ssid) && isConfigured(lnbitsHost) && isConfigured(lnbitsInvoiceKey)) {
+  if (isConfigured(ssid) && hasWalletConfig()) {
     Serial.println("All mandatory configuration items are set.");
     return true;
   }

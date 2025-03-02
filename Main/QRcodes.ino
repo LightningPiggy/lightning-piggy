@@ -1,49 +1,5 @@
 #include "qrcoded.h"
 
-/*
- * returns: x value before QR code
- */
-int showLNURLpQR(String qrData) {
-  if (qrData.length() < 1 || qrData == "null") {
-    Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
-    return displayWidth();
-  }
-  Serial.println("Building LNURLp QR code...");
-
-  int qrVersion = getQRVersion(qrData);
-  int pixSize = getQrCodePixelSize(qrVersion);
-  Serial.println("qrVersion = " + String(qrVersion) + " and pixSize = " + String(pixSize));
-  uint8_t qrcodeData[qrcode_getBufferSize(qrVersion)];
-
-  QRCode qrcoded;
-  const char *qrDataChar = qrData.c_str();
-  qrcode_initText(&qrcoded, qrcodeData, qrVersion, 0, qrDataChar);
-
-  Serial.println("Displaying LNURLp QR code...");
-  int qrSideSize = pixSize * qrcoded.size;
-  int qrPosX = displayWidth() - qrSideSize;
-  int qrPosY = 0;
-  Serial.println("qrSideSize = " + String(qrSideSize) + " and qrPosX,qrPosY = " + String(qrPosX) + "," + String(qrPosY));
-
-  //display.setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
-  setPartialWindow(0, 0, displayWidth(), displayHeight()); // this is the first thing that gets displayed so blank the entire screen
-  displayFirstPage();
-  do {
-    for (uint8_t y = 0; y < qrcoded.size; y++)
-    {
-      for (uint8_t x = 0; x < qrcoded.size; x++)
-      {
-        if (qrcode_getModule(&qrcoded, x, y))
-        {
-          displayFillRect(qrPosX + pixSize * x, qrPosY + pixSize * y, pixSize, pixSize, GxEPD_BLACK);
-        }
-      }
-    }
-  } while (displayNextPage());
-
-  return qrPosX;  // returns 192 on 250px wide display
-}
-
 /**
  * @brief Get the size of the qr code to produce
  * 

@@ -10,6 +10,10 @@ nostr::Transport *transport;
 unsigned long long maxtime = 0; // if maxtime is 0, then it will default to "now", so it will fetch the latest transaction, and work backwards from there
 unsigned long long requestedTime = -1;
 
+bool canUseNWC() {
+  return isConfigured(nwcURL);
+}
+
 void getNextTransaction() {
   Serial.println("Doing listTransactions for maxtime " + String(maxtime) + ":");
 
@@ -48,6 +52,6 @@ void setup_nwc() {
 }
 
 void nwc_getBalance() {
-  nwc->getBalance([&](nostr::GetBalanceResponse resp) { Serial.println("[!] Balance: " + String(resp.balance) + " msatoshis"); },
+  nwc->getBalance([&](nostr::GetBalanceResponse resp) { Serial.println("[!] Balance: " + String(resp.balance) + " msatoshis"); receivedWalletBalance(resp.balance/1000); },
       [](String err, String errMsg) { Serial.println("[!] Error: " + err + " " + errMsg); });
 }

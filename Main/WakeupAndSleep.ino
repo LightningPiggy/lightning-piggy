@@ -222,7 +222,7 @@ bool hibernateDependingOnBattery() {
 void hibernate(int sleepTimeSeconds) {
   Serial.println("Going to sleep for " + String(sleepTimeSeconds) + " seconds...");
 
-  displayStatus(xBeforeLNURLp, true);
+  displayStatus(true);
 
   disconnectWebsocket();
   // Disconnect wifi cleanly because some access points will refuse reconnections if this is forgotten...

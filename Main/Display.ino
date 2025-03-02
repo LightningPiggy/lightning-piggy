@@ -7,8 +7,9 @@
 // <amount> sat(s): comment3                          status
 // <fiatbalance> <currency> (<fiatprice> <currency)
 //
+#include "qrcoded.h"
 
-//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
+#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
 
 // base class GxEPD2_GFX can be used to pass references or pointers to the display instance as parameter, uses ~1.2k more code
 // enable or disable GxEPD2_GFX base class
@@ -109,6 +110,11 @@ int balanceHeight; // [0,balanceHeight] is the vertical zone of the balance regi
 int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat region.
 
 int waitForSloganReadUntil = 0;
+int lastBalance = NOT_SPECIFIED;
+
+bool forceRefreshBalanceAndPayments = false; // should the payments list be refreshed, even if it didn't change?
+
+int xBeforeLNURLp; // every time the QR code is shown, we store the x before it, to use for other display stuff
 
 /* Detecting the display works by timing the clearScreen operation.
 09:08:03.074 -> init operation took 23ms
@@ -455,10 +461,9 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
   displayDrawImage(logo, posX, posY, sizeX, sizeY, false);
 }
 
-// returns whether it updated the display
-void displayBalanceAndPayments(int xBeforeLNURLp, bool forceRefresh) {
-  int currentBalance = getWalletBalance();
-  if (currentBalance != lastBalance || forceRefresh) {
+void receivedWalletBalance(int currentBalance) {
+  if (currentBalance != lastBalance) {
+    lastBalance = currentBalance;
     updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
   } else {
     updateBalanceAndPayments(xBeforeLNURLp, currentBalance, false);
@@ -466,8 +471,6 @@ void displayBalanceAndPayments(int xBeforeLNURLp, bool forceRefresh) {
 }
 
 void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchPayments) {
-  lastBalance = currentBalance;
-
   int delta = 2;
   if (displayToUse == 2) delta = 0; // on the 2.66 we don't need this delta
 
@@ -483,11 +486,13 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
     displayFillRect(0, balanceHeight+delta, xBeforeLNURLp-5, 1, GxEPD_BLACK);
   } while (displayNextPage());
 
+  /* TODO: make this work for NWC:
   // Display payment amounts and comments
   int maxYforLNURLPayments = displayHeight();
   if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
   if (fetchPayments) fetchLNURLPayments(MAX_PAYMENTS);
   displayLNURLPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, balanceHeight+1+delta, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...
+  */
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
@@ -522,7 +527,7 @@ void displayWifiStrength(int y) {
 }
 
 // returns the y value after showing all the status info
-void displayStatus(int xBeforeLNURLp, bool showsleep) {
+void displayStatus(bool showsleep) {
   setFont(0);
   int qrPixels = displayWidth() - xBeforeLNURLp; // square
   Serial.println("qrPixels = " + String(qrPixels));
@@ -650,4 +655,65 @@ void showBootSlogan() {
 
 bool doneWaitingForBootSlogan() {
   return (millis() > waitForSloganReadUntil);
+}
+
+
+/*
+ * returns: x value before QR code
+ */
+void showLNURLpQR(String qrData) {
+  if (qrData.length() < 1 || qrData == "null") {
+    Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
+    xBeforeLNURLp = displayWidth();
+  }
+  Serial.println("Building LNURLp QR code...");
+
+  int qrVersion = getQRVersion(qrData);
+  int pixSize = getQrCodePixelSize(qrVersion);
+  Serial.println("qrVersion = " + String(qrVersion) + " and pixSize = " + String(pixSize));
+  uint8_t qrcodeData[qrcode_getBufferSize(qrVersion)];
+
+  QRCode qrcoded;
+  const char *qrDataChar = qrData.c_str();
+  qrcode_initText(&qrcoded, qrcodeData, qrVersion, 0, qrDataChar);
+
+  Serial.println("Displaying LNURLp QR code...");
+  int qrSideSize = pixSize * qrcoded.size;
+  int qrPosX = displayWidth() - qrSideSize;
+  int qrPosY = 0;
+  Serial.println("qrSideSize = " + String(qrSideSize) + " and qrPosX,qrPosY = " + String(qrPosX) + "," + String(qrPosY));
+
+  //display.setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
+  setPartialWindow(0, 0, displayWidth(), displayHeight()); // this is the first thing that gets displayed so blank the entire screen
+  displayFirstPage();
+  do {
+    for (uint8_t y = 0; y < qrcoded.size; y++)
+    {
+      for (uint8_t x = 0; x < qrcoded.size; x++)
+      {
+        if (qrcode_getModule(&qrcoded, x, y))
+        {
+          displayFillRect(qrPosX + pixSize * x, qrPosY + pixSize * y, pixSize, pixSize, GxEPD_BLACK);
+        }
+      }
+    }
+  } while (displayNextPage());
+
+  xBeforeLNURLp = qrPosX;
+  xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
+  //return qrPosX;  // returns 192 on 250px wide display
+}
+
+
+void nextRefreshBalanceAndPayments() {
+  forceRefreshBalanceAndPayments = true;
+}
+
+void setNextRefreshBalanceAndPayments(bool value) {
+  forceRefreshBalanceAndPayments = value;
+}
+
+
+bool getForceRefreshBalanceAndPayments() {
+  return forceRefreshBalanceAndPayments;
 }
