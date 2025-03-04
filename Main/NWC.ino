@@ -72,6 +72,8 @@ void getNextTransaction() {
 }
 
 void loop_nwc() {
+  if (!nwc) return; // not initialized
+
   nwc->loop();
   // if we can request the next one AND we need to fetch the next one AND we haven't reached the end:
   if (paymentsFetched < paymentsToFetch && !reachedEndOfTransactionsList) {
