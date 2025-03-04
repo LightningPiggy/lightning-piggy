@@ -86,6 +86,12 @@ void loop() {
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
   loop_interrupts(); // handle keypress
 
+  if (walletToUse() == WALLET_LNBITS) {
+    loop_websocket();
+  } else if (walletToUse() == WALLET_NWC) {
+    loop_nwc();
+  }
+
   if (piggyMode == PIGGYMODE_INIT) {
     if (!displayVoltageWarning()) {
       if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
@@ -121,12 +127,6 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
-
-    if (walletToUse() == WALLET_LNBITS) {
-      loop_websocket();
-    } else if (walletToUse() == WALLET_NWC) {
-      loop_nwc();
-    }
 
     // For both: refresh if getForceRefreshBalanceAndPayments()
     // For LNbits: refresh sporadically
