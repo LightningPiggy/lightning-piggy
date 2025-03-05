@@ -104,6 +104,8 @@ int statusAreaVoltageHeight = -1; // this value is cached after it's calculated 
 int blackBackgroundVerticalMargin=2;
 int blackBackgroundHorizontalMargin=2;
 
+int marginFromQRcode = 5; // margin between balance and QR Code
+
 String lines[MAX_TEXT_LINES];
 int nroflines = 0;
 
@@ -468,31 +470,29 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
 }
 
 void drawBalance(int currentBalance) {
-  int delta = 2;
-  if (displayToUse == 2) delta = 0; // on the 2.66 we don't need this delta
+  int marginBelowBalance = 2;
+  startPaymentsHeight = balanceHeight+1+marginBelowBalance;
 
   // Display balance from 0 to balanceHeight
-  setPartialWindow(0, 0, xBeforeLNURLp, balanceHeight+3);
+  setPartialWindow(0, 0, xBeforeLNURLp, startPaymentsHeight);
   displayFirstPage();
   do {
     if (currentBalance == NOT_SPECIFIED) {
-      displayFit("Unknown Balance", 0, 0, xBeforeLNURLp-5, balanceHeight-1+delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
+      displayFit("Unknown Balance", 0, 0, xBeforeLNURLp-marginFromQRcode, balanceHeight-1+marginBelowBalance, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
     } else {
-      displayFit(formatIntWithSeparator(currentBalance) + " sats", 0, 0, xBeforeLNURLp-5, balanceHeight-1+delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
+      displayFit(formatIntWithSeparator(currentBalance) + " sats", 0, 0, xBeforeLNURLp-marginFromQRcode, balanceHeight-1+marginBelowBalance, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
     }
-    displayFillRect(0, balanceHeight+delta, xBeforeLNURLp-5, 1, GxEPD_BLACK);
+    displayFillRect(0, balanceHeight+marginBelowBalance, xBeforeLNURLp-marginFromQRcode, 1, GxEPD_BLACK); // black line
+    displayFillRect(xBeforeLNURLp-marginFromQRcode, 0, marginFromQRcode, startPaymentsHeight, GxEPD_WHITE); // white margin between balance and QR code
   } while (displayNextPage());
-
-  startPaymentsHeight = balanceHeight+1+delta;
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
 }
 
 void displayPayments() {
-  int maxX = xBeforeLNURLp - 5;
-  int maxY = displayHeight();
-  if (isConfigured(btcPriceCurrencyChar)) maxY = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
+  int maxX = xBeforeLNURLp - marginFromQRcode;
+  int maxY = isConfigured(btcPriceCurrencyChar) ? fiatHeight : displayHeight();
 
   int startY = startPaymentsHeight;
 
@@ -507,6 +507,7 @@ void displayPayments() {
       Serial.println("Displaying payment: " + getPayment(i));
       yPos = displayFit(getPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
     }
+    displayFillRect(maxX, startY, marginFromQRcode, h, GxEPD_WHITE); // margin between balance and QR code
   } while (displayNextPage());
 }
 
