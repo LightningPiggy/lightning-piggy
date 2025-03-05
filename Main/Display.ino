@@ -36,6 +36,8 @@ public:
     }
 
     void setPartialWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+      fillRect(x,y,w,h,GxEPD_BLACK);
+      delay(750);
       fillRect(x,y,w,h,GxEPD_WHITE);
     }
 
@@ -174,7 +176,9 @@ void setup_display() {
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
 
   balanceHeight = roundEight(displayHeight()/5)-1;  // 0,23 inclusive is 24 pixels height.
+  Serial.println("calculated balanceHeight: " + String(balanceHeight));
   fiatHeight = roundEight((displayHeight()*4)/5);
+  Serial.println("calculated fiatHeight: " + String(fiatHeight));
 }
 
 int getDisplayToUse() {
@@ -182,6 +186,7 @@ int getDisplayToUse() {
 }
 
 void setPartialWindow(int x, int y, int h, int w) {
+  Serial.println("setPartialWindow(x,y,h,w) = setPartialWindow(" + String(x) + "," + String(y) + "," + String(h) + "," + String(w) + ")");
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
     display1.setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
@@ -661,10 +666,6 @@ bool doneWaitingForBootSlogan() {
   return (millis() > waitForSloganReadUntil);
 }
 
-
-/*
- * returns: x value before QR code
- */
 void showLNURLpQR(String qrData) {
   if (qrData.length() < 1 || qrData == "null") {
     Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
