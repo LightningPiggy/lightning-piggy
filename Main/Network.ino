@@ -72,7 +72,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
       details = "Obtained IP address: " + ipToString(WiFi.localIP());
   } else if (eventid == ARDUINO_EVENT_WIFI_STA_CONNECTED) {
     Serial.println("Got ARDUINO_EVENT_WIFI_STA_CONNECTED; flagging balance and payments for refresh to clear any error messages that might linger on the display.");
-    nextRefreshBalanceAndPayments();
+    setNextRefreshBalanceAndPayments(true);
   }
 
   Serial.println(details);
@@ -317,8 +317,9 @@ void parseWebsocketText(String text) {
     resetLastPaymentReceivedMillis();
     String paymentDetail = paymentJsonToString(doc["payment"].as<JsonObject>());
     Serial.println("Websocket update with paymentDetail: " + paymentDetail);
-    addLNURLpayment(paymentDetail);
-    updateBalanceAndPayments(xBeforeLNURLp, walletBalance+balanceBiasInt, false);
+    prependPayment(paymentDetail);
+    setBalance(walletBalance+balanceBiasInt);
+    piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
   } else {
     Serial.println("Websocket update did not contain payment, ignoring...");
   }

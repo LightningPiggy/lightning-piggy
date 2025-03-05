@@ -62,7 +62,7 @@ void loop_interrupts() {
     } else if (tiltMessageShown) { // else not recent but message still shown?
       displayFit("Back up!", 0, 0, displayWidth(), displayHeight(), 6);
       tiltMessageShown = false;
-      nextRefreshBalanceAndPayments();
+      setNextRefreshBalanceAndPayments(true);
     }
   }
 
@@ -72,25 +72,24 @@ void loop_interrupts() {
       pressStartTime = millis();  // Record when the button was first pressed
     }
 
-    long pressDuration = millis() - pressStartTime;
-    if (!actionTriggered) {
+    if (!actionTriggered && millis() - pressStartTime >= HOLD_TIME) {
       actionTriggered = true;  // Prevent repeated triggering
-      if (pressDuration > minTimeBetweenInterrupts && pressDuration < HOLD_TIME) {
-        Serial.println("Handling short button press");
-        moveOnAfterSleepBootSlogan();
-      } else if (pressDuration >= HOLD_TIME) {
-        // handle long press
-        Serial.println("Handling long button press");
-        if (piggyMode != PIGGYMODE_STARTING_AP && piggyMode != PIGGYMODE_STARTED_AP) {
-          displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-          piggyMode = PIGGYMODE_STARTING_AP;
-        } else {
-          displayFit("User button was pushed while already in configuration mode, going back to station mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
-          piggyMode = PIGGYMODE_STARTING_STA;
-        }
+      // handle long press
+      Serial.println("Handling long button press");
+      if (piggyMode != PIGGYMODE_STARTING_AP && piggyMode != PIGGYMODE_STARTED_AP) {
+        displayFit("User button was pushed for more than 3s, starting Access Point configuration mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+        piggyMode = PIGGYMODE_STARTING_AP;
+      } else {
+        displayFit("User button was pushed while already in configuration mode, going back to station mode!", 0, 0, displayWidth(), displayHeight(), MAX_FONT);
+        piggyMode = PIGGYMODE_STARTING_STA;
       }
     }
   } else { // button not pressed
+    long pressDuration = millis() - pressStartTime;
+    if (pressStartTime > 0 && pressDuration < HOLD_TIME) {
+      Serial.println("Handling short button press");
+      moveOnAfterSleepBootSlogan();
+    } 
     pressStartTime = 0;  // Reset timer when the button is released
   }
 }

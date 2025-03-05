@@ -15,7 +15,15 @@ String currentVersion = "5.1.0";
 #define PIGGYMODE_STARTED_STA 2      // websocket handling and triggering refresh if it's time
 #define PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE 8
 #define PIGGYMODE_STARTED_STA_REFRESH_STATUS 9
-#define PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS 10
+
+#define PIGGYMODE_STARTED_STA_REFRESH_BALANCE 10
+#define PIGGYMODE_STARTED_STA_WAIT_BALANCE 13
+#define PIGGYMODE_STARTED_STA_RECEIVED_BALANCE 14
+
+#define PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS 15
+#define PIGGYMODE_STARTED_STA_WAIT_PAYMENTS 16
+#define PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS 17
+
 #define PIGGYMODE_STARTED_STA_CHECKUPDATE 11
 #define PIGGYMODE_FAILED_STA 3       // failed to connect to station => show warning and how to trigger config mode and go to sleep
 #define PIGGYMODE_STARTING_AP 4      // attempt to start AP + webserver and then go to started-ap

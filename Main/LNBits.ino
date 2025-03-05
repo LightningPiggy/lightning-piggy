@@ -1,8 +1,5 @@
 #include "Constants.h"
 
-String lnurlPayments[MAX_PAYMENTS];
-int nroflnurlPayments = 0;
-
 String cachedLNURLp = "";
 
 bool canUseLNBits() {
@@ -70,16 +67,13 @@ void fetchLNURLPayments(int limit) {
   }
 
   Serial.println("Displaying payment amounts and comments...");
-  nroflnurlPayments = 0;
   for (JsonObject areaElems : doc.as<JsonArray>()) {
     String paymentDetail = paymentJsonToString(areaElems);
-    if (paymentDetail.length() > 0 && nroflnurlPayments<MAX_PAYMENTS) {
-      lnurlPayments[nroflnurlPayments] = paymentDetail;
-      nroflnurlPayments++;
+    if (paymentDetail.length() > 0 && getNrOfPayments()<MAX_PAYMENTS) {
+      appendPayment(paymentDetail);
     }
   }
-
-  Serial.println("After parsing LNURL payments, the list contains:" + stringArrayToString(lnurlPayments, nroflnurlPayments));
+  setFetchedPaymentsDone(true);
 }
 
 
@@ -94,7 +88,7 @@ String getLNURLp() {
   Serial.println("Mocking getLNURLp:"); return "LNURL1DP68GURN8GHJ7MR9VAJKUEPWD3HXY6T5WVHXXMMD9AKXUATJD3CZ7DTRWE2NVKQ72L5D3";
   #endif
 
-  // Only fetch the first one using the API if no fixed lnurlPayments was configured
+  // Only fetch the first one using the API if staticLNURLp was configured
   if (isConfigured(staticLNURLp))
     return staticLNURLp;
 
@@ -127,31 +121,4 @@ String getLNURLp() {
   Serial.println("Fetched LNURLp: " + lnurlp);
   cachedLNURLp = lnurlp;
   return lnurlp;
-}
-
-void addLNURLpayment(String toadd) {
-  // First move them all down one spot
-  // This uses min(nroflnurlPayments,MAX_PAYMENTS-1) because:
-  // - if nroflnurlPayments == 0 then lastSpot = 0 (because the new one will be at index 0 only)
-  // - if nroflnurlPayments == 1 then lastSpot = 1 (because the new one will be at index 0 and the old one at index 1)
-  // ...
-  // - if nroflnurlPayments == 8 then lastSpot = 8
-  // - if nroflnurlPayments == 9 then lastSpot = 9
-  // - if nroflnurlPayments == 10 then lastSpot = 9 (because the new one will be at index 0 and the old ones at 1-9 and the last one will be dropped)
-  // - if nroflnurlPayments == 11 then lastSpot = 9 (because the new one will be at index 0 and the old ones at 1-9 and the last 2 will be dropped)
-  for (int i=min(nroflnurlPayments,MAX_PAYMENTS-1);i>0;i--) {
-    Serial.println("Moving payment comment for item " + String(i-1) + " to item " + String(i));
-    lnurlPayments[i] = lnurlPayments[i-1];
-  }
-  lnurlPayments[0] = toadd;
-  if (nroflnurlPayments<MAX_PAYMENTS) nroflnurlPayments++;
-  Serial.println("After adding LNURL payment, the list contains:" + stringArrayToString(lnurlPayments, nroflnurlPayments));
-}
-
-int getNroflnurlPayments() {
-  return nroflnurlPayments;
-}
-
-String getLnurlPayment(int item) {
-  return lnurlPayments[item];
 }

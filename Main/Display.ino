@@ -467,16 +467,7 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
   displayDrawImage(logo, posX, posY, sizeX, sizeY, false);
 }
 
-void receivedWalletBalance(int currentBalance) {
-  if (currentBalance != lastBalance) {
-    lastBalance = currentBalance;
-    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
-  } else {
-    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, false);
-  }
-}
-
-void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchPayments) {
+void drawBalance(int currentBalance) {
   int delta = 2;
   if (displayToUse == 2) delta = 0; // on the 2.66 we don't need this delta
 
@@ -493,32 +484,26 @@ void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchP
   } while (displayNextPage());
 
   startPaymentsHeight = balanceHeight+1+delta;
-  // Fetch payment amounts and comments
-  if (fetchPayments) fetchPaymentsAsync(MAX_PAYMENTS); // should this be moved this to main state machine?
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
 }
 
-void receivedPayments() {
-  Serial.println("Done receiving payments, displaying payment amounts and comments...");
-  int maxYforLNURLPayments = displayHeight();
-  if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
-  displayPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, startPaymentsHeight, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...
-}
+void displayPayments() {
+  int maxX = xBeforeLNURLp - 5;
+  int maxY = displayHeight();
+  if (isConfigured(btcPriceCurrencyChar)) maxY = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
 
-/**
- * @brief Get recent LNURL Payments
- *
- * @param limit
- */
-void displayPayments(int limit, int maxX, int startY, int maxY) {
+  int startY = startPaymentsHeight;
+
   int marginAtBottom = 8;
-  setPartialWindow(0, startY, maxX, maxY);
+  int w = maxX - 0;
+  int h = maxY - startY;
+  setPartialWindow(0, startY, w, h);
   displayFirstPage();
   do {
     int yPos = startY;
-    for (int i=0;i<min(getNrofPayments(),limit) && yPos+marginAtBottom < maxY;i++) {
+    for (int i=0;i<min(getNrOfPayments(),MAX_PAYMENTS) && yPos+marginAtBottom < maxY;i++) {
       Serial.println("Displaying payment: " + getPayment(i));
       yPos = displayFit(getPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
     }
@@ -688,8 +673,7 @@ void showLNURLpQR(String qrData) {
   int qrPosY = 0;
   Serial.println("qrSideSize = " + String(qrSideSize) + " and qrPosX,qrPosY = " + String(qrPosX) + "," + String(qrPosY));
 
-  //display.setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
-  setPartialWindow(0, 0, displayWidth(), displayHeight()); // this is the first thing that gets displayed so blank the entire screen
+  setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
   displayFirstPage();
   do {
     for (uint8_t y = 0; y < qrcoded.size; y++)
@@ -709,15 +693,9 @@ void showLNURLpQR(String qrData) {
   //return qrPosX;  // returns 192 on 250px wide display
 }
 
-
-void nextRefreshBalanceAndPayments() {
-  forceRefreshBalanceAndPayments = true;
-}
-
 void setNextRefreshBalanceAndPayments(bool value) {
   forceRefreshBalanceAndPayments = value;
 }
-
 
 bool getForceRefreshBalanceAndPayments() {
   return forceRefreshBalanceAndPayments;
