@@ -105,7 +105,7 @@
       ["config_lnbits_host", "LNBits Server Domain Name (without https://)", "The server on which you've created an LNBits wallet. Example: demo.lnpiggy.com or your own server's domain name. DO NOT put https:// - only the domain name!"],
       ["config_lnbits_https_port", "LNBits HTTPS Port", "If LNBits is not on the default port 443, specify here."],
       ["config_lnbits_invoice_key", "LNBits Invoice/Read Key", "Copy-paste the invoice/read key from your LNBits wallet."],
-      ["config_static_receive_code", "LNBits Static Receive Code", "This can be LNURL1... or a Lightning Address (like oink@demo.lnpiggy.com). If empty, it will be fetched from the LNBits backend, which is a bit slower."],
+      ["config_static_receive_code", "Lightning Address or LNURL-pay code (to receive sats)", "Like oink@demo.lnpiggy.com or LNURL1... from the LNBits 'Pay Links' extension."],
       ["config_fiat_currency", "Fiat Currency", "Example: USD, EUR, DKK, etc. Leave empty to hide fiat amounts."],
       ["config_balance_bias", "Balance Bias", "Satoshis to add (or subtract if negative) to adjust your balance."],
       ["config_thousands_separator", "Thousands Separator", "Example: . or , or a space. Leave empty to use locale default."],
@@ -118,7 +118,7 @@
       ["config_update_host", "Update Server", "Server to check for updates. Defaults to m.lightningpiggy.com"],
       ["config_time_server", "Time Server", "The time server to fetch time before going to sleep. Defaults to timeapi.io"],
       ["config_time_server_path", "Time Server Path", "Path to append to the time server. Defaults to /api/time/current/zone?timeZone="],
-      ["config_nwc_url", "Nostr Wallet Connect String", "Example: nostr+walletconnect://69effe...60d9?relay=wss://relay.getalby.com/v1&secret=be42...c007" ]
+      ["config_nwc_url", "Nostr Wallet Connect String", "NWC URL like: nostr+walletconnect://69effe...60d9?relay=wss://relay.getalby.com/v1&secret=be42...c007" ]
     ];
 
     // We want LNBits HTTPS Port & Balance Bias to be integers
@@ -283,6 +283,13 @@
           fieldDiv.appendChild(errorEl);
 
           section.appendChild(fieldDiv);
+
+          if (name == "config_nwc_url") { // After NWC, add the word "OR"
+            const orDiv = document.createElement("div");
+            orDiv.className = "text-3xl font-bold";
+            orDiv.innerHTML = "OR";
+            section.appendChild(orDiv);
+          }
         });
 
         card.appendChild(section);
