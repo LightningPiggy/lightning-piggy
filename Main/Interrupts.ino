@@ -85,10 +85,12 @@ void loop_interrupts() {
       }
     }
   } else { // button not pressed
+    // Check if it was a short press
     long pressDuration = millis() - pressStartTime;
     if (pressStartTime > 0 && pressDuration < HOLD_TIME) {
       Serial.println("Handling short button press");
-      moveOnAfterSleepBootSlogan();
+      setNextRefreshBalanceAndPayments(true); // same as tilt sensor causing a refresh
+      moveOnAfterSleepBootSlogan(); // or if sleeping after boot slogan: move on
     } 
     pressStartTime = 0;  // Reset timer when the button is released
   }
