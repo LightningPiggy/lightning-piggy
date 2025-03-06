@@ -1,3 +1,7 @@
+**5.1.0**
+- Add support for Nostr Wallet Connect (NWC)
+- Do full wifi scan and select the Access Point with the strongest signal
+
 **5.0.7**
 - Improve configuration page help text
 - Configuration page: add GMT offsets to timezones
