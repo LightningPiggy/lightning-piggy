@@ -60,7 +60,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define AWAKE_SECONDS_AFTER_MANUAL_WAKEUP 3*60
 #define AWAKE_SECONDS_AS_ACCESS_POINT 5*60
 
-#define CHECK_UPDATE_PERIOD_SECONDS 7*24*60*60 // every week
+#define CHECK_UPDATE_PERIOD_SECONDS 24*60*60 // every 24 hours
 
 #define NWC_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 // NWC doesn't have notifications so update regularly
 #define LNBITS_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // LNBits should have websockets so these manual updates are only a fallback
