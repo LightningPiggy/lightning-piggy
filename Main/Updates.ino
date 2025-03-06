@@ -27,10 +27,10 @@ bool isUpdateAvailable() {
 
 void checkShowUpdateAvailable() {
   if (lastChecked == NOT_SPECIFIED || (millis()-lastChecked > CHECK_UPDATE_PERIOD_SECONDS*1000)) {
+    lastChecked = millis();
     newVersion = checkNewVersion();
     Serial.println("checkNewVersion returned: '" + newVersion + "' of length: " + String(newVersion.length()));
     if (newVersion != "") {
-      lastChecked = millis();
       if (isUpdateAvailable()) {
         Serial.println("Update available!");
         displayStatus(false);
