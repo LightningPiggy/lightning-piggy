@@ -9,7 +9,7 @@
 //
 #include "qrcoded.h"
 
-#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
+//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
 
 // base class GxEPD2_GFX can be used to pass references or pointers to the display instance as parameter, uses ~1.2k more code
 // enable or disable GxEPD2_GFX base class
@@ -471,6 +471,7 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
 
 void drawBalance(int currentBalance) {
   int marginBelowBalance = 2;
+  if (displayToUse == 2) marginBelowBalance = 0;
   startPaymentsHeight = balanceHeight+1+marginBelowBalance;
 
   // Display balance from 0 to balanceHeight
