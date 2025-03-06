@@ -31,7 +31,7 @@ long lastUpdatedBalance = -LNBITS_UPDATE_BALANCE_PERIOD_MILLIS;  // this makes i
 long apstart_time  = 0;
 long lastHeap = 0;
 
-int previousPiggyMode = 0;
+int previousPiggyMode = NOT_SPECIFIED;
 int piggyMode = PIGGYMODE_INIT;
 
 char* ssid = NULL;
@@ -120,6 +120,7 @@ void loop() {
         // Show IP address
         displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
+        fastClearScreen(); // otherwise the logo or boot slogan will stay there until overwritten
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
         if (walletToUse() == WALLET_NWC) setup_nwc();
       } else {
@@ -127,7 +128,6 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
-
     // For both: refresh if getForceRefreshBalanceAndPayments()
     // For LNbits: refresh sporadically
     // For NWC: refresh regularly (because there's no push notifications)
@@ -144,16 +144,28 @@ void loop() {
       hibernateDependingOnBattery(); // go to sleep if that's necessary
       // otherwise stay in this piggyMode
     }
-
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
       showLNURLpQR(getLNURLp());
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_STATUS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_STATUS) {
       displayStatus(false);  // takes ~2000ms, which is too much to do with the websocket
-      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS;
-  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_BALANCE_PAYMENTS) {
+      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_BALANCE;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_BALANCE) {
       getWalletBalanceAsync();
-      piggyMode = PIGGYMODE_STARTED_STA_CHECKUPDATE;
+      piggyMode = PIGGYMODE_STARTED_STA_WAIT_BALANCE;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_WAIT_BALANCE) {
+    if (getBalanceDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_BALANCE) {
+    drawBalance(getBalance());
+    piggyMode = balanceChanged() ? PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS : PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS) {
+    fetchPaymentsAsync();
+    piggyMode = PIGGYMODE_STARTED_STA_WAIT_PAYMENTS;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_WAIT_PAYMENTS) {
+    if (fetchedPaymentsDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+  } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS) {
+    displayPayments();
+    piggyMode = PIGGYMODE_STARTED_STA_CHECKUPDATE;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_CHECKUPDATE) {
       checkShowUpdateAvailable();
       piggyMode = PIGGYMODE_STARTED_STA; // go back to idling on websocket
@@ -197,6 +209,8 @@ void loop() {
 
 
 void moveOnAfterSleepBootSlogan() {
+  if (piggyMode != PIGGYMODE_SLEEP_BOOTSLOGAN) return; // only move on after sleep boot slogan
+
   if (hasMinimalConfig()) {
     piggyMode = PIGGYMODE_STARTING_STA;
   } else {

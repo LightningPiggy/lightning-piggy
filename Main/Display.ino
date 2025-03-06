@@ -36,6 +36,8 @@ public:
     }
 
     void setPartialWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+      fillRect(x,y,w,h,GxEPD_BLACK);
+      delay(750);
       fillRect(x,y,w,h,GxEPD_WHITE);
     }
 
@@ -101,6 +103,8 @@ int statusAreaVoltageHeight = -1; // this value is cached after it's calculated 
 
 int blackBackgroundVerticalMargin=2;
 int blackBackgroundHorizontalMargin=2;
+
+int marginFromQRcode = 5; // margin between balance and QR Code
 
 String lines[MAX_TEXT_LINES];
 int nroflines = 0;
@@ -174,7 +178,9 @@ void setup_display() {
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
 
   balanceHeight = roundEight(displayHeight()/5)-1;  // 0,23 inclusive is 24 pixels height.
+  Serial.println("calculated balanceHeight: " + String(balanceHeight));
   fiatHeight = roundEight((displayHeight()*4)/5);
+  Serial.println("calculated fiatHeight: " + String(fiatHeight));
 }
 
 int getDisplayToUse() {
@@ -182,6 +188,7 @@ int getDisplayToUse() {
 }
 
 void setPartialWindow(int x, int y, int h, int w) {
+  Serial.println("setPartialWindow(x,y,h,w) = setPartialWindow(" + String(x) + "," + String(y) + "," + String(h) + "," + String(w) + ")");
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
     display1.setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
@@ -462,61 +469,46 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
   displayDrawImage(logo, posX, posY, sizeX, sizeY, false);
 }
 
-void receivedWalletBalance(int currentBalance) {
-  if (currentBalance != lastBalance) {
-    lastBalance = currentBalance;
-    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, true);
-  } else {
-    updateBalanceAndPayments(xBeforeLNURLp, currentBalance, false);
-  }
-}
-
-void updateBalanceAndPayments(int xBeforeLNURLp, int currentBalance, bool fetchPayments) {
-  int delta = 2;
-  if (displayToUse == 2) delta = 0; // on the 2.66 we don't need this delta
+void drawBalance(int currentBalance) {
+  int marginBelowBalance = 2;
+  if (displayToUse == 2) marginBelowBalance = 0;
+  startPaymentsHeight = balanceHeight+1+marginBelowBalance;
 
   // Display balance from 0 to balanceHeight
-  setPartialWindow(0, 0, xBeforeLNURLp, balanceHeight+3);
+  setPartialWindow(0, 0, xBeforeLNURLp, startPaymentsHeight);
   displayFirstPage();
   do {
     if (currentBalance == NOT_SPECIFIED) {
-      displayFit("Unknown Balance", 0, 0, xBeforeLNURLp-5, balanceHeight-1+delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
+      displayFit("Unknown Balance", 0, 0, xBeforeLNURLp-marginFromQRcode, balanceHeight-1+marginBelowBalance, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
     } else {
-      displayFit(formatIntWithSeparator(currentBalance) + " sats", 0, 0, xBeforeLNURLp-5, balanceHeight-1+delta, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
+      displayFit(formatIntWithSeparator(currentBalance) + " sats", 0, 0, xBeforeLNURLp-marginFromQRcode, balanceHeight-1+marginBelowBalance, 5, false, false, false); // no fontdecent so all the way down to balanceHeight-1
     }
-    displayFillRect(0, balanceHeight+delta, xBeforeLNURLp-5, 1, GxEPD_BLACK);
+    displayFillRect(0, balanceHeight+marginBelowBalance, xBeforeLNURLp-marginFromQRcode, 1, GxEPD_BLACK); // black line
+    displayFillRect(xBeforeLNURLp-marginFromQRcode, 0, marginFromQRcode, startPaymentsHeight, GxEPD_WHITE); // white margin between balance and QR code
   } while (displayNextPage());
-
-  startPaymentsHeight = balanceHeight+1+delta;
-  // Fetch payment amounts and comments
-  if (fetchPayments) fetchPaymentsAsync(MAX_PAYMENTS); // should this be moved this to main state machine?
 
   // Display fiat values
   showFiatValues(currentBalance, xBeforeLNURLp);
 }
 
-void receivedPayments() {
-  Serial.println("Done receiving payments, displaying payment amounts and comments...");
-  int maxYforLNURLPayments = displayHeight();
-  if (isConfigured(btcPriceCurrencyChar)) maxYforLNURLPayments = fiatHeight; // leave room for fiat values at the bottom (fontsize 2 = 18 + 2 extra for the black background)
-  displayPayments(MAX_PAYMENTS, xBeforeLNURLp - 5, startPaymentsHeight, maxYforLNURLPayments); //balanceHeight+2 erases the line below the balance...
-}
+void displayPayments() {
+  int maxX = xBeforeLNURLp - marginFromQRcode;
+  int maxY = isConfigured(btcPriceCurrencyChar) ? fiatHeight : displayHeight();
 
-/**
- * @brief Get recent LNURL Payments
- *
- * @param limit
- */
-void displayPayments(int limit, int maxX, int startY, int maxY) {
+  int startY = startPaymentsHeight;
+
   int marginAtBottom = 8;
-  setPartialWindow(0, startY, maxX, maxY);
+  int w = maxX - 0;
+  int h = maxY - startY;
+  setPartialWindow(0, startY, w, h);
   displayFirstPage();
   do {
     int yPos = startY;
-    for (int i=0;i<min(getNrofPayments(),limit) && yPos+marginAtBottom < maxY;i++) {
+    for (int i=0;i<min(getNrOfPayments(),MAX_PAYMENTS) && yPos+marginAtBottom < maxY;i++) {
       Serial.println("Displaying payment: " + getPayment(i));
       yPos = displayFit(getPayment(i), 0, yPos, maxX, maxY, 3, false, false, false);
     }
+    displayFillRect(maxX, startY, marginFromQRcode, h, GxEPD_WHITE); // margin between balance and QR code
   } while (displayNextPage());
 }
 
@@ -661,10 +653,6 @@ bool doneWaitingForBootSlogan() {
   return (millis() > waitForSloganReadUntil);
 }
 
-
-/*
- * returns: x value before QR code
- */
 void showLNURLpQR(String qrData) {
   if (qrData.length() < 1 || qrData == "null") {
     Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
@@ -687,8 +675,7 @@ void showLNURLpQR(String qrData) {
   int qrPosY = 0;
   Serial.println("qrSideSize = " + String(qrSideSize) + " and qrPosX,qrPosY = " + String(qrPosX) + "," + String(qrPosY));
 
-  //display.setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
-  setPartialWindow(0, 0, displayWidth(), displayHeight()); // this is the first thing that gets displayed so blank the entire screen
+  setPartialWindow(qrPosX, qrPosY, qrSideSize, qrSideSize);
   displayFirstPage();
   do {
     for (uint8_t y = 0; y < qrcoded.size; y++)
@@ -708,15 +695,9 @@ void showLNURLpQR(String qrData) {
   //return qrPosX;  // returns 192 on 250px wide display
 }
 
-
-void nextRefreshBalanceAndPayments() {
-  forceRefreshBalanceAndPayments = true;
-}
-
 void setNextRefreshBalanceAndPayments(bool value) {
   forceRefreshBalanceAndPayments = value;
 }
-
 
 bool getForceRefreshBalanceAndPayments() {
   return forceRefreshBalanceAndPayments;

@@ -72,7 +72,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
       details = "Obtained IP address: " + ipToString(WiFi.localIP());
   } else if (eventid == ARDUINO_EVENT_WIFI_STA_CONNECTED) {
     Serial.println("Got ARDUINO_EVENT_WIFI_STA_CONNECTED; flagging balance and payments for refresh to clear any error messages that might linger on the display.");
-    nextRefreshBalanceAndPayments();
+    setNextRefreshBalanceAndPayments(true);
   }
 
   Serial.println(details);
@@ -97,6 +97,8 @@ bool connectWifiAsync() {
   wifiStartTime = millis();
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
+  WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // make sure to scan all channels...
+  WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // ...and select the Access Point with the strongest signal
   WiFi.begin(ssid, password);
   return true;
 }
@@ -278,7 +280,7 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 }
 
 void connectWebsocket() {
-  disconnectWebsocket(); // make sure it's disconnected
+  if (isWebsocketConnected()) return; // already connected
   if (!wifiConnected()) {
     Serial.println("Not connecting websocket because wifi is not connected.");
     return;
@@ -317,8 +319,9 @@ void parseWebsocketText(String text) {
     resetLastPaymentReceivedMillis();
     String paymentDetail = paymentJsonToString(doc["payment"].as<JsonObject>());
     Serial.println("Websocket update with paymentDetail: " + paymentDetail);
-    addLNURLpayment(paymentDetail);
-    updateBalanceAndPayments(xBeforeLNURLp, walletBalance+balanceBiasInt, false);
+    prependPayment(paymentDetail);
+    setBalance(walletBalance+balanceBiasInt);
+    piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
   } else {
     Serial.println("Websocket update did not contain payment, ignoring...");
   }
