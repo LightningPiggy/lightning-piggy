@@ -1,0 +1,13 @@
+docs/html
+docs/xml_output
+venv
+.pio
+.vscode
+docs
+bin
+pvenv
+src/nano
+examples/ArduinoUIP*
+arduinouip
+examples/NANO*
+wokwi/nano*
