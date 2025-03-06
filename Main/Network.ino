@@ -97,6 +97,8 @@ bool connectWifiAsync() {
   wifiStartTime = millis();
   WiFi.onEvent(wifiEventCallback);
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
+  WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // make sure to scan all channels...
+  WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // ...and select the Access Point with the strongest signal
   WiFi.begin(ssid, password);
   return true;
 }
