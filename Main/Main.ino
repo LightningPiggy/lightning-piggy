@@ -157,11 +157,7 @@ void loop() {
     if (getBalanceDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_BALANCE) {
     drawBalance(getBalance());
-    if (balanceChanged()) {
-      piggyMode = PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS;
-    } else {
-      piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
-    }
+    piggyMode = balanceChanged() ? PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS : PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS) {
     fetchPaymentsAsync();
     piggyMode = PIGGYMODE_STARTED_STA_WAIT_PAYMENTS;
