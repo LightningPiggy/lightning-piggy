@@ -1,14 +1,12 @@
-**5.1.0**
+**6.0.0**
 - Add support for Nostr Wallet Connect (NWC)
-- Do full wifi scan and select the Access Point with the strongest signal
-- Short press on General Purpose (IO39) button refreshes the balance
-
-**5.0.7**
+- Add NWC URL to configuration page
 - Improve configuration page help text
-- Configuration page: add GMT offsets to timezones
+- Add GMT offsets to timezones in configuration page for clarity
 - Show IP address after connection to access point as client
-- Only refresh display when tilt sensor is triggered in idle mode while waiting for payments
-- Short press on General Purpose (IO39) button skips the wait during the logo/boot slogan display
+- Short press on General Purpose (IO39) button refreshes the balance (like tilt sensor)
+- Short press on General Purpose (IO39) button skips the wait during the logo/boot wisdom display
+- Do full wifi scan and select the Access Point with the strongest signal
 
 **5.0.6**
 - Fix QR encoding of lightning addresses (like oink@demo.lnpiggy.com)
