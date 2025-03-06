@@ -120,7 +120,7 @@ void loop() {
         // Show IP address
         displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
-        fastClearScreen(); // otherwise the logo or boot slogan will stay there until overwritten
+        fastClearScreen(); // clear screen, otherwise the logo or boot slogan will stay there until overwritten
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
         if (walletToUse() == WALLET_NWC) setup_nwc();
       } else {
@@ -142,7 +142,6 @@ void loop() {
     } else {
       if (walletToUse() == WALLET_LNBITS) connectWebsocket();
       hibernateDependingOnBattery(); // go to sleep if that's necessary
-      // otherwise stay in this piggyMode
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
       showLNURLpQR(getLNURLp());
