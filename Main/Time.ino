@@ -1,3 +1,5 @@
+#include "../timezones/timezones.h"
+
 String lastTime = "";
 
 String getTimeFromNTP() {
@@ -78,4 +80,34 @@ String getDayOfWeekString(int dayOfWeek) {
   } else {
      return enWeekdays[dayOfWeek];
   }
+}
+
+// Function to find POSIX TZ string in PROGMEM
+const char* getPosixTZ(const char* city) {
+    for (int i = 0; i < TIMEZONE_COUNT; i++) {
+        char cityBuffer[50], tzBuffer[50];
+        strcpy_P(cityBuffer, (PGM_P)pgm_read_ptr(&(timeZoneMap[i].city)));
+        strcpy_P(tzBuffer, (PGM_P)pgm_read_ptr(&(timeZoneMap[i].posixTZ)));
+
+        if (strcmp(cityBuffer, city) == 0) {
+            return strdup(tzBuffer);  // Return a copy since PROGMEM is read-only
+        }
+    }
+    return "GMT0"; // Default fallback
+}
+
+void setTimeZone(const char* city) {
+    const char* posixTZ = getPosixTZ(city);
+    Serial.printf("Setting Timezone: %s -> %s\n", city, posixTZ);
+    setenv("TZ", posixTZ, 1);
+    tzset();
+}
+
+void printLocalTime() {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        Serial.println("Failed to obtain time");
+        return;
+    }
+    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }

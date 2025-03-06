@@ -6,9 +6,14 @@ trash/
 Main/config.h_*
 
 config_partition/config.json
+config_partition/config.json_*
 
+# Generated files:
+##################
 webconfig/index.html.gzip.h
 webconfig/index_inlined.html
 webconfig/tailwind_output.css
+webconfig/server.log
+webconfig/config.json
 
-
+timezones/timezones.h
