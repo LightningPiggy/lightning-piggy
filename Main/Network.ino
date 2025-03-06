@@ -280,7 +280,7 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 }
 
 void connectWebsocket() {
-  disconnectWebsocket(); // make sure it's disconnected
+  if (isWebsocketConnected()) return; // already connected
   if (!wifiConnected()) {
     Serial.println("Not connecting websocket because wifi is not connected.");
     return;
