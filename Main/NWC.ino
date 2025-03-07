@@ -27,6 +27,27 @@ bool canUseNWC() {
   return isConfigured(nwcURL);
 }
 
+String extractPlainTextFromTransactionDescription(const String &input) {
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, input);
+
+    if (!error && doc.is<JsonArray>()) {
+        JsonArray outerArray = doc.as<JsonArray>();
+        for (JsonVariant rowVariant : outerArray) {
+            if (rowVariant.is<JsonArray>()) {
+                JsonArray row = rowVariant.as<JsonArray>();
+                for (size_t i = 0; i < row.size(); i++) {
+                    if (row[i].as<String>() == "text/plain" && i + 1 < row.size()) {
+                        return row[i + 1].as<String>();
+                    }
+                }
+            }
+        }
+    }
+    return input; // Return the original input if it's not valid JSON or no "text/plain" found
+}
+
+
 void getNextTransaction() {
   Serial.println("Doing listTransactions for maxtime " + String(maxtime) + ":");
 
@@ -49,7 +70,7 @@ void getNextTransaction() {
 
           String paymentDetail = paymentAmount + " " + units;
 
-          String paymentComment(transaction.description);
+          String paymentComment(extractPlainTextFromTransactionDescription(transaction.description));
           if (paymentComment.length() == 0) {
             paymentDetail += "!";
           } else {
