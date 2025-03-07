@@ -1,7 +1,8 @@
 **6.0.1**
-- Rate-limit fiat price fetching to 15 minutes
 - NWC: add support for JSON-format payment descriptions (like coinos.io does it)
+- Rate-limit fiat price fetching to 15 minutes
 - Increase maximal configuration string length from 131 to 256 for long LNURLs
+- Configuration page: order timezones alphabetically instead of by GMT offset
 
 **6.0.0**
 - Add support for Nostr Wallet Connect (NWC)
