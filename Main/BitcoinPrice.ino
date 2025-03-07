@@ -1,13 +1,24 @@
 #include <ArduinoJson.h>
 #include "Constants.h"
 
+long lastFetchedPrice = -FETCH_FIAT_BALANCE_PERIOD_MS;
+
+float lastBtcPrice = NOT_SPECIFIED;
+
 // https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd
 // returns: {"bitcoin":{"myr":429094}}
 // returns: {"bitcoin":{"usd":96474}}
 float getBitcoinPriceCoingecko() {
   String btcPriceCurrency = String(btcPriceCurrencyChar);
   btcPriceCurrency.toLowerCase();
-  Serial.println("Getting Bitcoin price from coingecko...");
+
+  if (lastBtcPrice != NOT_SPECIFIED && millis() - lastFetchedPrice < FETCH_FIAT_BALANCE_PERIOD_MS) {
+    Serial.println("Fiat price was fetched recently, returning cached value.");
+    return lastBtcPrice;
+  } else {
+    lastFetchedPrice = millis();
+    Serial.println("Getting Bitcoin price from coingecko...");
+  }
 
   #ifdef DEBUG
   Serial.println("Mocking getBitcoinPrice:"); return 30000.2;
@@ -27,18 +38,18 @@ float getBitcoinPriceCoingecko() {
   }
 
   Serial.println("Extracting bitcoin price from received data");
+  lastBtcPrice = doc["bitcoin"][btcPriceCurrency];
 
-  float btcPrice = doc["bitcoin"][btcPriceCurrency];
-
-  if (btcPrice == 0.0) {
+  if (lastBtcPrice == 0.0) {
     Serial.println("BTC Price not found, returning NOT_SPECIFIED");
     return (float)NOT_SPECIFIED;
   }
 
-  Serial.println("BTC Price: " + String(btcPrice, 0));
-  return btcPrice;
+  Serial.println("BTC Price: " + String(lastBtcPrice, 0));
+  return lastBtcPrice;
 }
 
+/* Unused because API was broken:
 float getBitcoinPriceCoindesk() {
   String btcPriceCurrency = String(btcPriceCurrencyChar);
   btcPriceCurrency.toUpperCase();
@@ -73,3 +84,4 @@ float getBitcoinPriceCoindesk() {
   Serial.println("BTC Price: " + String(btcPrice, 0));
   return btcPrice;
 }
+*/

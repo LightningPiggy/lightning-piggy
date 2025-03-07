@@ -62,6 +62,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define CHECK_UPDATE_PERIOD_SECONDS 24*60*60 // every 24 hours
 
+#define FETCH_FIAT_BALANCE_PERIOD_MS 15*60*1000 // every 15 minutes
+
 #define NWC_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 // NWC doesn't have notifications so update regularly
 #define LNBITS_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // LNBits should have websockets so these manual updates are only a fallback
 

@@ -1,3 +1,7 @@
+**6.0.1**
+- Rate-limit fiat price fetching to 15 minutes
+- NWC: add support for JSON-format payment descriptions (like coinos.io does it)
+
 **6.0.0**
 - Add support for Nostr Wallet Connect (NWC)
 - Add NWC URL to configuration page
