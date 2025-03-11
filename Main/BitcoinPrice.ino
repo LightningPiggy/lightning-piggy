@@ -9,6 +9,10 @@ float lastBtcPrice = NOT_SPECIFIED;
 // returns: {"bitcoin":{"myr":429094}}
 // returns: {"bitcoin":{"usd":96474}}
 float getBitcoinPriceCoingecko() {
+  #ifdef DEBUG
+  return 60456;
+  #endif
+
   String btcPriceCurrency = String(btcPriceCurrencyChar);
   btcPriceCurrency.toLowerCase();
 

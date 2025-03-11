@@ -83,6 +83,7 @@ void setup() {
 
 
 void loop() {
+  delay(10); // allow other tasks to run
   feed_watchdog(); // Feed the watchdog regularly, otherwise it will "bark" (= reboot the device)
   loop_interrupts(); // handle keypress
 
@@ -144,7 +145,7 @@ void loop() {
       hibernateDependingOnBattery(); // go to sleep if that's necessary
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
-      showLNURLpQR(getLNURLp());
+      displayLNURLpQR(getLNURLp());
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_STATUS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_STATUS) {
       displayStatus(false);  // takes ~2000ms, which is too much to do with the websocket
@@ -155,7 +156,7 @@ void loop() {
   } else if (piggyMode == PIGGYMODE_STARTED_STA_WAIT_BALANCE) {
     if (getBalanceDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_BALANCE) {
-    drawBalance(getBalance());
+    displayBalance(getBalance());
     piggyMode = balanceChanged() ? PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS : PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS) {
     fetchPaymentsAsync();

@@ -469,7 +469,7 @@ void showLogo(const unsigned char logo [], int sizeX, int sizeY, int posX, int p
   displayDrawImage(logo, posX, posY, sizeX, sizeY, false);
 }
 
-void drawBalance(int currentBalance) {
+void displayBalance(int currentBalance) {
   int marginBelowBalance = 2;
   if (displayToUse == 2) marginBelowBalance = 0;
   startPaymentsHeight = balanceHeight+1+marginBelowBalance;
@@ -590,41 +590,22 @@ void showFiatValues(int balance, int maxX) {
   if (!isConfigured(btcPriceCurrencyChar)) {
     Serial.println("Not showing fiat values because no fiat currency is configured.");
     return;
+  } else if (balance == NOT_SPECIFIED) {
+    Serial.println("Not showing fiat balance because couldn't find Bitcoin balance.");
+    return;
   }
 
-  #ifdef DEBUG
-  float btcPrice = 60456;
-  #else
   float btcPrice = getBitcoinPriceCoingecko();
-  #endif
-
   if (btcPrice == NOT_SPECIFIED) {
     Serial.println("Not showing fiat values because couldn't find Bitcoin price.");
     return;
   }
 
-  String toDisplay = "";
-
   // Try to add the fiat balance
-  if (balance == NOT_SPECIFIED) {
-    Serial.println("Not showing fiat balance because couldn't find Bitcoin balance.");
-  } else {
-    float balanceValue = btcPrice / 100000000 * balance;
-    if (prependCurrencySymbol()) {
-      toDisplay += getCurrentCurrencyCode() + " " + floatToString(balanceValue, 2);
-    } else {
-      toDisplay += floatToString(balanceValue, 2) + " " + getCurrentCurrencyCode();
-    }
-    Serial.println("balanceValue: " + toDisplay + " ");
-  }
+  float balanceValue = btcPrice / 100000000 * balance;
+  String toDisplay = prependCurrencySymbol() ? getCurrentCurrencyCode() + " " + floatToString(balanceValue, 2) + " (" + getCurrentCurrencyCode() + " " + formatIntWithSeparator((int)btcPrice) + ")" : floatToString(balanceValue, 2) + " " + getCurrentCurrencyCode() + " (" + formatIntWithSeparator((int)btcPrice) + " " + getCurrentCurrencyCode() + ")";
 
-  // Add the Bitcoin price
-  if (prependCurrencySymbol()) {
-    toDisplay += " (" + getCurrentCurrencyCode() + " " + formatIntWithSeparator((int)btcPrice) + ")";
-  } else {
-    toDisplay += " (" + formatIntWithSeparator((int)btcPrice) + " " + getCurrentCurrencyCode() + ")";
-  }
-
+  Serial.println("Displaying fiat values: " + toDisplay);
   displayFit(toDisplay, 0, fiatHeight, maxX, displayHeight(), 2, true);
 }
 
@@ -653,7 +634,7 @@ bool doneWaitingForBootSlogan() {
   return (millis() > waitForSloganReadUntil);
 }
 
-void showLNURLpQR(String qrData) {
+void displayLNURLpQR(String qrData) {
   if (qrData.length() < 1 || qrData == "null") {
     Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
     xBeforeLNURLp = displayWidth();
@@ -692,7 +673,6 @@ void showLNURLpQR(String qrData) {
 
   xBeforeLNURLp = qrPosX;
   xBeforeLNURLp = displayWidth()-roundEight(displayWidth()-xBeforeLNURLp);
-  //return qrPosX;  // returns 192 on 250px wide display
 }
 
 void setNextRefreshBalanceAndPayments(bool value) {
