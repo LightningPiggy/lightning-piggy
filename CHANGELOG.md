@@ -1,5 +1,5 @@
 **6.1.0**
-- Nostr Wallet Connect: add support for NIP47 payment notifications for instant gratification; when a payment comes in, the new wallet balance(s) and list of payments are immediately displayed
+- Nostr Wallet Connect: add support for NIP47 payment notifications for instant gratification; when a payment comes in, the new wallet balance(s) and updated list of payments are immediately displayed
 - Fix issue #30 that would show "null" if no payment comment was provided (thanks for reporting, @jurjendevries !)
 
 **6.0.1**
