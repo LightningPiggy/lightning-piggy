@@ -71,7 +71,7 @@ void getNextTransaction() {
           String paymentDetail = paymentAmount + " " + units;
 
           String paymentComment(extractPlainTextFromTransactionDescription(transaction.description));
-          if (paymentComment.length() == 0) {
+          if (paymentComment.length() == 0 || paymentComment == "null") {
             paymentDetail += "!";
           } else {
             paymentDetail += ": " + paymentComment;

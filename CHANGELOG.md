@@ -1,3 +1,6 @@
+**6.0.2**
+- Fix issue #30 that would show "null" if no payment comment was provided
+
 **6.0.1**
 - NWC: add support for JSON-format payment descriptions (like coinos.io does it)
 - Rate-limit fiat price fetching to 15 minutes
