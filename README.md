@@ -90,9 +90,9 @@ To make a new release available on the web installer:
 - Update CHANGELOG.md
 - Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
 - Compile the project using Sketch > Compile.
-- Copy /tmp/arduino_build_*/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x/
-- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/3.1.1/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x/boot_app0.bin
-- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_5.x.json
+- Copy /tmp/arduino_build_*/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x/
+- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/3.1.1/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x/boot_app0.bin
+- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x.json
 - pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push  ; popd
 
 ESP32 emulation with QEMU (including WiFi!)
