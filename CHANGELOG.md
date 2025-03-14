@@ -1,8 +1,9 @@
-**6.0.2**
+**6.1.0**
+- Nostr Wallet Connect: add support for instant payment notifications while awake
 - Fix issue #30 that would show "null" if no payment comment was provided
 
 **6.0.1**
-- NWC: add support for JSON-format payment descriptions (like coinos.io does it)
+- Nostr Wallet Connect: add support for JSON-format payment descriptions (like coinos.io does it)
 - Rate-limit fiat price fetching to 15 minutes
 - Increase maximal configuration string length from 131 to 256 for long LNURLs
 - Configuration page: order timezones alphabetically instead of by GMT offset

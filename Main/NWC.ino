@@ -47,7 +47,6 @@ String extractPlainTextFromTransactionDescription(const String &input) {
     return input; // Return the original input if it's not valid JSON or no "text/plain" found
 }
 
-
 void getNextTransaction() {
   Serial.println("Doing listTransactions for maxtime " + String(maxtime) + ":");
 
@@ -60,23 +59,7 @@ void getNextTransaction() {
         for (auto transaction : resp.transactions) {
           Serial.println("=> Got transaction: " + String(transaction.amount) + " msat createdAt: " + String(transaction.createdAt) + " with description: '" + transaction.description + "'");         
           maxtime = transaction.createdAt-1;
-          // Payment always has an amount
-          long long amount = transaction.amount; // long long to support amounts above 999999000 millisats
-          long amountSmaller = amount / 1000; // millisats to sats
-
-          String paymentAmount(amountSmaller);
-          String units = "sats";
-          if (amountSmaller < 2) units = "sat";
-
-          String paymentDetail = paymentAmount + " " + units;
-
-          String paymentComment(extractPlainTextFromTransactionDescription(transaction.description));
-          if (paymentComment.length() == 0 || paymentComment == "null") {
-            paymentDetail += "!";
-          } else {
-            paymentDetail += ": " + paymentComment;
-          }
-          appendPayment(paymentDetail);
+          appendPayment(formatMillisatAndMessage(transaction.amount,extractPlainTextFromTransactionDescription(transaction.description)));
         }
     }, [](String err, String errMsg) { Serial.println("[!] listTransactions Error: " + err + " " + errMsg); });
 
@@ -134,6 +117,37 @@ void setup_nwc() {
 
   transport = nostr::esp32::ESP32Platform::getTransport();
   nwc = new nostr::NWC(transport, nwcURL);
+
+  subscribeNWC();
+}
+
+void subscribeNWC() {
+  Serial.println("Listening for payment notifications...");
+     nwc->subscribeNotifications(
+        [](nostr::NotificationResponse res) {
+            nostr::Nip47Notification notification = res.notification;
+            Serial.println("Notification Type: " + notification.notificationType);
+            Serial.println("Type: " + notification.type);
+            Serial.println("Amount: " + NostrString_fromUInt(notification.amount));
+            Serial.println("Description: " + notification.description);
+            Serial.println("Fees Paid: " + NostrString_fromUInt(notification.feesPaid));
+            Serial.println("Created At: " + NostrString_fromUInt(notification.createdAt));
+            Serial.println("Settled At: " + NostrString_fromUInt(notification.settledAt));
+
+            long long amount = notification.amount; // millisats to sats
+            if (notification.type == "outgoing") amount = -amount; // outgoing is negative, otherwise positive
+            setBalance(getConfigValueAsInt((char*)balanceBias, 0) + getBalance() + (amount/1000));
+            lastUpdatedBalance = millis();
+
+            if (amount > 0) prependPayment(formatMillisatAndMessage(amount,extractPlainTextFromTransactionDescription(notification.description))); // show only incoming payments
+
+            displayBalance(getBalance());
+            piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+        },
+        [](NostrString errorCode, NostrString errorMessage) {
+            Serial.println("Notification Error: " + errorCode + " - " + errorMessage);
+        }
+    );
 }
 
 void nwc_getBalance() {

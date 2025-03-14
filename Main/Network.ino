@@ -321,7 +321,8 @@ void parseWebsocketText(String text) {
     Serial.println("Websocket update with paymentDetail: " + paymentDetail);
     prependPayment(paymentDetail);
     setBalance(walletBalance+balanceBiasInt);
-    piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
+    displayBalance(getBalance());
+    piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
   } else {
     Serial.println("Websocket update did not contain payment, ignoring...");
   }

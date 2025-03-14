@@ -161,17 +161,11 @@ String paymentJsonToString(JsonObject areaElems) {
 
   // Payment always has an amount
   long long amount = areaElems["amount"]; // long long to support amounts above 999999000 millisats
-  long amountSmaller = amount / 1000; // millisats to sats
-
-  String paymentAmount(amountSmaller);
-  String units = "sats";
-  if (amountSmaller < 2) units = "sat";
-  String paymentDetail = paymentAmount + " " + units;
 
   const char* comment;
   if ((areaElems["extra"]["tag"] && !areaElems["extra"]["comment"]) || !areaElems["memo"]) {
     Serial.println("Payment is lnurlp without comment, or regular payment without memo.");
-    paymentDetail += "!";
+    return formatMillisatAndMessage(amount, "");
   } else {
     if(areaElems["extra"]["comment"]) {
       comment = areaElems["extra"]["comment"];
@@ -181,12 +175,25 @@ String paymentJsonToString(JsonObject areaElems) {
       comment = areaElems["memo"];
     }
     String paymentComment(comment);
-    paymentDetail += ": " + paymentComment;
+    return formatMillisatAndMessage(amount, paymentComment);
   }
-  return paymentDetail;
 }
 
 String getRandomElementFromArray(String inputArray[], int numOfSlogans) {
   int randomIndex = random(0, numOfSlogans); // Generate a random index between 0 and numOfSlogans-1
   return inputArray[randomIndex]; 
+}
+
+String formatMillisatAndMessage(long long millisat, String message) {
+  long amountSmaller = millisat / 1000; // millisats to sats
+  String paymentAmount(amountSmaller);
+  String units = "sats";
+  if (amountSmaller < 2) units = "sat";
+  String paymentDetail = paymentAmount + " " + units;
+  if (message.length() == 0 || message == "null") {
+    paymentDetail += "!";
+  } else {
+    paymentDetail += ": " + message;
+  }
+  return paymentDetail;
 }
