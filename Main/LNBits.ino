@@ -89,35 +89,28 @@ String getLNURLp() {
   #endif
 
   // Only fetch the first one using the API if staticLNURLp was configured
-  if (isConfigured(staticLNURLp))
-    return staticLNURLp;
+  if (isConfigured(staticLNURLp)) return staticLNURLp;
 
-  if (cachedLNURLp.length() > 0) {
-    return cachedLNURLp;
-  }
+  if (cachedLNURLp.length() > 0) return cachedLNURLp;
 
   if (walletToUse() != WALLET_LNBITS) {
-    Serial.println("Getting LNURLp link list...");
-  } else {
     Serial.println("WARNING: No receive code is configured and it can only be fetched for LNBits");
     return "";
   }
 
   // Get the first lnurlp
+  Serial.println("Getting LNURLp link list...");
   String lnurlpData = getEndpointData(lnbitsHost, "/lnurlp/api/v1/links?all_wallets=false", true);
-  
   Serial.println("Got lnurlpData: " + lnurlpData);
-  DynamicJsonDocument doc(8192); // the size of the list of links is unknown so don't skimp here
 
+  JsonDocument doc; // the size of the list of links is unknown so don't skimp here
   DeserializationError error = deserializeJson(doc, lnurlpData);
-  if (error)
-  {
-    Serial.print("deserializeJson() failed: ");
-    Serial.println(error.f_str());
+  if (error) {
+    Serial.print("deserializeJson() failed: "); Serial.println(error.f_str());
+    return "";
   }
-  String lnurlpId = doc[0]["id"];
-  String lnurlp = doc[0]["lnurl"];
 
+  String lnurlp = doc[0]["lnurl"];
   Serial.println("Fetched LNURLp: " + lnurlp);
   cachedLNURLp = lnurlp;
   return lnurlp;

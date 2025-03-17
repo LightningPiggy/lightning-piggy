@@ -1,3 +1,8 @@
+**6.1.1**
+- Avoid blank screen while fetching LNURLp from LNBits
+- Fix unscannable QR code in case of LNBits backend without configured static receive code
+- Don't show any QR code if no static receive code is configured and none can be fetched from wallet provider
+
 **6.1.0**
 - Nostr Wallet Connect: add support for NIP47 payment notifications for instant gratification; when a payment comes in, the new wallet balance(s) and updated list of payments are immediately displayed
 - Fix issue #30 that would show "null" if no payment comment was provided (thanks for reporting, @jurjendevries !)

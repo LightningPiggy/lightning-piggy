@@ -121,7 +121,6 @@ void loop() {
         // Show IP address
         displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
-        fastClearScreen(); // clear screen, otherwise the logo or boot slogan will stay there until overwritten
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
         if (walletToUse() == WALLET_NWC) setup_nwc();
       } else {
@@ -145,7 +144,9 @@ void loop() {
       hibernateDependingOnBattery(); // go to sleep if that's necessary
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
-      displayLNURLpQR(getLNURLp());
+      String lnurlp = getLNURLp();
+      fastClearScreen(); // clear screen, otherwise the logo or boot slogan will stay there until overwritten
+      displayLNURLpQR(lnurlp);
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_STATUS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_STATUS) {
       displayStatus(false);  // takes ~2000ms, which is too much to do with the websocket

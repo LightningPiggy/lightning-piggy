@@ -638,6 +638,7 @@ void displayLNURLpQR(String qrData) {
   if (qrData.length() < 1 || qrData == "null") {
     Serial.println("INFO: not showing LNURLp QR code because no LNURLp code was found.");
     xBeforeLNURLp = displayWidth();
+    return;
   }
   Serial.println("Building LNURLp QR code...");
 
