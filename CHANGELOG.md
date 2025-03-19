@@ -1,5 +1,5 @@
 **6.2.0**
-- Fix "Unknown Balance" that appeared after 15 minutes while on USB power
+- Fix "Unknown Balance" that appeared after 15 minutes when using LNBits
 - Improve boot salutations
 
 **6.1.1**
