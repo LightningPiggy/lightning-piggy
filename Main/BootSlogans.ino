@@ -112,7 +112,7 @@ String bitcoinSlogans_da[] = {
   "Alle har et sultent hjerte.",
   "Alle mennesker ønsker de samme grundlæggende ting af de samme grunde.",
   "Uanset hvor meget du har, vil du være lige så glad.",
-  "Having more will not make you happier.",
+  "At have mere gør dig ikke lykkeligere.",
   "Praktiser medfølelse; sæt dig selv i andres sko.",
   "Praktiser opmærksomhed; føl uden dom. Oplev med nysgerrighed.",
   "Praktiser taknemmelighed; find altid ting at være taknemmelig for.",
