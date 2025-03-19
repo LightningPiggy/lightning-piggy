@@ -88,9 +88,8 @@ TFT_eSPI_Adapter display2 = display1;
 #define MAX_DISPLAY_BUFFER_SIZE 65536ul
 #define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8))
 // Both display drivers are compiled in, and the right one is detected and used at runtime:
-//GxEPD2_BW<GxEPD2_213_B74, MAX_HEIGHT(GxEPD2_213_B74)> display1(GxEPD2_213_B74(/*CS=*/ 5, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
-GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)> display1(GxEPD2_213_BN(/*CS=*/ 5, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4));
-GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)> display2(GxEPD2_266_BN(/*CS=*/ 5, /*DC=*/ 19, /*RST=*/ 4, /*BUSY=*/ 34));
+GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)> * display1 = nullptr;
+GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)> * display2 = nullptr;
 
 #endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
@@ -156,20 +155,25 @@ void setup_display() {
 
 # else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
-  display1.init(115200, true, 2, false);
+  display1 = new GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)>(GxEPD2_213_BN(5, 17, 16, 4));
+  display1->init(115200, true, 2, false);
   long beforeTime = millis();
-  display1.clearScreen();
+  display1->clearScreen();
   Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
   if ((millis() - beforeTime) > 1500) {
     Serial.println("clearScreen took a long time so found the right display: 1!");
-    display1.setRotation(1); // display is used in landscape mode
-    u8g2Fonts.begin(display1); // connect u8g2 procedures to Adafruit GFX
+    display1->setRotation(1); // display is used in landscape mode
+    u8g2Fonts.begin(*display1); // connect u8g2 procedures to Adafruit GFX
   } else {
-    display2.init(115200, true, 2, false);
-    display2.clearScreen();
+    display1->hibernate();  // Optional: puts display in low-power state
+    delete display1;        // Deallocates the memory
+    display1 = nullptr;     // Prevents accidental reuse of freed memory
+    display2 = new GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)>(GxEPD2_266_BN(5, 19, 4, 34));
+    display2->init(115200, true, 2, false);
+    display2->clearScreen();
     displayToUse = DISPLAY_TYPE_266DEPG;
-    display2.setRotation(1); // display is used in landscape mode
-    u8g2Fonts.begin(display2); // connect u8g2 procedures to Adafruit GFX
+    display2->setRotation(1); // display is used in landscape mode
+    u8g2Fonts.begin(*display2); // connect u8g2 procedures to Adafruit GFX
   }
 
 #endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
@@ -190,9 +194,9 @@ int getDisplayToUse() {
 void setPartialWindow(int x, int y, int h, int w) {
   Serial.println("setPartialWindow(x,y,h,w) = setPartialWindow(" + String(x) + "," + String(y) + "," + String(h) + "," + String(w) + ")");
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    display1.setPartialWindow(x, y, h, w);
+    display1->setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    display2.setPartialWindow(x, y, h, w);
+    display2->setPartialWindow(x, y, h, w);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -200,9 +204,9 @@ void setPartialWindow(int x, int y, int h, int w) {
 
 void displayFirstPage() {
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    display1.firstPage();
+    display1->firstPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    display2.firstPage();
+    display2->firstPage();
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -213,9 +217,9 @@ bool displayNextPage() {
   Serial.println("_Update_Part : 775996"); // emulate the debug print by ./GxEPD2/src/epd/GxEPD2_266_BN.cpp's .refresh() which is called by libraries/GxEPD2/src/GxEPD2_BW.h +441 because setPartialWindow set _using_partial_mode
   #endif
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    return display1.nextPage();
+    return display1->nextPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    return display2.nextPage();
+    return display2->nextPage();
   }
   Serial.println("ERROR: there's no display to use detected!");
   return false;
@@ -223,9 +227,9 @@ bool displayNextPage() {
 
 void displayFillRect(int x, int y, int w, int h, int color) {
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    display1.fillRect(x,y,w,h,color);
+    display1->fillRect(x,y,w,h,color);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    display2.fillRect(x,y,w,h,color);
+    display2->fillRect(x,y,w,h,color);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -233,9 +237,9 @@ void displayFillRect(int x, int y, int w, int h, int color) {
 
 void displayDrawImage(const unsigned char logo [], int posX, int posY, int sizeX, int sizeY, bool toggle) {
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    display1.drawImage(logo, posX, posY, sizeX, sizeY, toggle);
+    display1->drawImage(logo, posX, posY, sizeX, sizeY, toggle);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    display2.drawImage(logo, posX, posY, sizeX, sizeY, toggle);
+    display2->drawImage(logo, posX, posY, sizeX, sizeY, toggle);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }

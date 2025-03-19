@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "6.1.1";
+String currentVersion = "6.2.0";
 
 /**
  * The piggy can be in different 'modes':
@@ -65,7 +65,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define FETCH_FIAT_BALANCE_PERIOD_MS 15*60*1000 // every 15 minutes
 
 #define NWC_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 5 // NWC has notifications so these manual updates are only a fallback
-#define LNBITS_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 15 // LNBits should have websockets so these manual updates are only a fallback
+#define LNBITS_UPDATE_BALANCE_PERIOD_MILLIS 1000 * 60 * 2 // LNBits should have websockets so these manual updates are only a fallback
 
 #define UPDATE_VOLTAGE_PERIOD_MILLIS 1000 * 60 * 5 // update voltage display every 5 minutes
 
