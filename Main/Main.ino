@@ -128,19 +128,15 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
-    // For both: refresh if getForceRefreshBalanceAndPayments()
-    // For LNbits: refresh sporadically
-    // For NWC: refresh regularly (because there's no push notifications)
-    // If it has been a long time since it was refreshed, then refresh it
+    // getForceRefreshBalanceAndPayments() == true or if it has been a long time: refresh it
     if (getForceRefreshBalanceAndPayments() ||
       (walletToUse() == WALLET_LNBITS && (millis() - lastUpdatedBalance) > LNBITS_UPDATE_BALANCE_PERIOD_MILLIS) ||
       (walletToUse() == WALLET_NWC && (millis() - lastUpdatedBalance) > NWC_UPDATE_BALANCE_PERIOD_MILLIS)) {
       lastUpdatedBalance = millis();
       setNextRefreshBalanceAndPayments(false);
-      if (walletToUse() == WALLET_LNBITS) disconnectWebsocket();
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE;
     } else {
-      if (walletToUse() == WALLET_LNBITS) connectWebsocket();
+      if (walletToUse() == WALLET_LNBITS) connectWebsocket(); // make sure LNBits websocket is connected
       hibernateDependingOnBattery(); // go to sleep if that's necessary
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
