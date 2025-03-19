@@ -1,3 +1,7 @@
+**6.2.0**
+- Fix "Unknown Balance" that appeared after 15 minutes while on USB power
+- Improve boot salutations
+
 **6.1.1**
 - Avoid blank screen while fetching LNURLp from LNBits
 - Fix unscannable QR code in case of LNBits backend without configured static receive code
