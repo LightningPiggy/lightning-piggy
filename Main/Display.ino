@@ -209,6 +209,9 @@ void displayFirstPage() {
 }
 
 bool displayNextPage() {
+  #ifdef EMULATE_DISPLAY_TYPE_213DEPG
+  Serial.println("_Update_Part : 775996"); // emulate the debug print by ./GxEPD2/src/epd/GxEPD2_266_BN.cpp's .refresh() which is called by libraries/GxEPD2/src/GxEPD2_BW.h +441 because setPartialWindow set _using_partial_mode
+  #endif
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
     return display1.nextPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
