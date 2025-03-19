@@ -294,9 +294,9 @@ void connectWebsocket() {
   String url = websocketApiUrl + String(lnbitsInvoiceKey);
   int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
   Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
-  webSocket.onEvent(webSocketEvent);
-  webSocket.setReconnectInterval(1000);
   webSocket.beginSSL(lnbitsHost, lnbitsPortInteger, url);
+  webSocket.setReconnectInterval(1000);
+  webSocket.onEvent(webSocketEvent);
 }
 
 void parseWebsocketText(String text) {
