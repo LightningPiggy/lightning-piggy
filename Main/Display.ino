@@ -158,7 +158,9 @@ void setup_display() {
   long beforeTime = millis();
   display1->clearScreen();
   Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
-  if (runningOnQemu() || (millis() - beforeTime) > 1500) {
+  // QEMU normally works with EMULATE_DISPLAY_TYPE_213DEPG but if that one is not defined,
+  // use display2 to test the "delete display1" logic and to try out a slightly larger display etc.
+  if (!runningOnQemu() && (millis() - beforeTime) > 1500) {
     Serial.println("clearScreen took a long time so found the right display: 1!");
     display1->setRotation(1); // display is used in landscape mode
     u8g2Fonts.begin(*display1); // connect u8g2 procedures to Adafruit GFX
