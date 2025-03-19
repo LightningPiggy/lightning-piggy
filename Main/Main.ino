@@ -219,3 +219,8 @@ void moveOnAfterSleepBootSlogan() {
     piggyMode = PIGGYMODE_STARTING_AP;
   }
 }
+
+bool runningOnQemu() {
+  uint32_t reg_value = *((volatile uint32_t *)0x3ff66078);
+  return (reg_value == 0x51454d55); // "QEMU" in ASCII as 32-bit hex
+}
