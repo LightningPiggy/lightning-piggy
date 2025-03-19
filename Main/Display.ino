@@ -80,8 +80,8 @@ public:
     }
 };
 
-TFT_eSPI_Adapter display1(tft);
-TFT_eSPI_Adapter display2 = display1;
+TFT_eSPI_Adapter* display1 = new TFT_eSPI_Adapter(tft);
+TFT_eSPI_Adapter* display2 = nullptr;
 
 # else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
@@ -151,7 +151,7 @@ void setup_display() {
     tft.fillRect(0,i,displayWidth(),1,TFT_RED);
   }
 
-  u8g2Fonts.begin(display1);
+  u8g2Fonts.begin(*display1);
 
 # else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
