@@ -197,13 +197,14 @@ void loop() {
     loop_nwc();
   }
 
-  if (millis() - lastHeap >= 2000) {
-    Serial.printf("Free heap memory: %" PRIu32 " bytes\r\n", ESP.getFreeHeap());
+  if (millis() - lastHeap >= 1000) {
+    Serial.printf("Free heap memory: %" PRIu32 " bytes (timed)\r\n", ESP.getFreeHeap());
     lastHeap = millis();
   }
 
   if (previousPiggyMode != piggyMode) {
     Serial.println("piggyMode changed from " + String(previousPiggyMode) + " to " + piggyMode);
+    Serial.printf("Free heap memory: %" PRIu32 " bytes (piggyMode changed)\r\n", ESP.getFreeHeap());
     previousPiggyMode = piggyMode;
   }
 }

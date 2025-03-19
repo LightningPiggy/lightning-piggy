@@ -186,7 +186,7 @@ bool hibernateDependingOnBattery() {
   } else {
     lastHibernateCheck = nowCheckedHibernate;
   }
-  Serial.println("FREE HEAP MEMORY: " + String(ESP.getFreeHeap()));
+  Serial.printf("Free heap memory: %" PRIu32 " bytes (hibernateDependingOnBattery)\r\n", ESP.getFreeHeap());
 
   int resetReason = rtc_get_reset_reason(0);
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
