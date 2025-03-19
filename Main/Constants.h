@@ -122,4 +122,7 @@ const char* defaultDecimalSeparator = ".";
 #define WALLET_LNBITS 1
 #define WALLET_NWC 2
 
+#define DISPLAY_HEIGHT_213DEPG 250
+#define DISPLAY_HEIGHT_266DEPG 296
+
 #endif // #ifndef CONSTANTS_H

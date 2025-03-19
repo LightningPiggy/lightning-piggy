@@ -21,7 +21,7 @@
 #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
 #define TFT_WIDTH  135 // should be 122 but then the display is offset
-#define TFT_HEIGHT 250
+#define TFT_HEIGHT DISPLAY_HEIGHT_213DEPG
 #include <TFT_eSPI.h>
 TFT_eSPI tft = TFT_eSPI();
 
@@ -85,11 +85,9 @@ TFT_eSPI_Adapter* display2 = nullptr;
 
 # else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
-#define MAX_DISPLAY_BUFFER_SIZE 65536ul
-#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 8))
 // Both display drivers are compiled in, and the right one is detected and used at runtime:
-GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)> * display1 = nullptr;
-GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)> * display2 = nullptr;
+GxEPD2_BW<GxEPD2_213_BN, DISPLAY_HEIGHT_213DEPG> * display1 = nullptr;
+GxEPD2_BW<GxEPD2_266_BN, DISPLAY_HEIGHT_266DEPG> * display2 = nullptr;
 
 #endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
@@ -155,12 +153,12 @@ void setup_display() {
 
 # else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
-  display1 = new GxEPD2_BW<GxEPD2_213_BN, MAX_HEIGHT(GxEPD2_213_BN)>(GxEPD2_213_BN(5, 17, 16, 4));
+  display1 = new GxEPD2_BW<GxEPD2_213_BN, DISPLAY_HEIGHT_213DEPG>(GxEPD2_213_BN(5, 17, 16, 4));
   display1->init(115200, true, 2, false);
   long beforeTime = millis();
   display1->clearScreen();
   Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
-  if ((millis() - beforeTime) > 1500) {
+  if (runningOnQemu() || (millis() - beforeTime) > 1500) {
     Serial.println("clearScreen took a long time so found the right display: 1!");
     display1->setRotation(1); // display is used in landscape mode
     u8g2Fonts.begin(*display1); // connect u8g2 procedures to Adafruit GFX
@@ -168,7 +166,7 @@ void setup_display() {
     display1->hibernate();  // Optional: puts display in low-power state
     delete display1;        // Deallocates the memory
     display1 = nullptr;     // Prevents accidental reuse of freed memory
-    display2 = new GxEPD2_BW<GxEPD2_266_BN, MAX_HEIGHT(GxEPD2_266_BN)>(GxEPD2_266_BN(5, 19, 4, 34));
+    display2 = new GxEPD2_BW<GxEPD2_266_BN, DISPLAY_HEIGHT_266DEPG>(GxEPD2_266_BN(5, 19, 4, 34));
     display2->init(115200, true, 2, false);
     display2->clearScreen();
     displayToUse = DISPLAY_TYPE_266DEPG;
@@ -257,9 +255,9 @@ int displayHeight() {
 
 int displayWidth() {
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    return 250;
+    return DISPLAY_HEIGHT_213DEPG;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    return 296;
+    return DISPLAY_HEIGHT_266DEPG;
   }
   Serial.println("ERROR: there's no display to use detected!");
   return 0;
