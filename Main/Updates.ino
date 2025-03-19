@@ -46,6 +46,9 @@ void checkShowUpdateAvailable() {
 }
 
 String getShortHardwareInfo() {
+  #ifdef EMULATE_DISPLAY_TYPE_213DEPG
+  return "2.13T";
+  #endif
   int displayToUse = getDisplayToUse();
   if (displayToUse == DISPLAY_TYPE_213DEPG) {
     return "2.13D";
@@ -57,6 +60,9 @@ String getShortHardwareInfo() {
 }
 
 String getLongHardwareInfo() {
+  #ifdef EMULATE_DISPLAY_TYPE_213DEPG
+  return "QEMU|TDISPLAY_213DEPG";
+  #endif
   // Since the unified builds, we only know which display it is, not really which hardware.
   // But to be backwards compatible with the update checker metrics, we assume
   // a 2.13DEPG display must be the LILYGOT5V213
