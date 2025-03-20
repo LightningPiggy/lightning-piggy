@@ -1,5 +1,5 @@
 **6.1.2**
-- Fix "Unknown Balance" that appeared after 15 minutes when using LNBits
+- Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)
 - Improve boot salutations
 
 **6.1.1**
