@@ -1,4 +1,4 @@
-**6.2.0**
+**6.1.2**
 - Fix "Unknown Balance" that appeared after 15 minutes when using LNBits
 - Improve boot salutations
 
