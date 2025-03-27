@@ -186,7 +186,7 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   int connectionAttempts = 0;
 
   int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
-  if (strncmp(host,lnbitsHost,MAX_CONFIG_LENGTH)!=0) lnbitsPortInteger = 443; // only use lnbitsPort for lnbitsHost
+  if (strncmp(host,lnbitsHost,MAX_CONFIG_LENGTH)!=0) lnbitsPortInteger = 443; // only use lnbitsPort for connecting to lnbitsHost
 
   Serial.println("Fetching " + endpointUrl + " from " + String(host) + " on port " + String(lnbitsPortInteger));
 
