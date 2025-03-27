@@ -519,16 +519,6 @@ void displayPayments() {
   } while (displayNextPage());
 }
 
-void displayWifiStrengthBottom() {
-  displayWifiStrength(displayHeight()-smallestFontHeight);
-}
-
-void displayWifiStrength(int y) {
-  int wifiStrengthPercent = strengthPercent(getStrength(5));
-  String wifiString = "Wifi:" + String(wifiStrengthPercent) + "%";
-  displayFit(wifiString, displayWidth()-8*7, y, displayWidth(), displayHeight(), 1, false, true);
-}
-
 // returns the y value after showing all the status info
 void displayStatus(bool showsleep) {
   setFont(0);
@@ -567,11 +557,8 @@ void displayStatus(bool showsleep) {
     //String displayString = getShortHardwareInfo();
     //startY += drawLine(displayString, displayWidth(), startY, false, true);
 
-    // Time is only shown before sleep
-    if (showsleep) {
-      String currentTime = getTimeFromNTP();
-      drawLine(currentTime, displayWidth(), startY, false, true);    // 6 characters, width of 8
-    }
+    String currentTime = getTimeFromNTP();
+    drawLine(currentTime, displayWidth(), startY, false, true);    // 6 characters, width of 8
   } while (displayNextPage());
 }
 
@@ -689,4 +676,8 @@ void setNextRefreshBalanceAndPayments(bool value) {
 
 bool getForceRefreshBalanceAndPayments() {
   return forceRefreshBalanceAndPayments;
+}
+
+void updateStatusBar(String toShow) {
+  displayFit(toShow, 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
 }

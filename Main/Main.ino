@@ -105,7 +105,7 @@ void loop() {
       moveOnAfterSleepBootSlogan();
     } // else do nothing but wait
   } else if (piggyMode == PIGGYMODE_STARTING_STA) {
-      displayFit("Wifi: " + String(ssid), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
+      updateStatusBar("Wifi: " + String(ssid));
       stop_webserver();
       delay(1000);
       if (!connectWifiAsync()) {
@@ -117,11 +117,17 @@ void loop() {
     if (!keepWaitingWifi()) {
       if (wifiConnected()) {
         // Show IP address
-        displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
-        piggyMode = PIGGYMODE_STARTED_STA;
+        int wifiStrengthPercent = strengthPercent(getStrength(5));
+        updateStatusBar("Strength: " + String(wifiStrengthPercent) + "% IP: " + ipToString(WiFi.localIP())); delay(500);
+        updateStatusBar("Synchronizing clock with pool.ntp.org");
         setup_time();
-        if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
+        if (strncmp(alwaysRunWebserver,"YES", 3) == 0) {
+          updateStatusBar("Starting webserver...");
+          start_webserver();
+        }
         if (walletToUse() == WALLET_NWC) setup_nwc();
+        updateStatusBar("Fetching wallet info...");
+        piggyMode = PIGGYMODE_STARTED_STA;
       } else {
         piggyMode = PIGGYMODE_FAILED_STA;
       }
