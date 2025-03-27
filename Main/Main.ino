@@ -175,8 +175,8 @@ void loop() {
       checkShowUpdateAvailable();
       piggyMode = PIGGYMODE_STARTED_STA; // go back to idling on websocket
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 4 hours. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
-    hibernate(4*60*60);
+    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 6 hours. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+    hibernate(DEFAULT_SLEEP_TIME);
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
       stop_webserver();
