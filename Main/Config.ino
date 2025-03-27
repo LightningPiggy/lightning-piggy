@@ -224,9 +224,7 @@ void setup_webserver() {
 
   server.on("/restart", HTTP_POST, [](AsyncWebServerRequest* request) {
     request->send(200, "text/html", "Restarting the device...");
-    disconnectWifi();
-    Serial.println("Restarting...");
-    ESP.restart();
+    restart();
   }).addMiddleware(&digestAuth);
 
   server.on("/delete-config", HTTP_GET, [](AsyncWebServerRequest* request) {

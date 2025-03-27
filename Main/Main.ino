@@ -208,6 +208,7 @@ void loop() {
   if (millis() - lastHeap >= 1000) {
     Serial.printf("Free heap memory: %" PRIu32 " bytes (timed)\r\n", ESP.getFreeHeap());
     lastHeap = millis();
+    checkPeriodicRestart();
   }
 
   if (previousPiggyMode != piggyMode) {

@@ -139,3 +139,17 @@ bool feed_watchdog() {
     count_watchdog_kicks++;
     return true;
 }
+
+void restart() {
+  disconnectWifi();
+  delay(1000);
+  Serial.println("Restarting...");
+  ESP.restart();
+}
+
+void checkPeriodicRestart() {
+  if (millis() > PERIODIC_RESTART_MILLIS) {
+    Serial.println("Time for a periodic restart!");
+    restart();
+  }
+}

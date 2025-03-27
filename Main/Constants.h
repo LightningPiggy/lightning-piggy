@@ -77,6 +77,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define DEFAULT_SLEEP_TIME 60 * 60 * 6          // 6 hours = morning, afternoon, evening and night
 
+#define PERIODIC_RESTART_MILLIS 1000 * 60 * 60 * 23    // restart every 23 hours to handle any long-duration issues such as out of memory
+
 #define DEFAULT_LNBITS_PORT 443
 
 #define HTTPS_TIMEOUT_SECONDS 15
