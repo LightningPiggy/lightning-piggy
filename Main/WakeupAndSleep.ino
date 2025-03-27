@@ -178,6 +178,14 @@ int batteryVoltageToSleepSeconds(double voltage) {
 
 // Stay awake for a minimal amount of time after boot or after a payment came in
 bool awakeLongEnough() {
+   // rate limit these hibernate checks because it seems to become buggy
+  long nowCheckedHibernate = millis();
+  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS) {
+    return false;
+  } else {
+    lastHibernateCheck = nowCheckedHibernate;
+  }
+
   long millisSinceLastPayment = millis()-lastPaymentReceivedMillis;
   if (runningOnQemu()) millisSinceLastPayment = millisSinceLastPayment/4; // QEMU is slow so the uptime counts for less
 
@@ -214,20 +222,10 @@ void hibernateDependingOnConfiguration() {
   hibernate(sleepSeconds);
 }
 
-
+/* No longer used:
 // returns: true if hibernate was checked, false if it was rate limited
 bool hibernateDependingOnBattery() {
   if (!awakeLongEnough()) return false;
-
-   // rate limit these hibernate checks because it seems to become buggy
-  long nowCheckedHibernate = millis();
-  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS) {
-    return false;
-  } else {
-    lastHibernateCheck = nowCheckedHibernate;
-  }
-
-  Serial.printf("Free heap memory: %" PRIu32 " bytes (canSleep check)\r\n", ESP.getFreeHeap());
 
   double voltage = getBatteryVoltage(); // takes around 450ms (due to 4 battery voltage samples with 100ms delay between)
   // voltage < 0 means it's battery powered, but sometimes it can glitch and show NOT battery powered
@@ -250,6 +248,7 @@ bool hibernateDependingOnBattery() {
   }
   return true;
 }
+*/
 
 void hibernate(int sleepTimeSeconds) {
   if (sleepTimeSeconds <= 0) return;

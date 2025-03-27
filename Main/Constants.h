@@ -69,7 +69,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define UPDATE_VOLTAGE_PERIOD_MILLIS 1000 * 60 * 5 // update voltage display every 5 minutes
 
-#define HIBERNATE_CHECK_PERIOD_MILLIS 1000 * 30 // hibernate check every 30 seconds
+#define HIBERNATE_CHECK_PERIOD_MILLIS 1000 * 10 // hibernate check every 10 seconds
 
 #define TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS 1000 * 30
 
