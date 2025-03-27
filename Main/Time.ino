@@ -13,7 +13,7 @@ void setup_time() {
     // Later on, this could validate the timezone even more,
     // and show a clear error if there's something wrong with it.
     setTimeZone(timezone);
-    Serial.print("Local time after setTimeZone: " + getLocalTimeAsString());
+    Serial.println("Local time after setTimeZone: " + getLocalTimeAsString());
   }
 }
 
