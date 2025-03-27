@@ -5,7 +5,7 @@
 #include "services/NWC.h"
 
 #define NWC_GET_NEXT_TRANSACTION_TIMEOUT_MS 15 * 1000
-#define NWC_GET_BALANCE_TIMEOUT_MS 20 * 1000
+#define NWC_GET_BALANCE_TIMEOUT_MS 30 * 1000
 
 nostr::NWC *nwc = NULL;
 nostr::Transport *transport;

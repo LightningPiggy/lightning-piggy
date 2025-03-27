@@ -142,6 +142,7 @@ void loop() {
       piggyMode = PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE;
     } else {
       if (walletToUse() == WALLET_LNBITS) connectWebsocket(); // make sure LNBits websocket is connected
+      if (timeChanged()) displayStatus(false);
       hibernateDependingOnBattery(); // go to sleep if that's necessary
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {

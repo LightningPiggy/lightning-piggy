@@ -1,5 +1,7 @@
 #include "../timezones/timezones.h"
 
+String lastTime = "";
+
 void setup_time() {
   Serial.println("Initializing time using NTP...");
   nostr::esp32::ESP32Platform::initTime("pool.ntp.org");
@@ -16,11 +18,13 @@ void setup_time() {
 }
 
 String getTimeFromNTP() {
-  #ifdef DEBUG
-  lastTime = "W23:39";
-  return "W23:39";
-  #endif
-  return getDayOfWeekString(getDayOfWeek()) + getLocalTimeAsString();
+  lastTime = getDayOfWeekString(getDayOfWeek()) + " " + getLocalTimeAsString();
+  return lastTime;
+}
+
+bool timeChanged() {
+  String oldTime = lastTime;
+  return (oldTime != getTimeFromNTP());
 }
 
 // In alphabetical order
@@ -69,7 +73,7 @@ String getLocalTimeAsString() {
         return "Failed to obtain time";
     }
     char timeString[64];  // Buffer to hold the formatted time string
-    strftime(timeString, sizeof(timeString), "%H:%M:%S", &timeinfo);
+    strftime(timeString, sizeof(timeString), "%H:%M", &timeinfo);
     return String(timeString);
 }
 
