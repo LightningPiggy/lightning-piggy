@@ -1,8 +1,8 @@
 **6.1.3**
 - Show more info about what the device is doing at startup
 - Use standard NTP time sync (pool.ntp.org) for everything, eliminating dependency on https://timeapi.io
-- Always display current time on display when powered on, not just before sleeping
-- Bring back weekday names in local language
+- Always display current time on display when powered on instead of only before sleeping
+- Bring back translation of weekday names to local language
 - Attempt wifi reconnection if connection is lost
 - Add configurable "sleep mode" setting (feature request issue #35)
 - Add periodic daily (23h) restart to handle any unforeseen issues that might have occurred
