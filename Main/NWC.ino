@@ -100,18 +100,6 @@ void loop_nwc() {
 }
 
 void setup_nwc() {
-  Serial.println("Initializing time using NTP...");
-  nostr::esp32::ESP32Platform::initTime("pool.ntp.org");
-
-  Serial.print("UTC time: ");
-  printLocalTime();
-
-  Serial.println("Setting local timezone...");
-  setTimeZone(timezone);
-
-  Serial.print("Local time: ");
-  printLocalTime();
-
   Serial.println("Initializing Nostr...");
   nostr::esp32::ESP32Platform::initNostr(true);
 

@@ -121,6 +121,7 @@ void loop() {
         // Show IP address
         displayFit("Connected. IP: " + ipToString(WiFi.localIP()), 0, displayHeight()-smallestFontHeight, displayWidth(), displayHeight(), 1);
         piggyMode = PIGGYMODE_STARTED_STA;
+        setup_time();
         if (strncmp(alwaysRunWebserver,"YES", 3) == 0) start_webserver();
         if (walletToUse() == WALLET_NWC) setup_nwc();
       } else {
