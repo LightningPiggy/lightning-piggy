@@ -195,8 +195,12 @@ void loop() {
     loop_dns();
     if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
-  } else if (piggyMode == PIGGYMODE_STARTED_STA_LOOP_NWC) {
-    loop_nwc();
+  } else if (piggyMode == PIGGYMODE_RECONNECT_WIFI) {
+    if (!connectWifiAsync()) {
+      piggyMode = PIGGYMODE_FAILED_STA;
+    } else {
+      piggyMode = PIGGYMODE_WAITING_STA;
+    }
   }
 
   if (millis() - lastHeap >= 1000) {

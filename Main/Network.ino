@@ -59,6 +59,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
     if ((reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_AUTH_LEAVE || reason == WIFI_REASON_MIC_FAILURE)
       || (millis() > 25*1000)) {
       Serial.println("WARNING: This wifi error is unrecoverable or it's taking too long, needs restart.");
+      piggyMode = PIGGYMODE_RECONNECT_WIFI; // try reconnecting anyway
       // If the next watchdog restart will trigger the max and long sleep,
       // then do that right now, so the error on-screen stays for troubleshooting.
       if (nextWatchdogRebootWillReachMax()) {
@@ -92,6 +93,7 @@ bool connectWifiAsync() {
   if (!isConfigured(ssid)) return false;
 
   wifi_ap_stop(); // make sure there is no Access Point active, otherwise it might go into AP+STA mode
+  disconnectWifi(); // make sure we're not connected
   Serial.println("Connecting to " + String(ssid));
   lastWifiError = "";
   wifiStartTime = millis();
@@ -127,9 +129,9 @@ bool keepWaitingWifi() {
 
 void disconnectWifi() {
   WiFi.disconnect(true);
-  delay(1000);
+  delay(200);
   WiFi.mode(WIFI_OFF);
-  delay(500);
+  delay(200);
 }
 
 bool wifiConnected() {

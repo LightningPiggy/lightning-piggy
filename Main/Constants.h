@@ -29,7 +29,7 @@ String currentVersion = "6.1.3";
 #define PIGGYMODE_STARTING_AP 4      // attempt to start AP + webserver and then go to started-ap
 #define PIGGYMODE_STARTED_AP 5       // AP is up-and-running: wait until user trigger /reboot
 
-#define PIGGYMODE_STARTED_STA_LOOP_NWC 12
+#define PIGGYMODE_RECONNECT_WIFI 12
 
 // Configuration through access point:
 #define ACCESS_POINT_SSID          "LightningPiggy Configuration"

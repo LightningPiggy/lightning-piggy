@@ -1,6 +1,9 @@
 **6.1.3**
 - Show more info about what the device is doing at startup
-- Use standard NTP time sync (pool.ntp.org) for everything instead of also using www.timeapi.io over HTTPS
+- Use standard NTP time sync (pool.ntp.org) for everything, eliminating dependency on https://timeapi.io
+- Always display current time on display when powered on, not just before sleeping
+- Bring back weekday names in local language
+- Attempt wifi reconnection if connection is lost
 
 **6.1.2**
 - Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)
