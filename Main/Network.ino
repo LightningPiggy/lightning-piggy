@@ -400,10 +400,9 @@ void disconnectWebsocket() {
     }
 }
 
-void wifi_init_softap(void)
-{
+void wifi_init_softap(void) {
     disconnectWifi(); // make sure STA mode is stopped, otherwise it might go into AP+STA mode
-    int delaytime = 10; // 5 might be too short (0816 and crash) so go with 10. 10 crashed so go for 15?
+    if (runningOnQemu()) int delaytime = 10; // QEMU seems to need this. 5 might be too short (0816 and crash) so go with 10.
     int counter = 0;
     Serial.println(counter++); delay(delaytime);
     ESP_ERROR_CHECK(esp_netif_init()); delay(delaytime); // if he hangs a long time after this, that seems to be a good sign...
