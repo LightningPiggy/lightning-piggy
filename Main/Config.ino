@@ -78,7 +78,7 @@ String getJsonValue(JsonDocument &doc, const char *name) {
   return "";
 }
 
-void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue, const char * defaultValue = NULL) {
+void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue = NULL, const char * defaultValue = NULL) {
     String value = getJsonValue(doc, key);
     if (value == "") {
       Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for binaryReplacedValue and defaultValue...");
@@ -137,10 +137,12 @@ bool parseConfig(String paramFileString) {
     // Device:
     tryGetJsonValue(doc, "config_locale", &localeSetting, MAX_CONFIG_LENGTH, REPLACE_localeSetting);
     tryGetJsonValue(doc, "config_time_zone", &timezone, MAX_CONFIG_LENGTH, REPLACE_timezone);
+    tryGetJsonValue(doc, "config_sleep_mode", &sleepMode, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "custom_sleep_minutes", &customSleepMinutes, MAX_CONFIG_LENGTH);
 
     // Advanced:
-    tryGetJsonValue(doc, "config_always_run_webserver", &alwaysRunWebserver, MAX_CONFIG_LENGTH, REPLACE_alwaysRunWebserver, "NO");
-    tryGetJsonValue(doc, "config_update_host", &checkUpdateHost, MAX_CONFIG_LENGTH, REPLACE_updateHost, defaultCheckUpdateHost);
+    tryGetJsonValue(doc, "config_always_run_webserver", &alwaysRunWebserver, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_update_host", &checkUpdateHost, MAX_CONFIG_LENGTH);
 
     Serial.printf("config_lnbits_https_port: %s\n", lnbitsPort);
 

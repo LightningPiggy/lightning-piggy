@@ -126,6 +126,7 @@ void subscribeNWC() {
             if (notification.type == "outgoing") amount = -amount; // outgoing is negative, otherwise positive
             setBalance(getConfigValueAsInt((char*)balanceBias, 0) + getBalance() + (amount/1000));
             lastUpdatedBalance = millis();
+            resetLastPaymentReceivedMillis();
 
             if (amount > 0) prependPayment(formatMillisatAndMessage(amount,extractPlainTextFromTransactionDescription(notification.description))); // show only incoming payments
 

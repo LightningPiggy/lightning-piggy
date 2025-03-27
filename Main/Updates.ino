@@ -97,5 +97,9 @@ String getFullVersion() {
  */
 String checkNewVersion() {
   Serial.print("Checking for updates: ");
-  return getEndpointData(checkUpdateHost, "/", false);
+  if (isConfigured(checkUpdateHost)) {
+    return getEndpointData(checkUpdateHost, "/", false);
+  } else {
+    return getEndpointData(defaultCheckUpdateHost, "/", false);
+  }
 }

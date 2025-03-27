@@ -114,13 +114,15 @@
       ["config_boot_salutation", "Boot Salutation", "Greeting at startup. Example: 'Some wisdom from your favorite uncle:'."],
       ["config_locale", "Language (Locale)", "Language to use for boot wisdom etc."],
       ["config_time_zone", "Timezone", "Used for showing the time of the last update before going to sleep. Example: America/New_York, Africa/Johannesburg, Europe/Copenhagen."],
+      ["config_sleep_mode", "Sleep Mode", "Whether the device should sleep to conserve battery."],
+      ["config_custom_sleep_minutes", "Custom Sleep Duration Minutes", "Duration of the sleep, in minutes. Only applicable if 'custom_sleep' mode is enabled."],
       ["config_always_run_webserver", "Always Run Webserver", "Whether to run the webserver in wifi client ('station') mode too (YES/NO)."],
       ["config_update_host", "Update Server", "Server to check for updates. Defaults to m.lightningpiggy.com"],
       ["config_nwc_url", "Nostr Wallet Connect String", "NWC URL like: nostr+walletconnect://69effe...60d9?relay=wss://relay.getalby.com/v1&secret=be42...c007" ]
     ];
 
     // We want LNBits HTTPS Port & Balance Bias to be integers
-    const config_items_integer = [ "config_lnbits_https_port", "config_balance_bias" ];
+    const config_items_integer = [ "config_lnbits_https_port", "config_balance_bias", "config_custom_sleep_minutes" ];
     // We want these to be YES/NO only
     const config_items_yes_no = [ "config_show_boot_wisdom", "config_always_run_webserver" ];
     // We want these to be mandatory
@@ -131,7 +133,7 @@
       "Network Connection": ["config_wifi_ssid_1", "config_wifi_password_1"],
       "Wallet Connection": ["config_static_receive_code", "config_nwc_url", "config_lnbits_host", "config_lnbits_invoice_key", "config_lnbits_https_port"],
       "Display Settings": ["config_fiat_currency", "config_balance_bias", "config_thousands_separator", "config_decimal_separator", "config_show_boot_wisdom", "config_boot_salutation"],
-      "Device Configuration": ["config_locale", "config_time_zone"],
+      "Device Configuration": ["config_locale", "config_time_zone", "config_sleep_mode", "config_custom_sleep_minutes"],
       "Advanced Settings": ["config_always_run_webserver", "config_update_host"]
     };
 
@@ -143,6 +145,12 @@
       "de_CH": "Swiss German",
       "es": "Spanish",
       "nl": "Dutch"
+    };
+
+    const allowed_sleep_modes = {
+      "custom_sleep": "Fixed sleep duration of 6 hours, or provide sleep duration below",
+      "no_sleep": "Don't sleep - ideal for mains power or solar setup with battery backup",
+      "endless_sleep": "Endless sleep - wake up when action button or tilt sensor is triggered"
     };
 
     // Font Awesome icons for each category
@@ -245,6 +253,14 @@
             inputEl = document.createElement("select");
             inputEl.innerHTML = `<option value="">Select language...</option>`;
             for (const [code, fullName] of Object.entries(allowed_locales)) {
+              inputEl.innerHTML += `<option value="${code}">${fullName} (${code})</option>`;
+            }
+          }
+          // For sleep mode, build a dropdown
+          else if (name === "config_sleep_mode") {
+            inputEl = document.createElement("select");
+            inputEl.innerHTML = `<option value="">Select sleep mode...</option>`;
+            for (const [code, fullName] of Object.entries(allowed_sleep_modes)) {
               inputEl.innerHTML += `<option value="${code}">${fullName} (${code})</option>`;
             }
           }

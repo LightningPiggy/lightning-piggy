@@ -75,6 +75,8 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 
 #define WIFI_CONNECT_TIMEOUT_SECONDS 30         // after this time, it's deemed a failure
 
+#define DEFAULT_SLEEP_TIME 60 * 60 * 6          // 6 hours = morning, afternoon, evening and night
+
 #define DEFAULT_LNBITS_PORT 443
 
 #define HTTPS_TIMEOUT_SECONDS 15

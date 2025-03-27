@@ -54,6 +54,8 @@ char* showSloganAtBoot = NULL;
 
 char* timezone = NULL;
 char* localeSetting = NULL;
+char* sleepMode = NULL;
+char* customSleepMinutes = NULL;
 
 char* alwaysRunWebserver = NULL;
 char* checkUpdateHost = NULL;
@@ -143,7 +145,7 @@ void loop() {
     } else {
       if (walletToUse() == WALLET_LNBITS) connectWebsocket(); // make sure LNBits websocket is connected
       if (timeChanged()) displayStatus(false);
-      hibernateDependingOnBattery(); // go to sleep if that's necessary
+      hibernateDependingOnConfiguration(); // go to sleep if that's necessary
     }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
       String lnurlp = getLNURLp();
@@ -193,7 +195,7 @@ void loop() {
     }
   } else if (piggyMode == PIGGYMODE_STARTED_AP) {
     loop_dns();
-    if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnBattery(); // go to sleep after a while, otherwise battery might drain
+    if (millis() > AWAKE_SECONDS_AS_ACCESS_POINT*1000) hibernateDependingOnConfiguration(); // go to sleep after a while, otherwise battery might drain
     // Nothing to do, just wait until the mode is changed.
   } else if (piggyMode == PIGGYMODE_RECONNECT_WIFI) {
     if (!connectWifiAsync()) {

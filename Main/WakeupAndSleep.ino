@@ -177,25 +177,55 @@ int batteryVoltageToSleepSeconds(double voltage) {
   }
 }
 
-// returns: true if hibernate was checked, false if it was rate limited
-bool hibernateDependingOnBattery() {
-  // rate limit these hibernate checks because it seems to become buggy 
-  long nowCheckedHibernate = millis();
-  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS) {
-    return false;
-  } else {
-    lastHibernateCheck = nowCheckedHibernate;
-  }
-  Serial.printf("Free heap memory: %" PRIu32 " bytes (hibernateDependingOnBattery)\r\n", ESP.getFreeHeap());
-
+// Stay awake for a minimal amount of time after boot or after a payment came in
+bool awakeLongEnough() {
   int resetReason = rtc_get_reset_reason(0);
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   // if not payment came in, then lastPaymentReceivedMillis = 0, so it stays awake after boot if it was a manual wakeup
   if ((resetReason == POWERON_RESET || resetReason == SW_CPU_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1)
     && (millis()-lastPaymentReceivedMillis) < (AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000)) {
     Serial.println("Device was woken up manually or it crashed or received payment less than " + String(AWAKE_SECONDS_AFTER_MANUAL_WAKEUP) + "s ago, not sleeping yet because another payment might come in..");
-    return true;
+    return false;
   }
+
+  return true;
+}
+
+void hibernateDependingOnConfiguration() {
+  if (!awakeLongEnough()) return;
+
+  int sleepSeconds = DEFAULT_SLEEP_TIME;
+  if (isConfigured(sleepMode)) {
+    String sleepModeString = String(sleepMode);
+    if (sleepModeString == "no_sleep") {
+      sleepSeconds = 0; // don't sleep
+    } else if (sleepModeString == "endless_sleep") {
+      sleepSeconds = 60 * 60 * 24 * 365 * 5; // 5 years of sleep is basically forever
+    } else if (sleepModeString == "custom_sleep") {
+      int sleepMinutes = getConfigValueAsInt((char*)customSleepMinutes, DEFAULT_SLEEP_TIME);
+      sleepSeconds = sleepMinutes * 60;
+    } else {
+      Serial.println("WARNING: invalid config_sleep_mode found, defaulting to " + String(sleepSeconds) + "seconds...");
+    }
+  }
+
+  hibernate(sleepSeconds);
+}
+
+
+// returns: true if hibernate was checked, false if it was rate limited
+bool hibernateDependingOnBattery() {
+  if (!awakeLongEnough()) return false;
+
+   // rate limit these hibernate checks because it seems to become buggy
+  long nowCheckedHibernate = millis();
+  if ((nowCheckedHibernate - lastHibernateCheck) < HIBERNATE_CHECK_PERIOD_MILLIS) {
+    return false;
+  } else {
+    lastHibernateCheck = nowCheckedHibernate;
+  }
+
+  Serial.printf("Free heap memory: %" PRIu32 " bytes (canSleep check)\r\n", ESP.getFreeHeap());
 
   double voltage = getBatteryVoltage(); // takes around 450ms (due to 4 battery voltage samples with 100ms delay between)
   // voltage < 0 means it's battery powered, but sometimes it can glitch and show NOT battery powered
@@ -220,6 +250,8 @@ bool hibernateDependingOnBattery() {
 }
 
 void hibernate(int sleepTimeSeconds) {
+  if (sleepTimeSeconds <= 0) return;
+
   Serial.println("Going to sleep for " + String(sleepTimeSeconds) + " seconds...");
 
   displayStatus(true);
