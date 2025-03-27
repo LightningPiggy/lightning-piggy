@@ -191,6 +191,10 @@ int getConfigValueAsInt(char* configValue, int defaultValue) {
   return configInt;
 }
 
+bool getConfigValueAsBool(char* configValue) {
+  return (isConfigured(configValue) && strncmp(configValue,"YES", 3) == 0);
+}
+
 void setup_webserver() {
   Serial.println("Setting up webserver...");
 

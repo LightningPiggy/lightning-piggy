@@ -93,10 +93,10 @@ void loop() {
 
   if (piggyMode == PIGGYMODE_INIT) {
     if (!displayVoltageWarning()) {
-      if (strncmp(showSloganAtBoot,"YES", 3) != 0) {
-        showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
-      } else {
+      if (getConfigValueAsBool(showSloganAtBoot)) {
         showBootSlogan();
+      } else {
+        showLogo(epd_bitmap_Lightning_Piggy, 104, 250, displayHeight() - 104, (displayWidth() - 250) / 2); // width and height are swapped because display rotation
       }
     } // if displayVoltageWarning() then no logo or slogan
     piggyMode = PIGGYMODE_SLEEP_BOOTSLOGAN;
@@ -121,7 +121,7 @@ void loop() {
         updateStatusBar("Strength: " + String(wifiStrengthPercent) + "% IP: " + ipToString(WiFi.localIP())); delay(500);
         updateStatusBar("Synchronizing clock with pool.ntp.org");
         setup_time();
-        if (strncmp(alwaysRunWebserver,"YES", 3) == 0) {
+        if (getConfigValueAsBool(alwaysRunWebserver)) {
           updateStatusBar("Starting webserver...");
           start_webserver();
         }
