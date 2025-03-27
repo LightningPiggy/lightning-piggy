@@ -1,3 +1,7 @@
+**6.1.3**
+- Show more info about what the device is doing at startup
+- Use standard NTP time sync (pool.ntp.org) for everything instead of also using www.timeapi.io over HTTPS
+
 **6.1.2**
 - Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)
 - Improve boot salutations
