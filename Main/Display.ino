@@ -9,16 +9,12 @@
 //
 #include "qrcoded.h"
 
-//#define EMULATE_DISPLAY_TYPE_213DEPG 1 // Uncomment this to have the display work on the QEMU emulator
-
 // base class GxEPD2_GFX can be used to pass references or pointers to the display instance as parameter, uses ~1.2k more code
 // enable or disable GxEPD2_GFX base class
 #define ENABLE_GxEPD2_GFX 0
 
 #include <GxEPD2_BW.h>
 #include <U8g2_for_Adafruit_GFX.h>
-
-#ifdef EMULATE_DISPLAY_TYPE_213DEPG
 
 #define TFT_WIDTH  135 // should be 122 but then the display is offset
 #define TFT_HEIGHT DISPLAY_HEIGHT_213DEPG
@@ -80,17 +76,11 @@ public:
     }
 };
 
-TFT_eSPI_Adapter* display1 = new TFT_eSPI_Adapter(tft);
-TFT_eSPI_Adapter* display2 = nullptr;
-
-# else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
 
 // Both display drivers are compiled in, and the right one is detected and used at runtime:
 GxEPD2_BW<GxEPD2_213_BN, DISPLAY_HEIGHT_213DEPG> * display1 = nullptr;
 GxEPD2_BW<GxEPD2_266_BN, DISPLAY_HEIGHT_266DEPG> * display2 = nullptr;
-
-#endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
-
+TFT_eSPI_Adapter* display3 = new TFT_eSPI_Adapter(tft);
 
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
@@ -106,7 +96,7 @@ int marginFromQRcode = 5; // margin between balance and QR Code
 String lines[MAX_TEXT_LINES];
 int nroflines = 0;
 
-int displayToUse = DISPLAY_TYPE_213DEPG;
+int displayToUse = NOT_SPECIFIED;
 int balanceHeight; // [0,balanceHeight] is the vertical zone of the balance region plus the line underneath it.
 int fiatHeight; // [fiatHeight,displayHeight()] is the vertical zone of the fiat region.
 int startPaymentsHeight;
@@ -137,46 +127,41 @@ void setup_display() {
   }
   Serial.println("done.");
   
-#ifdef EMULATE_DISPLAY_TYPE_213DEPG
-
-  tft.init();
-  tft.setRotation(1);
-  tft.fillScreen(TFT_WHITE);
-  for (int i=0;i<displayWidth();i=i+5) {
-    tft.fillRect(i,0,1,displayHeight(),TFT_BLUE);
+  if (runningOnQemu()) {
+    tft.init();
+    tft.setRotation(1);
+    tft.fillScreen(TFT_WHITE);
+    displayToUse = DISPLAY_TYPE_213DEPG_QEMU;
+    for (int i=0;i<displayWidth();i=i+5) {
+      tft.fillRect(i,0,1,displayHeight(),TFT_BLUE);
+    }
+    for (int i=0;i<displayHeight();i=i+5) {
+      tft.fillRect(0,i,displayWidth(),1,TFT_RED);
+    }
+    u8g2Fonts.begin(*display3);
+  } else { // not runningOnQemu:
+    display1 = new GxEPD2_BW<GxEPD2_213_BN, DISPLAY_HEIGHT_213DEPG>(GxEPD2_213_BN(5, 17, 16, 4));
+    display1->init(115200, true, 2, false);
+    long beforeTime = millis();
+    display1->clearScreen();
+    Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
+    if ((millis() - beforeTime) > 1500) {
+      displayToUse = DISPLAY_TYPE_213DEPG;
+      display1->setRotation(1); // display is used in landscape mode
+      u8g2Fonts.begin(*display1); // connect u8g2 procedures to Adafruit GFX
+    } else {
+      display1->hibernate();  // Optional: puts display in low-power state
+      delete display1;        // Deallocates the memory
+      display1 = nullptr;     // Prevents accidental reuse of freed memory
+      display2 = new GxEPD2_BW<GxEPD2_266_BN, DISPLAY_HEIGHT_266DEPG>(GxEPD2_266_BN(5, 19, 4, 34));
+      display2->init(115200, true, 2, false);
+      display2->clearScreen();
+      displayToUse = DISPLAY_TYPE_266DEPG;
+      display2->setRotation(1); // display is used in landscape mode
+      u8g2Fonts.begin(*display2); // connect u8g2 procedures to Adafruit GFX
+    }
   }
-  for (int i=0;i<displayHeight();i=i+5) {
-    tft.fillRect(0,i,displayWidth(),1,TFT_RED);
-  }
-
-  u8g2Fonts.begin(*display1);
-
-# else // ifndef EMULATE_DISPLAY_TYPE_213DEPG:
-
-  display1 = new GxEPD2_BW<GxEPD2_213_BN, DISPLAY_HEIGHT_213DEPG>(GxEPD2_213_BN(5, 17, 16, 4));
-  display1->init(115200, true, 2, false);
-  long beforeTime = millis();
-  display1->clearScreen();
-  Serial.println("clearScreen operation took " + String(millis() - beforeTime) + "ms");
-  // QEMU normally works with EMULATE_DISPLAY_TYPE_213DEPG but if that one is not defined,
-  // use display2 to test the "delete display1" logic and to try out a slightly larger display etc.
-  if (!runningOnQemu() && (millis() - beforeTime) > 1500) {
-    Serial.println("clearScreen took a long time so found the right display: 1!");
-    display1->setRotation(1); // display is used in landscape mode
-    u8g2Fonts.begin(*display1); // connect u8g2 procedures to Adafruit GFX
-  } else {
-    display1->hibernate();  // Optional: puts display in low-power state
-    delete display1;        // Deallocates the memory
-    display1 = nullptr;     // Prevents accidental reuse of freed memory
-    display2 = new GxEPD2_BW<GxEPD2_266_BN, DISPLAY_HEIGHT_266DEPG>(GxEPD2_266_BN(5, 19, 4, 34));
-    display2->init(115200, true, 2, false);
-    display2->clearScreen();
-    displayToUse = DISPLAY_TYPE_266DEPG;
-    display2->setRotation(1); // display is used in landscape mode
-    u8g2Fonts.begin(*display2); // connect u8g2 procedures to Adafruit GFX
-  }
-
-#endif // #ifdef EMULATE_DISPLAY_TYPE_213DEPG
+  Serial.println("Detected display: " + displayToUse);
 
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
@@ -197,6 +182,8 @@ void setPartialWindow(int x, int y, int h, int w) {
     display1->setPartialWindow(x, y, h, w);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2->setPartialWindow(x, y, h, w);
+  } else if (displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
+    display3->setPartialWindow(x, y, h, w);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -207,6 +194,8 @@ void displayFirstPage() {
     display1->firstPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2->firstPage();
+  } else if (displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
+    display3->firstPage();
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -220,6 +209,8 @@ bool displayNextPage() {
     return display1->nextPage();
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return display2->nextPage();
+  } else if (displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
+    return display3->nextPage();
   }
   Serial.println("ERROR: there's no display to use detected!");
   return false;
@@ -230,6 +221,8 @@ void displayFillRect(int x, int y, int w, int h, int color) {
     display1->fillRect(x,y,w,h,color);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2->fillRect(x,y,w,h,color);
+  } else if (displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
+    display3->fillRect(x,y,w,h,color);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
@@ -240,23 +233,25 @@ void displayDrawImage(const unsigned char logo [], int posX, int posY, int sizeX
     display1->drawImage(logo, posX, posY, sizeX, sizeY, toggle);
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     display2->drawImage(logo, posX, posY, sizeX, sizeY, toggle);
+  } else if (displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
+    display3->drawImage(logo, posX, posY, sizeX, sizeY, toggle);
   } else {
     Serial.println("ERROR: there's no display to use detected!");
   }
 }
 
 int displayHeight() {
-  if (displayToUse == DISPLAY_TYPE_213DEPG) {
-    return 122;
+  if (displayToUse == DISPLAY_TYPE_213DEPG || DISPLAY_TYPE_213DEPG_QEMU) {
+    return DISPLAY_WIDTH_213DEPG;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
-    return 152;
+    return DISPLAY_WIDTH_266DEPG;
   }
   Serial.println("ERROR: there's no display to use detected!");
   return 0;
 }
 
 int displayWidth() {
-  if (displayToUse == DISPLAY_TYPE_213DEPG) {
+  if (displayToUse == DISPLAY_TYPE_213DEPG || DISPLAY_TYPE_213DEPG_QEMU) {
     return DISPLAY_HEIGHT_213DEPG;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return DISPLAY_HEIGHT_266DEPG;

@@ -6,6 +6,7 @@
 - Attempt wifi reconnection if connection is lost
 - Add configurable "sleep mode" setting (feature request issue #35)
 - Add periodic daily (23h) restart to handle any unforeseen issues that might have occurred
+- Add support for running the same build on both physical and virtual (QEMU) ESP32 devices
 
 **6.1.2**
 - Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)

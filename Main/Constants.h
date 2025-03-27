@@ -103,6 +103,13 @@ String websocketApiUrl = "/api/v1/ws/";
 
 #define DISPLAY_TYPE_213DEPG 1
 #define DISPLAY_TYPE_266DEPG 2
+#define DISPLAY_TYPE_213DEPG_QEMU 3
+
+#define DISPLAY_HEIGHT_213DEPG 250
+#define DISPLAY_HEIGHT_266DEPG 296
+
+#define DISPLAY_WIDTH_213DEPG 122
+#define DISPLAY_WIDTH_266DEPG 152
 
 const char* defaultCheckUpdateHost = "m.lightningpiggy.com";
 
@@ -118,7 +125,5 @@ const char* defaultDecimalSeparator = ".";
 #define WALLET_LNBITS 1
 #define WALLET_NWC 2
 
-#define DISPLAY_HEIGHT_213DEPG 250
-#define DISPLAY_HEIGHT_266DEPG 296
 
 #endif // #ifndef CONSTANTS_H
