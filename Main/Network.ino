@@ -23,7 +23,7 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
   // Regular flow of events is: 0, 2, 7 (and then 3 when the device goes to sleep)
   String wifiStatus = "WiFi Event ID " + String(eventid);
   if (eventid > 0 && eventid < system_event_names_count) wifiStatus += " which means: " + String(system_event_names[eventid]);
-  Serial.print(wifiStatus);
+  Serial.println(wifiStatus);
 
   String details = "";
 
@@ -52,14 +52,14 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
     //
     // - 4WAY_HANDSHAKE_TIMEOUT? some kind of end state, happens with wrong password
     // - ASSOC_EXPIRE? some kind of end state, after 7 AUTH_EXPIREs
+    // - WIFI_REASON_ASSOC_LEAVE: intentional wifi stop, like when going from STA mode to AP mode
     // - AUTH_LEAVE? end state, happened when adding and changing password during connection
     // - WIFI_REASON_MIC_FAILURE? with wrong password, endstate
 
     // Boot takes around 11 seconds until wifi connection.
-    if ((reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_AUTH_LEAVE || reason == WIFI_REASON_MIC_FAILURE)
-      || (millis() > 25*1000)) {
+    if (reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_AUTH_LEAVE || reason == WIFI_REASON_MIC_FAILURE) {
       Serial.println("WARNING: This wifi error is unrecoverable or it's taking too long, needs restart.");
-      piggyMode = PIGGYMODE_RECONNECT_WIFI; // try reconnecting anyway
+      piggyMode = PIGGYMODE_RECONNECT_WIFI; // try reconnecting anyway (workaround the BEACON_TIMEOUT issue on QEMU)
       // If the next watchdog restart will trigger the max and long sleep,
       // then do that right now, so the error on-screen stays for troubleshooting.
       if (nextWatchdogRebootWillReachMax()) {
