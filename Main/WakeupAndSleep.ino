@@ -204,7 +204,7 @@ bool awakeLongEnough() {
 void hibernateDependingOnConfiguration() {
   if (!awakeLongEnough()) return;
 
-  int sleepSeconds = DEFAULT_SLEEP_TIME;
+  int sleepSeconds = DEFAULT_SLEEP_DURATION_SECONDS;
   if (isConfigured(sleepMode)) {
     String sleepModeString = String(sleepMode);
     if (sleepModeString == "no_sleep") {
@@ -212,7 +212,7 @@ void hibernateDependingOnConfiguration() {
     } else if (sleepModeString == "endless_sleep") {
       sleepSeconds = 60 * 60 * 24 * 365 * 5; // 5 years of sleep is basically forever
     } else if (sleepModeString == "custom_sleep") {
-      int sleepMinutes = getConfigValueAsInt((char*)customSleepMinutes, DEFAULT_SLEEP_TIME);
+      int sleepMinutes = getConfigValueAsInt((char*)customSleepMinutes, DEFAULT_SLEEP_DURATION_SECONDS/60);
       sleepSeconds = sleepMinutes * 60;
     } else {
       Serial.println("WARNING: invalid config_sleep_mode found, defaulting to " + String(sleepSeconds) + "seconds...");

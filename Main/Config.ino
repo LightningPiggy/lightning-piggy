@@ -138,7 +138,7 @@ bool parseConfig(String paramFileString) {
     tryGetJsonValue(doc, "config_locale", &localeSetting, MAX_CONFIG_LENGTH, REPLACE_localeSetting);
     tryGetJsonValue(doc, "config_time_zone", &timezone, MAX_CONFIG_LENGTH, REPLACE_timezone);
     tryGetJsonValue(doc, "config_sleep_mode", &sleepMode, MAX_CONFIG_LENGTH);
-    tryGetJsonValue(doc, "custom_sleep_minutes", &customSleepMinutes, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_custom_sleep_minutes", &customSleepMinutes, MAX_CONFIG_LENGTH);
 
     // Advanced:
     tryGetJsonValue(doc, "config_always_run_webserver", &alwaysRunWebserver, MAX_CONFIG_LENGTH);
