@@ -4,6 +4,7 @@
 - Always display current time on display when powered on, not just before sleeping
 - Bring back weekday names in local language
 - Attempt wifi reconnection if connection is lost
+- Add configurable "sleep mode" setting (feature request issue #35)
 
 **6.1.2**
 - Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)

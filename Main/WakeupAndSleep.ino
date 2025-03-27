@@ -44,7 +44,6 @@
 // 22:05:08.530 -> Wakeup from sleep count: 1
 // 22:05:08.530 -> Wakeup caused by timer
 
-
 #include "driver/rtc_io.h"  // for rtc_gpio_pullup_dis and rtc_gpio_pulldown_en
 #include <rom/rtc.h>        // for rtc_get_reset_reason
 
@@ -179,11 +178,14 @@ int batteryVoltageToSleepSeconds(double voltage) {
 
 // Stay awake for a minimal amount of time after boot or after a payment came in
 bool awakeLongEnough() {
+  long millisSinceLastPayment = millis()-lastPaymentReceivedMillis;
+  if (runningOnQemu()) millisSinceLastPayment = millisSinceLastPayment/4; // QEMU is slow so the uptime counts for less
+
   int resetReason = rtc_get_reset_reason(0);
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   // if not payment came in, then lastPaymentReceivedMillis = 0, so it stays awake after boot if it was a manual wakeup
   if ((resetReason == POWERON_RESET || resetReason == SW_CPU_RESET || wakeup_reason == ESP_SLEEP_WAKEUP_EXT0 || wakeup_reason == ESP_SLEEP_WAKEUP_EXT1)
-    && (millis()-lastPaymentReceivedMillis) < (AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000)) {
+    && (millisSinceLastPayment < AWAKE_SECONDS_AFTER_MANUAL_WAKEUP*1000)) {
     Serial.println("Device was woken up manually or it crashed or received payment less than " + String(AWAKE_SECONDS_AFTER_MANUAL_WAKEUP) + "s ago, not sleeping yet because another payment might come in..");
     return false;
   }
@@ -252,13 +254,19 @@ bool hibernateDependingOnBattery() {
 void hibernate(int sleepTimeSeconds) {
   if (sleepTimeSeconds <= 0) return;
 
-  Serial.println("Going to sleep for " + String(sleepTimeSeconds) + " seconds...");
+  if (runningOnQemu()) {
+    Serial.println("WARNING: not doing deep sleep on QEMU because that crashes, staying awake...");
+    return;
+  }
 
+  Serial.println("Going to sleep for " + String(sleepTimeSeconds) + " seconds...");
   displayStatus(true);
 
   disconnectWebsocket();
+  delay(500);
   // Disconnect wifi cleanly because some access points will refuse reconnections if this is forgotten...
   disconnectWifi();
+  delay(500);
 
   uint64_t deepSleepTime = (uint64_t)sleepTimeSeconds * (uint64_t)1000 * (uint64_t)1000;
   esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON); // RTC peripherals needs to stay on for GPIO32's pulldown to work
@@ -279,7 +287,7 @@ void hibernate(int sleepTimeSeconds) {
   rtc_gpio_pulldown_en(GPIO_NUM_32); // pulldown is needed to avoid floating pin that triggers randomly
   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
 
-  esp_deep_sleep_start();
+  esp_deep_sleep_start(); // this crashes on QEMU :-/
 }
 
 void resetLastPaymentReceivedMillis() {
