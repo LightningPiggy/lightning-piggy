@@ -57,8 +57,6 @@ char* localeSetting = NULL;
 
 char* alwaysRunWebserver = NULL;
 char* checkUpdateHost = NULL;
-char* timeServer = NULL;
-char* timeServerPath = NULL;
 
 void setup() {
     Serial.begin(115200);

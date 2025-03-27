@@ -26,10 +26,6 @@
 // Example: USD, EUR, DKK, CHF, GBP, JPY, CNY, RMB, MYR,...
 #define REPLACE_btcPriceCurrencyChar "REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY_REPLACETHISBYFIATCURRENCY"
 
-// The ESP32 can't keep a time when it's off because it doesn't have a battery, so it needs to be fetched from a server
-#define REPLACE_timeServer "REPLACETHISBYTIMESERVER_REPLACETHISBYTIMESERVER_REPLACETHISBYTIMESERVER"
-// timezone is added after this path, so it becomes: https://worldtimeapi.org/api/timezone/Europe/Copenhagen
-#define REPLACE_timeServerPath "REPLACETHISBYTIMESERVERPATH_REPLACETHISBYTIMESERVERPATH_REPLACETHISBYTIMESERVERPATH"
 // Configure the timezone here, example: Europe/Copenhagen
 #define REPLACE_timezone "REPLACETHISBYTIMEZONE_REPLACETHISBYTIMEZONE_REPLACETHISBYTIMEZONE"
 

@@ -141,8 +141,6 @@ bool parseConfig(String paramFileString) {
     // Advanced:
     tryGetJsonValue(doc, "config_always_run_webserver", &alwaysRunWebserver, MAX_CONFIG_LENGTH, REPLACE_alwaysRunWebserver, "NO");
     tryGetJsonValue(doc, "config_update_host", &checkUpdateHost, MAX_CONFIG_LENGTH, REPLACE_updateHost, defaultCheckUpdateHost);
-    tryGetJsonValue(doc, "config_time_server", &timeServer, MAX_CONFIG_LENGTH, REPLACE_timeServer, defaultTimeServer);
-    tryGetJsonValue(doc, "config_time_server_path", &timeServerPath, MAX_CONFIG_LENGTH, REPLACE_timeServerPath, defaultTimeServerPath);
 
     Serial.printf("config_lnbits_https_port: %s\n", lnbitsPort);
 

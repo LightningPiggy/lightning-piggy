@@ -116,8 +116,6 @@
       ["config_time_zone", "Timezone", "Used for showing the time of the last update before going to sleep. Example: America/New_York, Africa/Johannesburg, Europe/Copenhagen."],
       ["config_always_run_webserver", "Always Run Webserver", "Whether to run the webserver in wifi client ('station') mode too (YES/NO)."],
       ["config_update_host", "Update Server", "Server to check for updates. Defaults to m.lightningpiggy.com"],
-      ["config_time_server", "Time Server", "The time server to fetch time before going to sleep. Defaults to timeapi.io"],
-      ["config_time_server_path", "Time Server Path", "Path to append to the time server. Defaults to /api/time/current/zone?timeZone="],
       ["config_nwc_url", "Nostr Wallet Connect String", "NWC URL like: nostr+walletconnect://69effe...60d9?relay=wss://relay.getalby.com/v1&secret=be42...c007" ]
     ];
 
@@ -134,7 +132,7 @@
       "Wallet Connection": ["config_static_receive_code", "config_nwc_url", "config_lnbits_host", "config_lnbits_invoice_key", "config_lnbits_https_port"],
       "Display Settings": ["config_fiat_currency", "config_balance_bias", "config_thousands_separator", "config_decimal_separator", "config_show_boot_wisdom", "config_boot_salutation"],
       "Device Configuration": ["config_locale", "config_time_zone"],
-      "Advanced Settings": ["config_always_run_webserver", "config_update_host", "config_time_server", "config_time_server_path"]
+      "Advanced Settings": ["config_always_run_webserver", "config_update_host"]
     };
 
     // Allowed locales mapping for dropdown (code: full name)
