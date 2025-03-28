@@ -1,12 +1,12 @@
-**6.1.3**
-- Show more info about what the device is doing at startup
+**6.2.0**
+- Show more info about what the device is doing at startup (connecting, time sync, webserver, fetching)
 - Use standard NTP time sync (pool.ntp.org) for everything, eliminating dependency on https://timeapi.io
 - Always display current time on display when powered on instead of only before sleeping
 - Bring back translation of weekday names to local language
 - Attempt wifi reconnection if connection is lost
-- Add configurable "sleep mode" setting (feature request issue #35)
+- Add configurable "sleep mode" setting (feature request issue #35) so you can choose between "no_sleep", "custom_sleep" (default, 6 hours) and "endless_sleep" modes
 - Add periodic daily (23h) restart to handle any unforeseen issues that might have occurred
-- Add support for running the same build on both physical and virtual (QEMU) ESP32 devices
+- Add support for running the same build on both physical and virtual (QEMU) ESP32 devices without recompilation
 
 **6.1.2**
 - Fix memory leak that resulted in "Unknown Balance" appearing when using LNBits after 15 minutes (so on USB power)

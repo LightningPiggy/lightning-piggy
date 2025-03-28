@@ -84,8 +84,6 @@ TFT_eSPI_Adapter* display3 = new TFT_eSPI_Adapter(tft);
 
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
-long lastRefreshedVoltage = -UPDATE_VOLTAGE_PERIOD_MILLIS;  // this makes it update when first run
-
 int statusAreaVoltageHeight = -1; // this value is cached after it's calculated so it can be reused later to updated only the voltage
 
 int blackBackgroundVerticalMargin=2;
