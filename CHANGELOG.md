@@ -1,3 +1,6 @@
+**6.2.1**
+- Fix white border bug on 2.66 inch ePaper display
+
 **6.2.0**
 - Show more info about what the device is doing at startup (connecting, time sync, webserver, fetching)
 - Use standard NTP time sync (pool.ntp.org) for everything, eliminating dependency on https://timeapi.io

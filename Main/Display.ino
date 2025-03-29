@@ -159,7 +159,7 @@ void setup_display() {
       u8g2Fonts.begin(*display2); // connect u8g2 procedures to Adafruit GFX
     }
   }
-  Serial.println("Detected display: " + displayToUse);
+  Serial.println("Detected display: " + String(displayToUse));
 
   u8g2Fonts.setForegroundColor(GxEPD_BLACK);
   u8g2Fonts.setBackgroundColor(GxEPD_WHITE);
@@ -239,7 +239,7 @@ void displayDrawImage(const unsigned char logo [], int posX, int posY, int sizeX
 }
 
 int displayHeight() {
-  if (displayToUse == DISPLAY_TYPE_213DEPG || DISPLAY_TYPE_213DEPG_QEMU) {
+  if (displayToUse == DISPLAY_TYPE_213DEPG || displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
     return DISPLAY_WIDTH_213DEPG;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return DISPLAY_WIDTH_266DEPG;
@@ -249,7 +249,7 @@ int displayHeight() {
 }
 
 int displayWidth() {
-  if (displayToUse == DISPLAY_TYPE_213DEPG || DISPLAY_TYPE_213DEPG_QEMU) {
+  if (displayToUse == DISPLAY_TYPE_213DEPG || displayToUse == DISPLAY_TYPE_213DEPG_QEMU) {
     return DISPLAY_HEIGHT_213DEPG;
   } else if (displayToUse == DISPLAY_TYPE_266DEPG) {
     return DISPLAY_HEIGHT_266DEPG;
