@@ -30,7 +30,13 @@
 // esp boards
 #if defined(ESP_PLATFORM)
 
+#include <esp_idf_version.h>
+
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 4, 0)
   #include <esp_system.h>
+#else
+  #include "esp_random.h"
+#endif
   uint32_t __attribute__((weak)) random32(void){
     return esp_random();
   }
