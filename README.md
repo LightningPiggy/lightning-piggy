@@ -13,7 +13,7 @@ The source code in Main/Main.ino works on both the TTGO LilyGo T5 ePaper 2.13 in
 **With Arduino IDE**
 
 - Arduino IDE version 2.3.5
-- ESP32 Board Support version 3.1.1
+- ESP32 Board Support version 3.2
 - Preferences -> Compiler warnings: Default
 - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 

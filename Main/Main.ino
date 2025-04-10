@@ -3,7 +3,7 @@
 //
 // Tested with:
 // - Arduino IDE version 2.3.5
-// - ESP32 Board Support version 3.1.1
+// - ESP32 Board Support version 3.2
 // - Preferences -> Compiler warnings: Default
 // - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 // - Tools -> Upload Speed: 921600
