@@ -8,6 +8,9 @@ Main/config.h_*
 config_partition/config.json
 config_partition/config.json_*
 
+# Arduino IDE 2.x "Export Compiled Binary" files:
+Main/build/
+
 # Generated files:
 ##################
 webconfig/index.html.gzip.h
