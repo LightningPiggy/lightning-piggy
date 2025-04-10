@@ -14,7 +14,7 @@ The following documentation puts all the pieces together in one logical process,
 # Overview
 
 ## What works
-- Running arduino-esp32 v2.0.17 and v3.1.1 based projects (including lightning-piggy, of course!)
+- Running arduino-esp32 v3.1.1 based projects (including lightning-piggy, of course!)
 - Running ESP-IDF v5.3.2 example projects
 - WiFi: connection to emulated open access point "Open Wifi"
 - WiFi: scanning and find a list of emulated open access points
@@ -99,17 +99,17 @@ Give it a test with:
 
 You need a recent version of esptool.py from ESP-IDF for its merge_bin functionality.
 
-If you're using the Arduino IDE with arduino-esp32 installed from the Library Manager, you should find it in ~/.arduino15/packages/esp32/tools/esptool_py/4.5.1/esptool.py 
+If you're using the Arduino IDE with arduino-esp32 installed from the Library Manager, you should find it in ~/.arduino15/packages/esp32/tools/esptool_py/*/esptool.py 
 
 Otherwise, you can install the ESP-IDF framework (explained below) and find it in the tools/ folder.
 
 ## 3. Compilation of your project
 
-You can compile the project with the Arduino IDE, resulting in these files:
+You can compile the project with the Arduino IDE 2.x, resulting in these files in Main/build if you choose "Sketch" -> "Export Compiled Binaries"
 - Main.ino.bootloader.bin
 - Main.ino.bin
 - Main.ino.partitions.bin
-- ~/.arduino15/packages/esp32/hardware/esp32/2.0.17/tools/partitions/boot_app0.bin
+- ~/.arduino15/packages/esp32/hardware/esp32/*/tools/partitions/boot_app0.bin
 
 Or you can compile the project using ESP-IDF, typically resulting in these files:
 - build/bootloader/bootloader.bin
@@ -118,17 +118,18 @@ Or you can compile the project using ESP-IDF, typically resulting in these files
   
 ### 3a Compiling with the Arduino IDE
 
-Open the project ("Main.ino") in the Arduino IDE and the other files will open as well.
+Open the project ("Main.ino") in the Arduino IDE 2.x and the other files will open as well.
 
-Follow the usual steps from the [README.md](README.md) to build it for a physical device, but instead of sending the sketch to your device using "Sketch" - "Upload", only compile it with "Sketch" - "Verify/Compile".
+Follow the usual steps from the [README.md](README.md) to build it for a physical device, but instead of sending the sketch to your device using "Sketch" - "Upload", only compile it with "Sketch" - "Export Compiled Binary".
 
-The resulting .bin files will be in /tmp/arduino_build_*/*.bin such as:
+The resulting .bin files will be in Main/build/esp32.esp32.esp32/ such as:
 
 ```
-user@arduino:~$ ls -al /tmp/arduino_build_*/*bin
--rw-r--r-- 1 user user 1158480 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.bin
--rw-r--r-- 1 user user   17536 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.bootloader.bin
--rw-r--r-- 1 user user    3072 Jan 28 11:59 /tmp/arduino_build_833289/Main.ino.partitions.bin
+user@arduino:~/Arduino/lightning-piggy$ ls -al Main/build/esp32.esp32.esp32/*bin
+-rw-r--r-- 1 user user 1752048 Apr 10 11:03 Main/build/esp32.esp32.esp32/Main.ino.bin
+-rw-r--r-- 1 user user   23440 Apr 10 11:03 Main/build/esp32.esp32.esp32/Main.ino.bootloader.bin
+-rw-r--r-- 1 user user 4194304 Apr 10 11:03 Main/build/esp32.esp32.esp32/Main.ino.merged.bin
+-rw-r--r-- 1 user user    3072 Apr 10 11:03 Main/build/esp32.esp32.esp32/Main.ino.partitions.bin
 ```
 
 ### 3b Compiling your Arduino project with ESP-IDF
@@ -218,12 +219,12 @@ Optionally, consider enabling:
 
 ## 4. Script to combine the binaries and run on QEMU
 
-Use something like this [run_in_qemu_emulator.sh script](run_in_qemu_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
+Use something like this [run_on_emulator.sh script](run_on_emulator.sh) to combine all binaries into one bootable MTD "disk" image, boot it with QEMU and connect to the serial port.
 
 When running it, you should see something like:
 
 ```
-user@arduino:~/Arduino/lightning-piggy$ ./run_in_qemu_emulator.sh
+user@arduino:~/Arduino/lightning-piggy$ ./scripts/run_on_emulator.sh
 
 esptool.py v4.8.1
 Wrote 0x400000 bytes to file flash_image.bin, ready to flash to offset 0x0

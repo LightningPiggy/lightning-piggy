@@ -2,14 +2,14 @@
 // Tested with the DEPG display variants, not with GDEM.
 //
 // Tested with:
-// - Arduino IDE version 1.8.13
+// - Arduino IDE version 2.3.5
 // - ESP32 Board Support version 3.1.1
 // - Preferences -> Compiler warnings: Default
 // - Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 // - Tools -> Upload Speed: 921600
 // - Tools -> CPU Frequency: 240Mhz
 // - Tools -> Flash Frequency: 80Mhz
-// - Tools -> Flash Mode: QIO
+// - Tools -> Flash Mode: DIO
 // - Tools -> Flash Size: 4MB (32Mb)
 // - Tools -> Partition Scheme: Custom (uses Main/partitions.csv)
 // - Tools -> Core Debug Level: Warn
