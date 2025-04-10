@@ -16,11 +16,12 @@ if [ -d config_partition/ ]; then
 	echo "Folder config_partition/ found, creating LittleFS configuration filesystem..."
 	~/sources/mklittlefs/mklittlefs -c config_partition/ -s 0x70000 config_partition.bin
 	[ $? -ne 0 ] && echo "ERROR: could not create LittleFS configuration filesystem" && exit 1
+	configargs="0x390000 config_partition.bin"
 fi
 
 
 echo "Merging .bin files into bootable image..."
-esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin 0x1000 "$BOOTLOADERNAME" 0x8000 "$PARTITIONSNAME" 0xe000 $BOOTAPP 0x10000 $APPNAME 0x390000 config_partition.bin
+esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin 0x1000 "$BOOTLOADERNAME" 0x8000 "$PARTITIONSNAME" 0xe000 $BOOTAPP 0x10000 $APPNAME $configargs
 # Or for ESP-IDF builds, use something like:
 # esptool.py --chip esp32 merge_bin --fill-flash-size=4MB --output flash_image.bin 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/main.bin
 
