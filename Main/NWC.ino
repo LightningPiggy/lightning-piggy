@@ -102,10 +102,10 @@ void loop_nwc() {
 void setup_nwc() {
   Serial.println("Initializing Nostr...");
   nostr::esp32::ESP32Platform::initNostr(true);
-
+  Serial.println("Nostr transport...");
   transport = nostr::esp32::ESP32Platform::getTransport();
   nwc = new nostr::NWC(transport, nwcURL);
-
+  Serial.println("Subscribing to NWC...");
   subscribeNWC();
 }
 
