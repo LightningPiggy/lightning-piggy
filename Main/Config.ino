@@ -252,6 +252,29 @@ void setup_webserver() {
       }
   }).addMiddleware(&digestAuth);
 
+  // CAPTIVE PORTAL CHECK URLs:
+  server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request) { // Android
+    request->redirect(configURL);
+  });
+  server.on("/success.txt", HTTP_GET, [](AsyncWebServerRequest *request) { // Chromium (some versions)
+    request->redirect(configURL);
+  });
+  server.on("/hotspot-detect.html", HTTP_GET, [](AsyncWebServerRequest *request) { // iOS, macOS
+    request->redirect(configURL);
+  });
+  server.on("/ncsi.txt", HTTP_GET, [](AsyncWebServerRequest *request) { // Windows
+    request->redirect(configURL);
+  });
+  server.on("/connecttest.txt", HTTP_GET, [](AsyncWebServerRequest *request) { // Windows (alternate)
+    request->redirect(configURL);
+  });
+  server.on("/redirect", HTTP_GET, [](AsyncWebServerRequest *request) { // Firefox
+    request->redirect(configURL);
+  });
+  server.on("/canonical.html", HTTP_GET, [](AsyncWebServerRequest *request) { // Firefox (alternate)
+    request->redirect(configURL);
+  });
+
   server.onNotFound([](AsyncWebServerRequest* request) {
     request->send(404, "text/plain", "Not found");
   });
