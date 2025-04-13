@@ -32,7 +32,7 @@ String currentVersion = "6.2.1";
 #define PIGGYMODE_RECONNECT_WIFI 12
 
 // Configuration through access point:
-#define ACCESS_POINT_SSID          "LightningPiggy Configuration"
+#define ACCESS_POINT_SSID          "Piggy Config"
 #define ACCESS_POINT_PASS          ""
 #define ACCESS_POINT_CHANNEL       1
 #define ACCESS_POINT_MAX_STA_CONN  4
