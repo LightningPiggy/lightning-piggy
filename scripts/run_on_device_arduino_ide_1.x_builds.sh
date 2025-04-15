@@ -1,6 +1,8 @@
 #!/bin/sh
+# Run lightning-piggy in an ESP32 emulator with QEMU, including WiFi!
+# See Emulation.md
 
-SOFTWARE_DIR=Main/build/esp32.esp32.esp32/
+SOFTWARE_DIR=$(ls -1drt /tmp/arduino_build_* | tail -n 1)
 APPNAME=$(find "$SOFTWARE_DIR" -iname "*ino.bin" )
 BOOTLOADERNAME=$(find "$SOFTWARE_DIR" -iname "*ino.bootloader.bin" )
 PARTITIONSNAME=$(find "$SOFTWARE_DIR" -iname "*ino.partitions.bin" )
