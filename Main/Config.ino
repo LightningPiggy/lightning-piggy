@@ -9,7 +9,8 @@
 
 #include <AsyncTCP.h>
 #include <DNSServer.h>
-#include <ESPAsyncWebServer.h>
+
+#include <base64.h>
 
 // index page:
 #include "../webconfig/index.html.gzip.h"
@@ -20,8 +21,6 @@ IPAddress apIP(192, 168, 4, 1);  // Hardcoded IP for the ESP32 SoftAP
 
 DNSServer dnsServer;
 AsyncWebServer server(80);
-AsyncAuthenticationMiddleware digestAuth;
-
 
 String readFile(String name) {
     File file = LittleFS.open(name, "r");
@@ -197,47 +196,82 @@ bool getConfigValueAsBool(char* configValue) {
   return (isConfigured(configValue) && strncmp(configValue,"YES", 3) == 0);
 }
 
+bool checkClientAuth(AsyncWebServerRequest *request) {
+  if (request->hasHeader("Cookie")) {
+    String cookie = request->getHeader("Cookie")->value();
+    Serial.println("Checking cookie: " + cookie);
+    String expectedCookie = String("auth=") + base64::encode(String(WEBCONFIG_USERNAME) + ":" + String(WEBCONFIG_PASSWORD));
+    return cookie.indexOf(expectedCookie) != -1;
+  }
+  return false;
+}
+
 void setup_webserver() {
   Serial.println("Setting up webserver...");
 
-  digestAuth.setUsername(WEBCONFIG_USERNAME);
-  digestAuth.setPassword(WEBCONFIG_PASSWORD);
-  digestAuth.setRealm(ACCESS_POINT_SSID);
-  digestAuth.setAuthFailureMessage("Authentication failed");
-  digestAuth.setAuthType(AsyncAuthType::AUTH_DIGEST);
-  digestAuth.generateHash();
-  
+  // Serve login page
+  server.on("/login", HTTP_GET, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/html", login_html);
+  });
+
+  // Handle login submission
+  server.on("/submit", HTTP_POST, [](AsyncWebServerRequest* request) {
+    if (request->hasParam("username", true) && request->hasParam("password", true)) {
+      String username = request->getParam("username", true)->value();
+      String password = request->getParam("password", true)->value();
+      if (username == WEBCONFIG_USERNAME && password == WEBCONFIG_PASSWORD) {
+        String cookieValue = base64::encode(username + ":" + password);
+        AsyncWebServerResponse* response = request->beginResponse(302);
+        response->addHeader("Location", "/");
+        response->addHeader("Set-Cookie", "auth=" + cookieValue + "; Path=/");
+        request->send(response);
+      } else {
+        AsyncWebServerResponse* response = request->beginResponse(302);
+        response->addHeader("Location", "/login?invalid");
+        request->send(response);
+      }
+    } else {
+      request->send(400, "text/plain", "Missing username or password");
+    }
+  });
+
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    if (!checkClientAuth(request)) {
+      request->redirect(loginURL);
+      return;
+    }
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_gzip, index_gzip_length);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
-  }).addMiddleware(&digestAuth);
+  });
 
   server.on(CONFIG_FILE, HTTP_GET, [](AsyncWebServerRequest* request) {
+    if (!checkClientAuth(request)) {
+      request->redirect(loginURL);
+      return;
+    }
     request->send(200, "text/html", paramFileString);
-  }).addMiddleware(&digestAuth);
-
-  server.on("/connect-wifi-station", HTTP_GET, [](AsyncWebServerRequest* request) {
-    //request->send(200, "text/html", "Trying to connect to WiFi station. If this fails, the device will go back into Access Point mode.");
-    piggyMode = PIGGYMODE_STARTING_STA;
-  }).addMiddleware(&digestAuth);
+  });
 
   server.on("/restart", HTTP_POST, [](AsyncWebServerRequest* request) {
+    if (!checkClientAuth(request)) {
+      request->redirect(loginURL);
+      return;
+    }
     request->send(200, "text/html", "Restarting the device...");
     restart();
-  }).addMiddleware(&digestAuth);
-
-  server.on("/delete-config", HTTP_GET, [](AsyncWebServerRequest* request) {
-    if (deleteFile(CONFIG_FILE)) {
-      request->send(200, "text/html", "Configuration file deleted.");
-    } else {
-      request->send(200, "text/html", "WARNING: Failed to delete configuration file!");
-    }
-  }).addMiddleware(&digestAuth);
+  });
 
   server.on(CONFIG_FILE, HTTP_PUT, [](AsyncWebServerRequest *request){
+      if (!checkClientAuth(request)) {
+        request->redirect(loginURL);
+        return;
+      }
       request->send(200, "text/plain", "Configuration file saved.");
   }, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+      if (!checkClientAuth(request)) {
+        return; // Don't process body if unauthenticated
+      }
       static String body;  // Accumulate data chunks
 
       if (index == 0) body = "";  // Reset on new request
@@ -250,7 +284,7 @@ void setup_webserver() {
           writeFile(CONFIG_FILE, body);
           parseConfig(paramFileString);
       }
-  }).addMiddleware(&digestAuth);
+  });
 
   // CAPTIVE PORTAL CHECK URLs:
   server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request) { // Android
@@ -276,7 +310,11 @@ void setup_webserver() {
   });
 
   server.onNotFound([](AsyncWebServerRequest* request) {
-    request->send(404, "text/plain", "Not found");
+    if (!checkClientAuth(request)) {
+      request->redirect(loginURL);
+    } else {
+      request->send(404, "text/plain", "Not found");
+    }
   });
 
 }
@@ -311,3 +349,4 @@ bool hasMinimalConfig() {
   Serial.println("WARNING: missing mandatory configuration items!");
   return false;
 }
+

@@ -20,6 +20,7 @@
 
 #include <ArduinoJson.h>
 #include <WebSocketsClient.h> // Needs to be here, otherwise compilation error...
+#include <ESPAsyncWebServer.h> // Needs to be here due to the way Arduino compiles, otherwise it complains about AsyncWebServerRequest not found
 
 #include "logos.h"
 #include "config.h"
