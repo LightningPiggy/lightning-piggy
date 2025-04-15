@@ -132,7 +132,7 @@ static const char login_html[] PROGMEM = R"rawliteral(
 <body style="background-color: #F0BCD7; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
 <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); padding: 2rem; width: 300px; text-align: center;">
 <h2 style="color: #EC008C; margin-bottom: 1.5rem;">Lightning Piggy Configuration Login</h2>
-<div id="error-message" style="color: #EC008C; margin-bottom: 1rem; display: none;">Invalid credentials, please try again...</div>
+<div id="error-message" style="color: #EC008C; margin-bottom: 1rem; display: none;">Invalid credentials, please try again.</div>
 <form action="/submit" method="POST">
 <input type="text" name="username" placeholder="Username" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
 <input type="password" name="password" placeholder="Password" style="width: 100%; padding: 0.5rem; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EC008C'; this.style.boxShadow='0 0 0 2px rgba(236, 0, 140, 0.2)';" onblur="this.style.borderColor='#ccc'; this.style.boxShadow='none';">
