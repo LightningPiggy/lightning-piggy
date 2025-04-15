@@ -7,8 +7,9 @@
 - Update GxEPD2 from 1.5.6 to 1.6.3
 - Update TFT_eSPI library from 2.2.20 to 2.5.4
 - Update arduino-esp32 from 3.1.1 to 3.2 (implies ESP-IDF 5.3.2 to 5.4.2)
-- Shorter Access Point name for configuration
-- Add captive portal redirect
+- Shorter access point name for configuration (Piggy Config)
+- Implement automatic captive portal redirect
+- Beautify configuration login page
 
 **6.2.1**
 - Fix white border bug on 2.66 inch ePaper display
