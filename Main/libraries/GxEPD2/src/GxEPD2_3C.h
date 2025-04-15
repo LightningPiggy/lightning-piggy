@@ -75,7 +75,7 @@
 #if __has_include("epd3c/GxEPD2_266c.h")
 #include "epd3c/GxEPD2_266c.h"
 #endif
-#if __has_include("epd3c/GxEPD2_150_BN.h")
+#if __has_include("epd3c/GxEPD2_270c.h")
 #include "epd3c/GxEPD2_270c.h"
 #endif
 #if __has_include("epd3c/GxEPD2_420c.h")
@@ -83,6 +83,12 @@
 #endif
 #if __has_include("epd3c/GxEPD2_420c_Z21.h")
 #include "epd3c/GxEPD2_420c_Z21.h"
+#endif
+#if __has_include("gdey3c/GxEPD2_420c_GDEY042Z98.h")
+#include "gdey3c/GxEPD2_420c_GDEY042Z98.h"
+#endif
+#if __has_include("gdey3c/GxEPD2_579c_GDEY0579Z93.h")
+#include "gdey3c/GxEPD2_579c_GDEY0579Z93.h"
 #endif
 #if __has_include("epd3c/GxEPD2_583c.h")
 #include "epd3c/GxEPD2_583c.h"
@@ -92,9 +98,6 @@
 #endif
 #if __has_include("epd3c/GxEPD2_583c_Z83.h")
 #include "epd3c/GxEPD2_583c_Z83.h"
-#endif
-#if __has_include("epd7c/GxEPD2_565c.h")
-#include "epd7c/GxEPD2_565c.h"
 #endif
 #if __has_include("epd3c/GxEPD2_750c.h")
 #include "epd3c/GxEPD2_750c.h"
