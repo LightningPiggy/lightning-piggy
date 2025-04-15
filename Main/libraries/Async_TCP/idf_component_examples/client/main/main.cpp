@@ -15,38 +15,32 @@
 #define WIFI_SSID "*********"
 #define WIFI_PASS "*********"
 
-// 16 slots on esp32 (CONFIG_LWIP_MAX_ACTIVE_TCP)
-#define MAX_CLIENTS CONFIG_LWIP_MAX_ACTIVE_TCP
-// #define MAX_CLIENTS 1
-
-size_t permits = MAX_CLIENTS;
+bool client_running = false;
 
 void makeRequest() {
-  if (!permits) {
+  client_running = true;
+  AsyncClient *client = new AsyncClient;
+  if (client == nullptr) {
+    Serial.println("** could not allocate client");
+    client_running = false;
     return;
   }
-
-  Serial.printf("** permits: %d\n", permits);
-
-  AsyncClient *client = new AsyncClient;
 
   client->onError([](void *arg, AsyncClient *client, int8_t error) {
     Serial.printf("** error occurred %s \n", client->errorToString(error));
     client->close(true);
     delete client;
+    client_running = false;
   });
 
   client->onConnect([](void *arg, AsyncClient *client) {
-    permits--;
     Serial.printf("** client has been connected: %" PRIu16 "\n", client->localPort());
 
     client->onDisconnect([](void *arg, AsyncClient *client) {
       Serial.printf("** client has been disconnected: %" PRIu16 "\n", client->localPort());
       client->close(true);
       delete client;
-
-      permits++;
-      makeRequest();
+      client_running = false;
     });
 
     client->onData([](void *arg, AsyncClient *client, void *data, size_t len) {
@@ -58,6 +52,7 @@ void makeRequest() {
 
   if (!client->connect(HOST, PORT)) {
     Serial.println("** connection failed");
+    client_running = false;
   }
 }
 
@@ -74,13 +69,12 @@ void setup() {
   Serial.println();
   Serial.print("Connected to WiFi. IP: ");
   Serial.println(WiFi.localIP());
-
-  for (size_t i = 0; i < MAX_CLIENTS; i++) {
-    makeRequest();
-  }
 }
 
 void loop() {
+  if (!client_running) {
+    makeRequest();
+  }
   delay(1000);
   Serial.printf("** free heap: %" PRIu32 "\n", ESP.getFreeHeap());
 }
