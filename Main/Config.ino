@@ -1,7 +1,5 @@
 /**
- * Configured values can be set by:
- * - the new method: modifying the CONFIG_FILE in LittleFS (this is done using the web server on the device)
- * - the old method: replacing the REPLACETHISBY... values in the binary (this is done using the webinstaller in a webbrowser, while the device is connecting with a USB cable)
+ * Configured values can be set by modifying the CONFIG_FILE in LittleFS (this is done using the web server on the device)
  */
 
 #include "FS.h"
@@ -77,17 +75,14 @@ String getJsonValue(JsonDocument &doc, const char *name) {
   return "";
 }
 
-void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, char* binaryReplacedValue = NULL, const char * defaultValue = NULL) {
+void tryGetJsonValue(JsonDocument &doc, const char *key, char **output, size_t maxLength, const char * defaultValue = NULL) {
     String value = getJsonValue(doc, key);
     if (value == "") {
-      Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for binaryReplacedValue and defaultValue...");
-      if (isConfigured(binaryReplacedValue)) {
-        Serial.println("Found binaryReplacedValue, using that: '" + String(binaryReplacedValue) + "'");
-        value = binaryReplacedValue;
-      } else if (defaultValue != NULL) {
+      Serial.println("WARNING: no Json config value found for '" + String(key) + "' so checking for defaultValue...");
+      if (defaultValue != NULL) {
         value = defaultValue;
       } else {
-        Serial.println("no binaryReplacedValue is set, no defaultValue is set, so config item remains empty");
+        Serial.println("no defaultValue is set, so config item remains empty");
       }
     }
     free(*output);  // Free old memory to prevent leaks
@@ -105,11 +100,11 @@ bool parseConfig(String paramFileString) {
 
     // Mandatory:
     // ==========
-    tryGetJsonValue(doc, "config_wifi_ssid_1", &ssid, MAX_CONFIG_LENGTH, REPLACE_ssid);
-    tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH, REPLACE_password);
-    tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH, REPLACE_lnbitsHost);
-    tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH, REPLACE_lnbitsInvoiceKey);
-    tryGetJsonValue(doc, "config_nwc_url", &nwcURL, MAX_CONFIG_LENGTH_NWCURL, "");
+    tryGetJsonValue(doc, "config_wifi_ssid_1", &ssid, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_wifi_password_1", &password, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_lnbits_host", &lnbitsHost, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_lnbits_invoice_key", &lnbitsInvoiceKey, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_nwc_url", &nwcURL, MAX_CONFIG_LENGTH_NWCURL);
 
     Serial.println("Parsed config:");
     Serial.printf("config_wifi_ssid_1: %s\n", ssid);
@@ -122,20 +117,20 @@ bool parseConfig(String paramFileString) {
     // ========
 
     // Wallet:
-    tryGetJsonValue(doc, "config_lnbits_https_port", &lnbitsPort, MAX_CONFIG_LENGTH, REPLACE_lnbitsPort);
-    tryGetJsonValue(doc, "config_static_receive_code", &staticLNURLp, MAX_CONFIG_LENGTH, REPLACE_staticLNURLp);
+    tryGetJsonValue(doc, "config_lnbits_https_port", &lnbitsPort, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_static_receive_code", &staticLNURLp, MAX_CONFIG_LENGTH);
 
     // Display:
-    tryGetJsonValue(doc, "config_fiat_currency", &btcPriceCurrencyChar, MAX_CONFIG_LENGTH, REPLACE_btcPriceCurrencyChar);
-    tryGetJsonValue(doc, "config_balance_bias", &balanceBias, MAX_CONFIG_LENGTH, REPLACE_balanceBias);
-    tryGetJsonValue(doc, "config_thousands_separator", &thousandsSeparator, MAX_CONFIG_LENGTH, REPLACE_thousandsSeparator, defaultThousandsSeparator);
-    tryGetJsonValue(doc, "config_decimal_separator", &decimalSeparator, MAX_CONFIG_LENGTH, REPLACE_decimalSeparator, defaultDecimalSeparator);
-    tryGetJsonValue(doc, "config_boot_salutation", &bootSloganPrelude, MAX_CONFIG_LENGTH, REPLACE_bootSloganPrelude);
-    tryGetJsonValue(doc, "config_show_boot_wisdom", &showSloganAtBoot, MAX_CONFIG_LENGTH, REPLACE_showSloganAtBoot, "NO");
+    tryGetJsonValue(doc, "config_fiat_currency", &btcPriceCurrencyChar, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_balance_bias", &balanceBias, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_thousands_separator", &thousandsSeparator, MAX_CONFIG_LENGTH, defaultThousandsSeparator);
+    tryGetJsonValue(doc, "config_decimal_separator", &decimalSeparator, MAX_CONFIG_LENGTH, defaultDecimalSeparator);
+    tryGetJsonValue(doc, "config_boot_salutation", &bootSloganPrelude, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_show_boot_wisdom", &showSloganAtBoot, MAX_CONFIG_LENGTH, "NO");
 
     // Device:
-    tryGetJsonValue(doc, "config_locale", &localeSetting, MAX_CONFIG_LENGTH, REPLACE_localeSetting);
-    tryGetJsonValue(doc, "config_time_zone", &timezone, MAX_CONFIG_LENGTH, REPLACE_timezone);
+    tryGetJsonValue(doc, "config_locale", &localeSetting, MAX_CONFIG_LENGTH);
+    tryGetJsonValue(doc, "config_time_zone", &timezone, MAX_CONFIG_LENGTH);
     tryGetJsonValue(doc, "config_sleep_mode", &sleepMode, MAX_CONFIG_LENGTH);
     tryGetJsonValue(doc, "config_custom_sleep_minutes", &customSleepMinutes, MAX_CONFIG_LENGTH);
 
@@ -173,7 +168,7 @@ void setup_config() {
 
 // Returns true if the value is configured, otherwise false.
 bool isConfigured(const char * configValue) {
-  if (configValue == NULL || strnlen(configValue, MAX_CONFIG_LENGTH) == 0 || strncmp(configValue, NOTCONFIGURED, NOTCONFIGURED_LENGTH) == 0) {
+  if (configValue == NULL || strnlen(configValue, MAX_CONFIG_LENGTH) == 0) {
     return false;
   } else {
     return true;
