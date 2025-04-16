@@ -23,7 +23,6 @@
 #include <ESPAsyncWebServer.h> // Needs to be here due to the way Arduino compiles, otherwise it complains about AsyncWebServerRequest not found
 
 #include "logos.h"
-#include "config.h"
 #include "Constants.h"
 
 #define roundEight(x) (((x) + 8 - 1) & -8) // round up to multiple of 8
