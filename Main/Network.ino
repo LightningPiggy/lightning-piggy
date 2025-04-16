@@ -141,11 +141,7 @@ bool wifiConnected() {
 // Take measurements of the Wi-Fi strength and return the average result.
 // 100 measurements takes 2 seconds so 20ms per measurement
 int getStrength(int points){
-    #ifdef DEBUG
-      delay(points*20);
-      return 42;
-    #endif
-
+    
     long rssi = 0;
     long averageRSSI = 0;
 
