@@ -135,23 +135,18 @@ void disconnectWifi() {
 }
 
 bool wifiConnected() {
-  return (WiFi.status() == WL_CONNECTED);
+  return WiFi.status() == WL_CONNECTED;
 }
 
 // Take measurements of the Wi-Fi strength and return the average result.
 // 100 measurements takes 2 seconds so 20ms per measurement
-int getStrength(int points){
-    
+int getStrength(int points) {
     long rssi = 0;
-    long averageRSSI = 0;
-
     for (int i=0;i < points;i++){
         rssi += WiFi.RSSI();
         delay(20);
     }
-
-    averageRSSI = rssi/points;
-    return averageRSSI;
+    return rssi/points;
 }
 
 /*
@@ -181,9 +176,7 @@ int strengthPercent(float strength) {
 String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   int connectionAttempts = 0;
 
-  int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
-  if (strncmp(host,lnbitsHost,MAX_CONFIG_LENGTH)!=0) lnbitsPortInteger = 443; // only use lnbitsPort for connecting to lnbitsHost
-
+  int lnbitsPortInteger = strncmp(host, lnbitsHost, MAX_CONFIG_LENGTH) != 0 ? 443 : getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
   Serial.println("Fetching " + endpointUrl + " from " + String(host) + " on port " + String(lnbitsPortInteger));
 
   WiFiClientSecure client;
@@ -216,12 +209,10 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 
   int chunked = 0;
   String line = "";
-  while (client.connected() && (millis() < maxTime))
-  {
+  while (client.connected() && millis() < maxTime) {
     line = client.readStringUntil('\n');
     line.toLowerCase();
-    if (line == "\r")
-    {
+    if (line == "\r") {
       break;
     } else if (line == "transfer-encoding: chunked\r") {
       Serial.println("HTTP chunking enabled");
@@ -238,26 +229,18 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 
     line = "";
     while (lengthline != "0\r" && (millis() < maxTime)) {
-      const char *lengthLineChar = lengthline.c_str();
-      int bytesToRead = strtol(lengthLineChar, NULL, 16);
+      int bytesToRead = strtol(lengthline.c_str(), NULL, 16);
       Serial.println("bytesToRead = " + String(bytesToRead));
 
       int bytesRead = 0;
       while (bytesRead < bytesToRead && (millis() < maxTime)) { // stop if less than max bytes are read
         uint8_t buff[HTTP_BUFFER_SIZE] = {0}; // zero initialize buffer to have 0x00 at the end
         int readNow = min(bytesToRead - bytesRead,HTTP_BUFFER_SIZE-1); // leave one byte for the 0x00 at the end
-        //Serial.println("Reading bytes: " + String(readNow));
         int thisBytesRead = client.read(buff, readNow);
-        //Serial.println("thisBytesRead = " + String(thisBytesRead));
         if (thisBytesRead > 0) {
           bytesRead += thisBytesRead;
-          String stringBuff = (char*)buff;
-          line += stringBuff;
-        } else {
-          //Serial.println("No bytes available from HTTPS, waiting a bit...");
-          //delay(42);
+          line += String((char*)buff);
         }
-        //Serial.println("chunked total reply = '" + reply + "'");
       }
 
       // skip \r\n
@@ -272,7 +255,6 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   }
   client.stop();
 
-  //Serial.println("returning total chunked reply = '" + reply + "'");
   feed_watchdog(); // after successfully completing this long-running and potentially hanging operation, it's a good time to feed the watchdog
   return line;
 }
@@ -299,7 +281,6 @@ void connectWebsocket() {
 
 void parseWebsocketText(String text) {
   Serial.println("Parsing websocket text: " + text);
-  String returnValue = "";
   DynamicJsonDocument doc(2048); // 2KB should be enough for the incoming payment
 
   DeserializationError error = deserializeJson(doc, text);
@@ -401,59 +382,55 @@ void wifi_init_softap(void) {
     int delaytime = 0;
     if (runningOnQemu()) delaytime = 10; // QEMU seems to need this. 5 might be too short (0816 and crash) so go with 10.
     int counter = 0;
-    Serial.println(counter++); delay(delaytime);
+    delay(delaytime);
     ESP_ERROR_CHECK(esp_netif_init()); delay(delaytime); // if he hangs a long time after this, that seems to be a good sign...
-    Serial.println(counter++); delay(delaytime);
-    //ESP_ERROR_CHECK(esp_event_loop_create_default()); // this crashes if STA was used before
-    //Serial.println(counter++);delay(delaytime);
-    Serial.println("skipped esp_event_loop_create_default for now!");
-    // esp_event_loop_create_default(); with an error check instead of abort() would also work but it doesn't seem necessary, probably in arduino context
+    delay(delaytime);
 
     esp_event_loop_create_default();
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     softap_netif = esp_netif_create_default_wifi_ap(); // causes conflict with other WiFi.softAP()
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config)); // Ensuring all fields are initialized
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
     strncpy(reinterpret_cast<char*>(wifi_config.ap.ssid), ACCESS_POINT_SSID, sizeof(wifi_config.ap.ssid) - 1);
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     wifi_config.ap.ssid_len = strlen(ACCESS_POINT_SSID);
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     wifi_config.ap.channel = ACCESS_POINT_CHANNEL;
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     strncpy(reinterpret_cast<char*>(wifi_config.ap.password), ACCESS_POINT_PASS, sizeof(wifi_config.ap.password) - 1);
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     wifi_config.ap.max_connection = ACCESS_POINT_MAX_STA_CONN;
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     wifi_config.ap.pmf_cfg.required = true;
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
     if (strlen(ACCESS_POINT_PASS) == 0) {
-        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    Serial.println(counter++);delay(delaytime);
+      wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+      delay(delaytime);
     } else {
-        wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
-    Serial.println(counter++);delay(delaytime);
+      wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
+      delay(delaytime);
     }
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
     ESP_ERROR_CHECK(esp_wifi_start());
-    Serial.println(counter++);delay(delaytime);
+    delay(delaytime);
 
     Serial.println("wifi_init_softap finished. SSID: '" + String(ACCESS_POINT_SSID) + "', password '" + String(ACCESS_POINT_PASS) + "', channel: " + String(ACCESS_POINT_CHANNEL));
     Serial.println(counter++);delay(delaytime);
