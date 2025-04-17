@@ -1,12 +1,10 @@
-// Array of Bitcoin slogans
-
 // These were removed because it seems they're confusing for kids, at least without context:
 // en: "'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks' -- Satoshi Nakamoto",
 // en: "'I am not Dorian Nakamoto.' - Satoshi Nakamoto",
 // de_DE: "'In der Times vom 03. Januar 2009 stand geschrieben: Der Finanzminister steht kurz vor einer zweiten Bankenrettung' - Satoshi Nakamoto",
 // de_CH: "'I dr Times vom 03. Januar 2009 isch gstange: Dr Schatzmeischter isch churz drvor ä zwöiti Bankerettig ufdsgleise' - Satoshi Nakamoto",
 
-String bitcoinSlogans_en[] = {
+const char* bitcoinSlogans_en[] PROGMEM = {
   "Bitcoin is nerds gold.",
   "In Bitcoin we trust.",
   "Be your own bank.",
@@ -50,7 +48,7 @@ String bitcoinSlogans_en[] = {
   "'We reject: kings, presidents, and voting. We believe in: rough consensus and running code.' — David Clark"
 };
 
-String bitcoinSlogans_nl[] = {
+const char* bitcoinSlogans_nl[] PROGMEM = {
   "Bitcoin is goud voor nerds.",
   "We vertrouwen op Bitcoin.",
   "Wees je eigen bank.",
@@ -93,7 +91,7 @@ String bitcoinSlogans_nl[] = {
   "'Als privacy illegaal wordt, zullen alleen illegalen privacy hebben.' - Phil Zimmermann"
 };
 
-String bitcoinSlogans_da[] = {
+const char* bitcoinSlogans_da[] PROGMEM = {
   "Bitcoin er nørdernes guld.",
   "Vi tror og stoler på Bitcoin.",
   "Vær din egen bank.",
@@ -136,7 +134,7 @@ String bitcoinSlogans_da[] = {
   "'Hvis privatliv er forbudt, vil kun lovbrydere have privatliv.' - Phil Zimmermann"
 };
 
-String bitcoinSlogans_de_DE[] = {
+const char* bitcoinSlogans_de_DE[] PROGMEM = {
   "Bitcoin ist Computerfreak Gold.",
   "In Bitcoin vertrauen wir.",
   "Sei deine eigene Bank.",
@@ -170,7 +168,7 @@ String bitcoinSlogans_de_DE[] = {
   "'Wenn du mir nicht glaubst oder es nicht verstehst, habe ich keine Zeit, dich zu überzeugen, sorry.' - Satoshi Nakamoto",
   "'Die Wärme deines Computers ist nicht verschwendet, wenn du dein Haus damit heizen kannst.' - Satoshi Nakamoto",
   "'Was halten Sie von dem B-Symbol mit den zwei Strichen an der Außenseite?' - Satoshi Nakamoto",
-  "'Der Nachweis, der jemanden als echt ausweist, ist die Fähigkeit, CPU-Leistung zu liefern.' - Satoshi Nakamoto",  
+  "'Der Nachweis, der jemanden als echt ausweist, ist die Fähigkeit, CPU-Leistung zu liefern.' - Satoshi Nakamoto",
   "'Für mehr Privatsphäre ist es am besten, Bitcoin-Adressen nur einmal zu verwenden.' - Satoshi Nakamoto",
   "'Ich bin sicher, dass es in 20 Jahren entweder ein sehr großes Transaktionsvolumen oder gar kein Volumen geben wird.' - Satoshi Nakamoto",
   "'Verlorene Coins machen die Coins aller anderen nur etwas mehr wert. Betrachten Sie es als eine Spende an alle.' - Satoshi Nakamoto",
@@ -179,7 +177,7 @@ String bitcoinSlogans_de_DE[] = {
   "'Wenn die Privatsphäre verboten wird, werden nur noch Gesetzlose eine Privatsphäre haben.' - Phil Zimmermann"
 };
 
-String bitcoinSlogans_de_CH[] {
+const char* bitcoinSlogans_de_CH[] PROGMEM = {
   "Dr Vättu dobe het di gärn.",
   "Bitcoin isch Goud für Computerfreaks.",
   "Mir vertroue uf Bitcoin.",
@@ -212,9 +210,9 @@ String bitcoinSlogans_de_CH[] {
   "Nume du chasch dis Läbe läbe.",
   "Cypherpunks schribe Code.",
   "'We du mir nid gloubsch oder es nid tscheggsch, hani ke Zit dir das no lenger z erkläre, sorry.' - Satoshi Nakamoto",
-  "'D Wermi vo dim Computer isch nid vergüdet, wenn du dis Hus drmit heizisch.' - Satoshi Nakamoto",
+  "'D Wermi vo dim Computer isch nid vergüudet, wenn du dis Hus drmit heizisch.' - Satoshi Nakamoto",
   "'Wie fingsch das B-Zeiche mit de zwöi Striche am Rand?' - Satoshi Nakamoto",
-  "'Dr Nachwis, dass öpper ächt isch, isch sini Fähigkeit Computerleischtig z liefere.' - Satoshi Nakamoto",  
+  "'Dr Nachwis, dass öpper ächt isch, isch sini Fähigkeit Computerleischtig z liefere.' - Satoshi Nakamoto",
   "'Für meh Privatsphäri isch es am beschte, wede dini Bitcoin-Adrässene nume einisch bruchsch.' - Satoshi Nakamoto",
   "'Ig bi sicher, dass es i 20 Jahr entweder henne viu oder gar keni Transaktione meh git.' - Satoshi Nakamoto",
   "'Verloreni Coins mache d Coins vo aune angere no meh wärt. Luegsch es aus Gschänk für die angere aa.' - Satoshi Nakamoto",
@@ -223,7 +221,7 @@ String bitcoinSlogans_de_CH[] {
   "'Wenn d Privatsphäri verbote wird, wärde nume no Gesetzlosi ä Privatsphäri ha.' - Phil Zimmermann"
 };
 
-String bitcoinSlogans_es[] = {
+const char* bitcoinSlogans_es[] PROGMEM = {
   "Bitcoin es el oro de los frikis.",
   "En Bitcoin confiamos.",
   "Sé tu propio banco.",
@@ -266,22 +264,35 @@ String bitcoinSlogans_es[] = {
   "'Si la privacidad se ilegaliza, solo los fuera de la ley tendrán privacidad.' - Phil Zimmermann"
 };
 
-// Function to get a random Bitcoin slogan from the array
+struct SloganLocale {
+  const char* locale;
+  const char* const* slogans;
+  size_t count;
+};
+
+const SloganLocale sloganLocales[] PROGMEM = {
+  { "da", bitcoinSlogans_da, sizeof(bitcoinSlogans_da) / sizeof(bitcoinSlogans_da[0]) },
+  { "de_CH", bitcoinSlogans_de_CH, sizeof(bitcoinSlogans_de_CH) / sizeof(bitcoinSlogans_de_CH[0]) },
+  { "de", bitcoinSlogans_de_DE, sizeof(bitcoinSlogans_de_DE) / sizeof(bitcoinSlogans_de_DE[0]) },
+  { "es", bitcoinSlogans_es, sizeof(bitcoinSlogans_es) / sizeof(bitcoinSlogans_es[0]) },
+  { "nl", bitcoinSlogans_nl, sizeof(bitcoinSlogans_nl) / sizeof(bitcoinSlogans_nl[0]) },
+  { "en", bitcoinSlogans_en, sizeof(bitcoinSlogans_en) / sizeof(bitcoinSlogans_en[0]) }
+};
+
 String getRandomBootSlogan() {
+  const char* const* slogans = bitcoinSlogans_en;
+  size_t count = sizeof(bitcoinSlogans_en) / sizeof(bitcoinSlogans_en[0]);
+
   if (isConfigured(localeSetting)) {
-    if (strncmp(localeSetting,"da",2) == 0) {
-      return getRandomElementFromArray(bitcoinSlogans_da, sizeof(bitcoinSlogans_da)/sizeof(bitcoinSlogans_da[0]));
-    } else if (strncmp(localeSetting,"de_CH",5) == 0) { // check specific locales first because they are preferred (de_CH before de)
-      return getRandomElementFromArray(bitcoinSlogans_de_CH, sizeof(bitcoinSlogans_de_CH)/sizeof(bitcoinSlogans_de_CH[0]));
-    } else if (strncmp(localeSetting,"de",2) == 0) { // matches de_DE and other de_* locales
-      return getRandomElementFromArray(bitcoinSlogans_de_DE, sizeof(bitcoinSlogans_de_DE)/sizeof(bitcoinSlogans_de_DE[0]));
-    } else if (strncmp(localeSetting,"es",2) == 0) { // matches Spanish (Espanol) and other es_* locales
-      return getRandomElementFromArray(bitcoinSlogans_es, sizeof(bitcoinSlogans_es)/sizeof(bitcoinSlogans_es[0]));
-    } else if (strncmp(localeSetting,"nl",2) == 0) { // matches Dutch (Nederlands) and other nl_* locales
-      return getRandomElementFromArray(bitcoinSlogans_nl, sizeof(bitcoinSlogans_nl)/sizeof(bitcoinSlogans_nl[0]));
+    for (size_t i = 0; i < sizeof(sloganLocales) / sizeof(sloganLocales[0]); i++) {
+      const char* locale = (const char*)pgm_read_ptr(&sloganLocales[i].locale);
+      if (strncmp(localeSetting, locale, strlen(locale)) == 0) {
+        slogans = (const char* const*)pgm_read_ptr(&sloganLocales[i].slogans);
+        count = pgm_read_dword(&sloganLocales[i].count);
+        break;
+      }
     }
   }
 
-  // Default to Engish
-  return getRandomElementFromArray(bitcoinSlogans_en, sizeof(bitcoinSlogans_en)/sizeof(bitcoinSlogans_en[0]));
+  return String((const char*)pgm_read_ptr(&slogans[random(count)]));
 }
