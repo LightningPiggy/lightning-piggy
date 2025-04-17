@@ -300,7 +300,7 @@ void connectWebsocket() {
 void parseWebsocketText(String text) {
   Serial.println("Parsing websocket text: " + text);
   String returnValue = "";
-  DynamicJsonDocument doc(4096); // 4096 bytes is plenty for just the wallet details (id, name and balance info)
+  DynamicJsonDocument doc(2048); // 2KB should be enough for the incoming payment
 
   DeserializationError error = deserializeJson(doc, text);
   if (error) {

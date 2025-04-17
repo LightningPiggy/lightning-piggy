@@ -14,7 +14,7 @@ int getWalletBalance() {
 
   const String line = getEndpointData(lnbitsHost, url, true);
   Serial.println("Got wallet balance line: " + line);
-  DynamicJsonDocument doc(4096); // 4096 bytes is plenty for just the wallet details (id, name and balance info)
+  DynamicJsonDocument doc(2048); // 2KB is plenty for just the wallet details (id, name and balance info)
 
   DeserializationError error = deserializeJson(doc, line);
   if (error)
@@ -47,7 +47,7 @@ void fetchLNURLPayments(int limit) {
   const String line = getEndpointData(lnbitsHost, url, true);
   Serial.println("Got payments: " + line);
 
-  DynamicJsonDocument doc(limit * 4096); // 4KB per lnurlpayment should be enough for everyone (tm)
+  DynamicJsonDocument doc(limit * 2048); // 2KB per lnurlpayment should be enough for everyone (tm) - I measured it at 1.1KB
   DeserializationError error = deserializeJson(doc, line);
   if (error)
   {

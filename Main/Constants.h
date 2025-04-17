@@ -115,7 +115,7 @@ const char* defaultDecimalSeparator = ".";
 #define smallestFontHeight 16
 #define MAX_FONT 5
 
-#define MAX_TEXT_LINES 20
+#define MAX_TEXT_LINES 10
 
 #define WALLET_NONE 0
 #define WALLET_LNBITS 1
