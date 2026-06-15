@@ -207,6 +207,20 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
 
   long maxTime = millis() + HTTPS_TIMEOUT_SECONDS * 1000;
 
+  // First line is the status line, e.g. "HTTP/1.1 200 OK". Without this
+  // check, error bodies (404 pages, 500 messages, proxy interstitials)
+  // were returned as if they were data — and e.g. the update checker
+  // would version-compare against an error page.
+  String statusLine = client.readStringUntil('\n');
+  int statusCode = 0;
+  int firstSpace = statusLine.indexOf(' ');
+  if (firstSpace > 0) statusCode = statusLine.substring(firstSpace + 1).toInt();
+  if (statusCode < 200 || statusCode > 299) {
+    Serial.println("WARNING: HTTP request returned status " + String(statusCode) + " (" + statusLine + "), returning empty reply...");
+    client.stop();
+    return "";
+  }
+
   int chunked = 0;
   String line = "";
   while (client.connected() && millis() < maxTime) {
@@ -273,7 +287,7 @@ void connectWebsocket() {
   // wss://demo.lnpiggy.com/api/v1/ws/<invoice read key>
   String url = websocketApiUrl + String(lnbitsInvoiceKey);
   int lnbitsPortInteger = getConfigValueAsInt((char*)lnbitsPort, DEFAULT_LNBITS_PORT);
-  Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + url);
+  Serial.println("Trying to connect websocket: wss://" + String(lnbitsHost) + ":" + String(lnbitsPortInteger) + String(websocketApiUrl) + "<invoice key redacted>");
   webSocket.beginSSL(lnbitsHost, lnbitsPortInteger, url);
   webSocket.setReconnectInterval(1000);
   webSocket.onEvent(webSocketEvent);
@@ -290,6 +304,13 @@ void parseWebsocketText(String text) {
     return;
   }
 
+  // Guard against notifications without a wallet_balance — parsing a
+  // missing field yields 0, and the payment branch below would then
+  // display a zero balance (plus bias) for a wallet that isn't empty.
+  if (doc["wallet_balance"].isNull()) {
+    Serial.println("Websocket update has no wallet_balance, ignoring...");
+    return;
+  }
   int walletBalance = doc["wallet_balance"];
   int balanceBiasInt = getConfigValueAsInt((char*)balanceBias, 0);
   Serial.println("Wallet now contains " + String(walletBalance) + " sats and balance bias of " + String(balanceBiasInt) + " sats.");

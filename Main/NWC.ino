@@ -124,7 +124,10 @@ void subscribeNWC() {
 
             long long amount = notification.amount; // millisats to sats
             if (notification.type == "outgoing") amount = -amount; // outgoing is negative, otherwise positive
-            setBalance(getConfigValueAsInt((char*)balanceBias, 0) + getBalance() + (amount/1000));
+            // The running balance already includes the configured
+            // balance bias (applied once in nwc_getBalance) — adding it
+            // again here would accumulate the bias on every payment.
+            setBalance(getBalance() + (amount/1000));
             lastUpdatedBalance = millis();
             resetLastPaymentReceivedMillis();
 
@@ -144,7 +147,9 @@ void nwc_getBalance() {
   setGetBalanceDone(false);
   nwc->getBalance([&](nostr::GetBalanceResponse resp) {
     Serial.println("[!] Balance: " + String(resp.balance) + " msatoshis");
-    setBalance(resp.balance/1000);
+    // Apply the configured balance bias here, once per fetch — the same
+    // semantics as the LNBits path (getWalletBalance adds it on fetch).
+    setBalance(resp.balance/1000 + getConfigValueAsInt((char*)balanceBias, 0));
     setGetBalanceDone(true);
   }, [](String err, String errMsg) {
     Serial.println("[!] Error: " + err + " " + errMsg);
@@ -159,4 +164,85 @@ void fetchNWCPayments(int max_payments) {
   fetchDoneNotified = false;
   maxtime = 0; // start from the "now" and go backwards
   requestedTime = NOT_SPECIFIED;
+}
+
+// ---------------------------------------------------------------------------
+// lud16 extraction from the NWC URL.
+//
+// NWC URLs can carry the wallet's Lightning Address as a `lud16` query
+// parameter (e.g. coinos, and LNBits' nwcprovider since PR #27):
+//   nostr+walletconnect://<pubkey>?relay=...&secret=...&lud16=user@host
+// Using it means an NWC-only piggy gets a receive QR with zero extra
+// configuration, instead of showing nothing until the user manually
+// fills in the static receive code.
+// ---------------------------------------------------------------------------
+
+static int nwcHexNibble(char h) {
+  if (h >= '0' && h <= '9') return h - '0';
+  if (h >= 'a' && h <= 'f') return h - 'a' + 10;
+  if (h >= 'A' && h <= 'F') return h - 'A' + 10;
+  return -1;
+}
+
+// Minimal percent-decoder. Some NWC generators URL-encode parameter
+// values (e.g. the @ in the lud16 as %40, or the relay's :// as
+// %3A%2F%2F); others emit them raw. Handles both.
+String nwcURLDecode(const String &in) {
+  String out;
+  out.reserve(in.length());
+  for (unsigned int i = 0; i < in.length(); i++) {
+    char c = in[i];
+    if (c == '%' && i + 2 < in.length()) {
+      int hi = nwcHexNibble(in[i + 1]);
+      int lo = nwcHexNibble(in[i + 2]);
+      if (hi >= 0 && lo >= 0) {
+        out += (char)(hi * 16 + lo);
+        i += 2;
+        continue;
+      }
+    }
+    out += c;
+  }
+  return out;
+}
+
+// Return the (percent-decoded) value of `param` from the NWC URL's query
+// string, or "" if absent / no NWC URL configured.
+String getNWCURLParam(const String &param) {
+  if (!isConfigured(nwcURL)) return "";
+  String url = String(nwcURL);
+  int queryStart = url.indexOf('?');
+  if (queryStart < 0) return "";
+  String query = url.substring(queryStart + 1);
+  unsigned int pos = 0;
+  while (pos < query.length()) {
+    int amp = query.indexOf('&', pos);
+    if (amp < 0) amp = query.length();
+    int eq = query.indexOf('=', pos);
+    if (eq > (int)pos && eq < amp) {
+      if (query.substring(pos, eq) == param) {
+        return nwcURLDecode(query.substring(eq + 1, amp));
+      }
+    }
+    pos = amp + 1;
+  }
+  return "";
+}
+
+// The wallet's Lightning Address from the NWC URL's lud16 parameter,
+// prefixed with the lightning: URI scheme, or "" if the URL doesn't
+// carry one.
+//
+// The prefix matters for the receive QR: phone cameras and wallet
+// scanners dispatch lightning:-scheme QRs straight into a Lightning-
+// enabled app, whereas a bare user@host scans as plain text on many
+// of them. Idempotent in case a generator ever includes the scheme
+// in the parameter itself.
+String getLud16FromNWCURL() {
+  String lud16 = getNWCURLParam("lud16");
+  if (lud16.length() == 0) return lud16;
+  String lower = lud16;
+  lower.toLowerCase();
+  if (lower.startsWith("lightning:")) return lud16;
+  return "lightning:" + lud16;
 }

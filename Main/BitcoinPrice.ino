@@ -38,6 +38,10 @@ float getBitcoinPriceCoingecko() {
 
   if (lastBtcPrice == 0.0) {
     Serial.println("BTC Price not found, returning NOT_SPECIFIED");
+    // Reset the cache marker — leaving 0.0 in lastBtcPrice would make the
+    // freshness check above return 0.0 as the "cached price" for the next
+    // 15 minutes after a single failed lookup.
+    lastBtcPrice = NOT_SPECIFIED;
     return (float)NOT_SPECIFIED;
   }
 

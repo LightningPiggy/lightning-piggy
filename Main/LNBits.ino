@@ -27,14 +27,18 @@ int getWalletBalance() {
   String walletName = doc["name"];
 
   if (walletName == "null") {
-    Serial.println("ERROR: could not find wallet details on lnbits host " + String(lnbitsHost) + " with invoice/read key " + String(lnbitsInvoiceKey) + " so something's wrong! Did you make a typo?");
+    Serial.println("ERROR: could not find wallet details on lnbits host " + String(lnbitsHost) + " with the configured invoice/read key (not printed) so something's wrong! Did you make a typo?");
     return NOT_SPECIFIED;
   } else {
     Serial.print("Wallet name: " + walletName);
   }
 
-  int walletBalance = doc["balance"];
-  walletBalance = walletBalance / 1000;
+  // Balance is in MILLISATS — an int overflows at 2^31 msat which is only
+  // ~2.15 million sats (~0.0215 BTC), turning bigger balances negative.
+  // Parse as long long (the same trick paymentJsonToString already uses
+  // for amounts) and convert to sats before going back to int.
+  long long walletBalanceMsat = doc["balance"];
+  int walletBalance = (int)(walletBalanceMsat / 1000);
 
   Serial.println(" contains " + String(walletBalance) + " sats");
   return walletBalance+balanceBiasInt;
@@ -80,7 +84,19 @@ String getLNURLp() {
   if (cachedLNURLp.length() > 0) return cachedLNURLp;
 
   if (walletToUse() != WALLET_LNBITS) {
-    Serial.println("WARNING: No receive code is configured and it can only be fetched for LNBits");
+    // NWC URLs can carry the wallet's Lightning Address as a lud16 query
+    // parameter (coinos, LNBits nwcprovider since PR #27, ...). Use it so
+    // an NWC-only piggy shows a receive QR without the user also having
+    // to fill in the static receive code manually.
+    if (walletToUse() == WALLET_NWC) {
+      String lud16 = getLud16FromNWCURL();
+      if (lud16.length() > 0) {
+        Serial.println("Using lud16 from the NWC URL as receive code: " + lud16);
+        cachedLNURLp = lud16;
+        return lud16;
+      }
+    }
+    Serial.println("WARNING: No receive code is configured; it can only be fetched from LNBits or taken from the NWC URL's lud16 parameter");
     return "";
   }
 

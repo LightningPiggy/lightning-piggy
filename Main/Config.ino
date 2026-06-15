@@ -108,10 +108,15 @@ bool parseConfig(String paramFileString) {
 
     Serial.println("Parsed config:");
     Serial.printf("config_wifi_ssid_1: %s\n", ssid);
-    Serial.printf("config_wifi_password_1: %s\n", password);
+    // Secrets are intentionally NOT printed: the serial console is often
+    // shared for debugging (and is readable by anything with USB access),
+    // so leaking the wifi password, the LNBits invoice key, or the NWC
+    // URL (which contains the wallet secret) would hand over credentials.
+    // Lengths are enough to confirm a value was loaded.
+    Serial.printf("config_wifi_password_1: <redacted, %u chars>\n", (unsigned)strnlen(password, MAX_CONFIG_LENGTH));
     Serial.printf("config_lnbits_host: %s\n", lnbitsHost);
-    Serial.printf("config_lnbits_invoice_key: %s\n", lnbitsInvoiceKey);
-    Serial.printf("config_nwc_url: %s\n", nwcURL);
+    Serial.printf("config_lnbits_invoice_key: <redacted, %u chars>\n", (unsigned)strnlen(lnbitsInvoiceKey, MAX_CONFIG_LENGTH));
+    Serial.printf("config_nwc_url: <redacted, %u chars>\n", (unsigned)strnlen(nwcURL, MAX_CONFIG_LENGTH_NWCURL));
 
     // Optional
     // ========
@@ -271,10 +276,13 @@ void setup_webserver() {
 
       if (index == 0) body = "";  // Reset on new request
 
-      body += String((char*)data).substring(0, len);  // Append chunk
+      // `data` is NOT NUL-terminated — constructing a String from it
+      // reads past the buffer until a stray zero byte. Append exactly
+      // `len` bytes instead.
+      body.concat((const char*)data, len);  // Append chunk
 
       if (index + len == total) {  // All data received
-          Serial.println("Received PUT data: '" + body + "'");
+          Serial.println("Received PUT data of " + String(body.length()) + " bytes (content not printed: contains credentials)");
           paramFileString = body;
           writeFile(CONFIG_FILE, body);
           parseConfig(paramFileString);

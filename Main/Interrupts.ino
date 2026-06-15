@@ -3,7 +3,7 @@
 
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-bool interruptTriggered = false;
+volatile bool interruptTriggered = false; // written from the tilt ISR — must be volatile
 long minTimeBetweenInterrupts = 250; // milliseconds
 long lastInterrupt = -minTimeBetweenInterrupts;
 
@@ -34,7 +34,10 @@ void IRAM_ATTR buttonISR() {
 void setup_interrupts() {
   Serial.println("configuring pin GPIO_NUM_32 as interrupt...");
   pinMode(GPIO_NUM_32, INPUT_PULLDOWN);
-  attachInterrupt(GPIO_NUM_32, interruptHandler, HIGH);
+  // RISING (edge), not HIGH (level): a level interrupt refires
+  // continuously for as long as the piggy is tilted, hammering the CPU
+  // with ISR calls. One edge per tilt is all the handler needs.
+  attachInterrupt(GPIO_NUM_32, interruptHandler, RISING);
 
   Serial.println("configuring pin GPIO_NUM_39 as interrupt...");
   pinMode(BUTTON_PIN, INPUT_PULLUP);

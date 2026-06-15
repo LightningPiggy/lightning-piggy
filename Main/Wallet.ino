@@ -53,12 +53,26 @@ String getPayment(int nr) {
 }
 
 void appendPayment(String detail) {
+  // nrOfPayments starts at NOT_SPECIFIED (-1) until the first fetch
+  // resets it — normalize so an early websocket/NWC payment can't
+  // write to payments[-1].
+  if (nrOfPayments < 0) nrOfPayments = 0;
+  // Bounds check BEFORE the write: when the list is full, the old code
+  // still assigned payments[MAX_PAYMENTS] — one past the end of the
+  // array — corrupting whatever lives next on the heap. The LNBits call
+  // site guards externally but the NWC path appends whatever the relay
+  // returns, which may be more than requested.
+  if (nrOfPayments >= MAX_PAYMENTS) {
+    Serial.println("WARNING: payment list is full, not appending.");
+    return;
+  }
   payments[nrOfPayments] = detail;
-  if (nrOfPayments<MAX_PAYMENTS) nrOfPayments++;
+  nrOfPayments++;
   Serial.println("After appending payment, the list contains:" + stringArrayToString(payments, nrOfPayments));
 }
 
 void prependPayment(String toadd) {
+  if (nrOfPayments < 0) nrOfPayments = 0; // see appendPayment — pre-fetch state is -1
   // First move them all down one spot
   for (int i=min(nrOfPayments,MAX_PAYMENTS-1);i>0;i--) {
     Serial.println("Moving payment comment for item " + String(i-1) + " to item " + String(i));
