@@ -48,7 +48,7 @@ Make sure the Arduino IDE has permissions to access the serial port:
 Commands:
 
 ```
-arduino-cli compile -u -v -t --libraries Main/libraries/ --fqbn esp32:esp32:esp32 -p /dev/ttyACM0 Main/
+arduino-cli compile -u -v -t --libraries Main/libraries/ --fqbn esp32:esp32:esp32:PartitionScheme=custom,FlashMode=dio -p /dev/ttyACM0 Main/
 ```
 
 **On the lnbits webpage:**
@@ -90,16 +90,58 @@ How to release
 
 To make a new release available on the web installer:
 
-- Open /Main/Main.ino using Arduino Studio.
-- Update version number in Constants.h
-- Make sure there are no uncommitted development changes (git diff; git diff --staged)
+- Update the version number in Constants.h
 - Update CHANGELOG.md
-- Copy the libraries used from C:\...\lightning-piggy\Main\libraries\ to your Arduino libraries folder (usually C:\Users\YourUsername\Documents\Arduino\libraries).
-- Compile the project using Sketch > Compile.
-- Copy /tmp/arduino_build_*/Main.ino.*bin to ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x/
-- Check that md5sum ~/.arduino15/packages/esp32/hardware/esp32/3.1.1/tools/partitions/boot_app0.bin matches ~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x/boot_app0.bin
-- Update the version number in ~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x.json
-- pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push  ; popd
+- Make sure there are no uncommitted development changes (git diff; git diff --staged)
+- Build and export the binaries with Arduino CLI (esp32 core 3.2.0, custom 4MB partition scheme, DIO flash mode — same settings as the build instructions above):
+
+```
+arduino-cli compile --libraries Main/libraries/ \
+  --fqbn esp32:esp32:esp32:PartitionScheme=custom,FlashMode=dio \
+  --export-binaries Main/
+```
+
+  This writes the binaries to `Main/build/esp32.esp32.esp32/`: `Main.ino.bin` (the app), `Main.ino.bootloader.bin`, `Main.ino.partitions.bin`, `Main.ino.merged.bin` (full 4MB flash image), plus `Main.ino.elf` and `Main.ino.map` (kept per-release for decoding crash backtraces with `addr2line`).
+
+- Copy the build output into the web installer repo. `boot_app0.bin` is not produced by the build — it ships with the esp32 core (on Linux under `~/.arduino15/`, on macOS under `~/Library/Arduino15/`):
+
+```
+DST=~/sources/lightningpiggy.github.io/firmware/ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x
+CORE=~/.arduino15/packages/esp32/hardware/esp32/3.2.0
+cp Main/build/esp32.esp32.esp32/Main.ino.bin            "$DST/"
+cp Main/build/esp32.esp32.esp32/Main.ino.bootloader.bin "$DST/"
+cp Main/build/esp32.esp32.esp32/Main.ino.partitions.bin "$DST/"
+cp Main/build/esp32.esp32.esp32/Main.ino.merged.bin     "$DST/"
+cp Main/build/esp32.esp32.esp32/Main.ino.elf            "$DST/"
+cp Main/build/esp32.esp32.esp32/Main.ino.map            "$DST/"
+cp "$CORE/tools/partitions/boot_app0.bin"               "$DST/"
+```
+
+- Check that the `boot_app0.bin` in the web installer repo matches the one shipped with the esp32 core:
+
+```
+md5sum "$CORE/tools/partitions/boot_app0.bin" "$DST/boot_app0.bin"
+```
+
+- Sanity-check that the partition table did not change between releases. It must stay byte-identical so that web-installs and OTA updates keep the existing `spiffs`/config partition at 0x390000 intact (a changed layout could brick configured devices):
+
+```
+git -C ~/sources/lightningpiggy.github.io diff --stat -- "$DST/Main.ino.partitions.bin"
+# (no output = unchanged = good)
+```
+
+- Update the version number in `~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x.json`
+- Commit and push the web installer repo. This is served via GitHub Pages, so pushing to `master` publishes the new firmware to the web installer (and to OTA) immediately:
+
+```
+pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push ; popd
+```
+
+- Tag the release on the lightning-piggy repo so it shows up under Releases (marked latest):
+
+```
+gh release create vX.Y.Z --target master --title "vX.Y.Z" --notes-file <changelog-notes> --latest
+```
 
 ESP32 emulation with QEMU (including WiFi!)
 ===================
