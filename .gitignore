@@ -1,3 +1,8 @@
+.DS_Store
+
+# build folder from exporting with arduino ide
+build/
+
 config_partition.bin
 flash_image.bin*
 

@@ -42,7 +42,7 @@ String currentVersion = "6.4.0";
 
 #define CONFIG_FILE "/config.json"
 
-extern const int NOT_SPECIFIED = -1; 
+extern const int NOT_SPECIFIED = -1;
 
 #define MAX_CONFIG_LENGTH 256 // used to be 131 but people with longer LNURLs had issues
 #define MAX_CONFIG_LENGTH_NWCURL 512
@@ -86,6 +86,7 @@ const char * dkWeekdays[] = { "Sø", "Ma", "Ti", "On", "To", "Fr", "Lø"};
 const char * esWeekdays[] = { "Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"};
 const char * enWeekdays[] = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
 const char * nlWeekdays[] = { "Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"};
+const char * ptWeekdays[] = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
 
 
 typedef enum {

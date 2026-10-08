@@ -41,6 +41,8 @@ String getDayOfWeekString(int dayOfWeek) {
     return nlWeekdays[dayOfWeek];
   } else if (strncmp(localeSetting,"es",2) == 0) {
     return esWeekdays[dayOfWeek];
+  } else if (strncmp(localeSetting,"pt",2) == 0) {
+    return ptWeekdays[dayOfWeek];
   } else {
      return enWeekdays[dayOfWeek];
   }
