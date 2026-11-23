@@ -129,7 +129,8 @@ String loginURL = "/login";
 
 static const char login_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Login</title></head>
 <body style="background-color: #F0BCD7; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
 <div style="background: white; border-radius: 0.75rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); padding: 2rem; width: 300px; text-align: center;">
 <h2 style="color: #EC008C; margin-bottom: 1.5rem;">Lightning Piggy Configuration Login</h2>
