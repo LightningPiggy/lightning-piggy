@@ -65,7 +65,7 @@
     </div>
 
     <!-- Form Container (built dynamically) -->
-    <form id="configForm" class="space-y-6 hidden" novalidate></form>
+    <form id="configForm" class="space-y-6 hidden" novalidate autocapitalize="none" autocorrect="off" spellcheck="false"></form>
 
     <!-- Save Button Container (with extra spacing) -->
     <div class="flex justify-center mt-8">
@@ -285,6 +285,12 @@
           inputEl.id = name;
           inputEl.name = name;
           inputEl.placeholder = label;
+          // keep lowercase for WiFi/URLs on Android/iOS keyboards
+          if (inputEl.tagName !== "SELECT") {
+            inputEl.autocapitalize = "none";
+            inputEl.autocorrect = false;
+            inputEl.spellcheck = false;
+          }
           inputEl.className =
             "mt-1 block w-full border-2 rounded-md shadow-sm p-2 focus:outline-none focus:border-[var(--primary)]";
           if (config_items_mandatory.includes(name)) {
