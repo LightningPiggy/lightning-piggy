@@ -1,3 +1,7 @@
+**6.4.1** (unreleased)
+- Stop printing secrets to the serial console, which 6.4.0 still did in three places: the raw config file at every boot (WiFi password, LNBits invoice key and NWC URL with the wallet secret), each config value as it was loaded (the same secrets), and the LNBits websocket URL on every (re)connect (the invoice key). Secret config values now show as `<redacted, N chars>`; other values are still printed
+
+
 **6.4.0**
 - NWC: use the Lightning Address from the NWC URL's `lud16` parameter as the receive code, so an NWC-only piggy shows a receive QR without also having to fill in the static receive code manually (coinos and LNBits' nwcprovider include it in generated URLs)
 - NWC: prefix the receive QR with the `lightning:` URI scheme so phone cameras and wallet scanners open a Lightning-enabled app instead of treating it as plain text

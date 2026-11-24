@@ -29,7 +29,10 @@ String readFile(String name) {
 
     String fileContent = file.readString();
 
-    Serial.println("File Content:" + fileContent);
+    // The config file holds the WiFi password, the LNBits invoice key and
+    // the NWC URL (which contains the wallet secret), so only its size is
+    // printed. getJsonValue() prints each value it loads, secrets redacted.
+    Serial.println("Read " + String(fileContent.length()) + " bytes from " + name + " (content not printed: contains credentials)");
 
     file.close();
 
@@ -64,11 +67,22 @@ bool deleteFile(const char* filename) {
   return false;
 }
 
+// Config keys whose values must never reach the serial console: the WiFi
+// password(s), the LNBits invoice key and the NWC URL (it contains the
+// wallet secret). Matched by name so similar keys added later are covered.
+bool isSecretConfigKey(const char *name) {
+  return strstr(name, "password") || strstr(name, "_key") || strstr(name, "nwc_url") || strstr(name, "secret");
+}
+
 String getJsonValue(JsonDocument &doc, const char *name) {
   for (JsonObject elem : doc.as<JsonArray>()) {
     if (strcmp(elem["name"], name) == 0) {
       String value = elem["value"].as<String>();
-      Serial.println("Found config value: '" + value + "'");
+      if (isSecretConfigKey(name)) {
+        Serial.printf("Found config value for '%s': <redacted, %u chars>\n", name, (unsigned)value.length());
+      } else {
+        Serial.println("Found config value for '" + String(name) + "': '" + value + "'");
+      }
       return value;
     }
   }
