@@ -118,6 +118,9 @@ void loop() {
   } else if (piggyMode == PIGGYMODE_WAITING_STA) {
     if (!keepWaitingWifi()) {
       if (wifiConnected()) {
+        // An earlier unrecoverable wifi error may have shortened the watchdog so it restarts soon.
+        // The wifi is back, so restore the long timeout that network fetches are sized for.
+        long_watchdog_timeout();
         // Show IP address
         int wifiStrengthPercent = strengthPercent(getStrength(5));
         updateStatusBar("Strength: " + String(wifiStrengthPercent) + "% IP: " + ipToString(WiFi.localIP())); delay(500);

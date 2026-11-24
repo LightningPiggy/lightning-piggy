@@ -182,6 +182,9 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   WiFiClientSecure client;
   client.setInsecure(); // see https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/README.md
   client.setHandshakeTimeout(HTTPS_TIMEOUT_SECONDS);
+  // setTimeout() only sets the Stream read timeout. The TCP connect uses NetworkClient's own
+  // connection timeout, which NetworkClientSecure sets to 30s, so set that one too.
+  client.setConnectionTimeout(HTTPS_TIMEOUT_SECONDS * 1000);
   client.setTimeout(HTTPS_TIMEOUT_SECONDS * 1000);
 
   while (feed_watchdog() && connectionAttempts < MAX_HTTPS_CONNECTION_ATTEMPTS && !client.connect(host, lnbitsPortInteger)) {
