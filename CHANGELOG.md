@@ -3,6 +3,7 @@
 - Add tests for that reader that run on a computer, without a device: `tests/host/run.sh`
 - Stop printing secrets to the serial console, which 6.4.0 still did in three places: the raw config file at every boot (WiFi password, LNBits invoice key and NWC URL with the wallet secret), each config value as it was loaded (the same secrets), and the LNBits websocket URL on every (re)connect (the invoice key). Secret config values now show as `<redacted, N chars>`; other values are still printed
 - Limit each HTTPS connection attempt to the intended 15 seconds (the connect could take up to 30 s), and restore the long watchdog timeout once the WiFi reconnects after a WiFi error, so a slow fetch can no longer run into the short 30 s watchdog meant for the failed connection
+- NWC: show all recent payments with wallets that ignore `list_transactions`' `until` parameter, such as LNBits' nwcprovider, which made the piggy show the newest payment twice and nothing else. When a reply is not older than the previous payment, the piggy pages with `offset` instead
 
 
 **6.4.0**
