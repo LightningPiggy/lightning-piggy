@@ -1,3 +1,8 @@
+**6.4.1** (unreleased)
+- Harden the shared HTTPS fetch helper's response reader. It now waits for data that arrives in several pieces, accepts any valid form of chunked replies (several chunks, chunk extensions, trailers, any header spelling) and honours Content-Length. A reply that is cut short, compressed or malformed is rejected instead of being passed on as data, so the update checker can no longer show "UPD!" because of half a reply. The whole reply has to arrive within 15 seconds.
+- Add tests for that reader that run on a computer, without a device: `tests/host/run.sh`
+
+
 **6.4.0**
 - NWC: use the Lightning Address from the NWC URL's `lud16` parameter as the receive code, so an NWC-only piggy shows a receive QR without also having to fill in the static receive code manually (coinos and LNBits' nwcprovider include it in generated URLs)
 - NWC: prefix the receive QR with the `lightning:` URI scheme so phone cameras and wallet scanners open a Lightning-enabled app instead of treating it as plain text
