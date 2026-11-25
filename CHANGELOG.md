@@ -1,3 +1,7 @@
+**6.4.1** (unreleased)
+- Limit each HTTPS connection attempt to the intended 15 seconds (the connect could take up to 30 s), and restore the long watchdog timeout once the WiFi reconnects after a WiFi error, so a slow fetch can no longer run into the short 30 s watchdog meant for the failed connection
+
+
 **6.4.0**
 - NWC: use the Lightning Address from the NWC URL's `lud16` parameter as the receive code, so an NWC-only piggy shows a receive QR without also having to fill in the static receive code manually (coinos and LNBits' nwcprovider include it in generated URLs)
 - NWC: prefix the receive QR with the `lightning:` URI scheme so phone cameras and wallet scanners open a Lightning-enabled app instead of treating it as plain text
