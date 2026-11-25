@@ -93,11 +93,11 @@ To make a new release available on the web installer:
 - Update the version number in Constants.h
 - Update CHANGELOG.md
 - Make sure there are no uncommitted development changes (git diff; git diff --staged)
-- Build and export the binaries with Arduino CLI (esp32 core 3.2.0, custom 4MB partition scheme, DIO flash mode — same settings as the build instructions above):
+- Build and export the binaries with Arduino CLI (esp32 core 3.2.0, custom 4MB partition scheme, QIO flash mode). The flash mode option only selects which prebuilt bootloader goes into `Main.ino.bootloader.bin` and `Main.ino.merged.bin`; the app is the same with either. Releases since 6.4.0 ship the QIO bootloader, which every installed piggy runs, so use `FlashMode=qio` for releases. The DIO setting in the build instructions above is for the QEMU emulator:
 
 ```
 arduino-cli compile --libraries Main/libraries/ \
-  --fqbn esp32:esp32:esp32:PartitionScheme=custom,FlashMode=dio \
+  --fqbn esp32:esp32:esp32:PartitionScheme=custom,FlashMode=qio \
   --export-binaries Main/
 ```
 
@@ -123,15 +123,22 @@ cp "$CORE/tools/partitions/boot_app0.bin"               "$DST/"
 md5sum "$CORE/tools/partitions/boot_app0.bin" "$DST/boot_app0.bin"
 ```
 
-- Sanity-check that the partition table did not change between releases. It must stay byte-identical so that web-installs and OTA updates keep the existing `spiffs`/config partition at 0x390000 intact (a changed layout could brick configured devices):
+- Sanity-check that the partition table did not change between releases. It must stay byte-identical so that web-installs keep the existing `spiffs`/config partition at 0x390000 intact (a changed layout could brick configured devices):
 
 ```
 git -C ~/sources/lightningpiggy.github.io diff --stat -- "$DST/Main.ino.partitions.bin"
 # (no output = unchanged = good)
 ```
 
+- Check that the bootloader did not change either. A changed `Main.ino.bootloader.bin` usually means the build used `FlashMode=dio`; rebuild with `FlashMode=qio`:
+
+```
+git -C ~/sources/lightningpiggy.github.io diff --stat -- "$DST/Main.ino.bootloader.bin"
+# (no output = unchanged = good)
+```
+
 - Update the version number in `~/sources/lightningpiggy.github.io/manifests/manifest_ttgo_lilygo_2.13_and_2.66_inch_epaper_6.x.json`
-- Commit and push the web installer repo. This is served via GitHub Pages, so pushing to `master` publishes the new firmware to the web installer (and to OTA) immediately:
+- Commit and push the web installer repo. This is served via GitHub Pages, so pushing to `master` publishes the new firmware to the web installer immediately (the firmware has no over-the-air update):
 
 ```
 pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push ; popd
@@ -142,6 +149,8 @@ pushd ~/sources/lightningpiggy.github.io/ ; git commit -a ; git push ; popd
 ```
 gh release create vX.Y.Z --target master --title "vX.Y.Z" --notes-file <changelog-notes> --latest
 ```
+
+- Raise the latest version on the update server `m.lightningpiggy.com` (run by the Lightning Piggy team), so that piggies on older versions show "UPD!". Do this only after the web installer serves the new version.
 
 ESP32 emulation with QEMU (including WiFi!)
 ===================
