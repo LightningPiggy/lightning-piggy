@@ -3,6 +3,7 @@
 
 #include "NostrTransport.h"
 #include "services/NWC.h"
+#include "NwcPaging.h"
 
 #define NWC_GET_NEXT_TRANSACTION_TIMEOUT_MS 15 * 1000
 #define NWC_GET_BALANCE_TIMEOUT_MS 30 * 1000
@@ -10,10 +11,10 @@
 nostr::NWC *nwc = NULL;
 nostr::Transport *transport;
 
-unsigned long long maxtime; // if maxtime is 0, then it will default to "now", so it will fetch the latest transaction, and work backwards from there
-unsigned long long requestedTime;
+NwcPagingState paging = {};
+bool waitingForTransaction;
+int transactionRequestId = 0; // replies to older requests are ignored
 
-int paymentsFetched;
 int paymentsToFetch;
 bool reachedEndOfTransactionsList;
 bool fetchDoneNotified;
@@ -48,18 +49,38 @@ String extractPlainTextFromTransactionDescription(const String &input) {
 }
 
 void getNextTransaction() {
-  Serial.println("Doing listTransactions for maxtime " + String(maxtime) + ":");
+  unsigned long long maxtime; // if maxtime is 0, then it will default to "now", so it will fetch the latest transaction, and work backwards from there
+  int offset;
+  nwcPagingNextRequest(paging, maxtime, offset);
+  int requestId = ++transactionRequestId;
+  waitingForTransaction = true;
+  timeOfGetNextTransaction = millis();
+  Serial.println("Doing listTransactions for maxtime " + String(maxtime) + " and offset " + String(offset) + ":");
 
   try {
-    nwc->listTransactions(0,maxtime,1,0,false,"incoming", [&](nostr::ListTransactionsResponse resp) {
+    nwc->listTransactions(0,maxtime,1,offset,false,"incoming", [requestId, maxtime](nostr::ListTransactionsResponse resp) {
+        if (requestId != transactionRequestId) {
+          Serial.println("Ignoring a listTransactions reply to an earlier request.");
+          return;
+        }
+        waitingForTransaction = false;
         size_t numTransactions = resp.transactions.size();
         Serial.println("[!] listTransactions result for maxtime " + String(maxtime) + " has " + String(numTransactions) + " transactions: ");
         if (numTransactions == 0) reachedEndOfTransactionsList = true;
 
         for (auto transaction : resp.transactions) {
-          Serial.println("=> Got transaction: " + String(transaction.amount) + " msat createdAt: " + String(transaction.createdAt) + " with description: '" + transaction.description + "'");         
-          maxtime = transaction.createdAt-1;
+          Serial.println("=> Got transaction: " + String(transaction.amount) + " msat createdAt: " + String(transaction.createdAt) + " with description: '" + transaction.description + "'");
+          NwcPagingAction action = nwcPagingOnTransaction(paging, maxtime, transaction.createdAt, transaction.paymentHash.c_str());
+          if (action == NWC_PAGING_SWITCH_TO_OFFSET) {
+            Serial.println("The wallet ignored 'until' and returned a transaction that was already shown, so paging with 'offset' from now on.");
+            break;
+          } else if (action == NWC_PAGING_END) {
+            Serial.println("The wallet ignored 'offset' too and returned a transaction that was already shown, so stopping here.");
+            reachedEndOfTransactionsList = true;
+            break;
+          }
           appendPayment(formatMillisatAndMessage(transaction.amount,extractPlainTextFromTransactionDescription(transaction.description)));
+          if (paging.paymentsFetched >= paymentsToFetch) break;
         }
     }, [](String err, String errMsg) { Serial.println("[!] listTransactions Error: " + err + " " + errMsg); });
 
@@ -80,16 +101,14 @@ void loop_nwc() {
   }
 
   // if we can request the next one AND we need to fetch the next one AND we haven't reached the end:
-  if (paymentsFetched < paymentsToFetch && !reachedEndOfTransactionsList) {
-    if (maxtime != requestedTime) {
-      requestedTime = maxtime;
-      paymentsFetched++;
-      timeOfGetNextTransaction = millis();
+  if (paging.paymentsFetched < paymentsToFetch && !reachedEndOfTransactionsList) {
+    if (!waitingForTransaction) {
       getNextTransaction();
     } else if (millis() - timeOfGetNextTransaction > NWC_GET_NEXT_TRANSACTION_TIMEOUT_MS) {
       // for some reason no reply came in, so just cancel the whole thing
       // even better would be to redo the request a few times first, but that's more complex
       reachedEndOfTransactionsList = true;
+      transactionRequestId++; // a late reply must not add payments after the fetch was reported done
     } // still waiting for a reply, do nothing...
   } else { // fetched enough payments or reached end of list
     if (!fetchDoneNotified) {
@@ -158,12 +177,12 @@ void nwc_getBalance() {
 
 
 void fetchNWCPayments(int max_payments) {
-  paymentsFetched = 0;
+  nwcPagingStartFetch(paging); // start from the "now" and go backwards
   paymentsToFetch = max_payments;
   reachedEndOfTransactionsList = false;
   fetchDoneNotified = false;
-  maxtime = 0; // start from the "now" and go backwards
-  requestedTime = NOT_SPECIFIED;
+  waitingForTransaction = false;
+  transactionRequestId++; // a reply still in flight from a previous fetch must not be appended to this one
 }
 
 // ---------------------------------------------------------------------------

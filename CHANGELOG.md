@@ -1,3 +1,7 @@
+**6.4.1** (unreleased)
+- NWC: show all recent payments with wallets that ignore `list_transactions`' `until` parameter, such as LNBits' nwcprovider, which made the piggy show the newest payment twice and nothing else. When a reply is not older than the previous payment, the piggy pages with `offset` instead
+
+
 **6.4.0**
 - NWC: use the Lightning Address from the NWC URL's `lud16` parameter as the receive code, so an NWC-only piggy shows a receive QR without also having to fill in the static receive code manually (coinos and LNBits' nwcprovider include it in generated URLs)
 - NWC: prefix the receive QR with the `lightning:` URI scheme so phone cameras and wallet scanners open a Lightning-enabled app instead of treating it as plain text

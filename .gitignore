@@ -20,3 +20,6 @@ webconfig/server.log
 webconfig/config.json
 
 timezones/timezones.h
+
+# Host test build output
+tests/host/build/
