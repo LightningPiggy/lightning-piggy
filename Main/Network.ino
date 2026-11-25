@@ -3,7 +3,7 @@
 
 #include <WiFiClientSecure.h>
 
-#define HTTP_BUFFER_SIZE 1024
+#include "HttpResponse.h"
 
 long lastWebsocketConnectionAttempt = -TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS;
 
@@ -205,67 +205,14 @@ String getEndpointData(const char * host, String endpointUrl, bool sendApiKey) {
   feed_watchdog();
   client.print(request);
 
-  long maxTime = millis() + HTTPS_TIMEOUT_SECONDS * 1000;
-
-  // First line is the status line, e.g. "HTTP/1.1 200 OK". Without this
-  // check, error bodies (404 pages, 500 messages, proxy interstitials)
-  // were returned as if they were data — and e.g. the update checker
-  // would version-compare against an error page.
-  String statusLine = client.readStringUntil('\n');
+  // The reader rejects anything it cannot fully and correctly decode (non-2xx
+  // status, truncated or compressed body, broken chunked framing), so callers
+  // never mistake an error page or half a reply for data.
+  String line;
   int statusCode = 0;
-  int firstSpace = statusLine.indexOf(' ');
-  if (firstSpace > 0) statusCode = statusLine.substring(firstSpace + 1).toInt();
-  if (statusCode < 200 || statusCode > 299) {
-    Serial.println("WARNING: HTTP request returned status " + String(statusCode) + " (" + statusLine + "), returning empty reply...");
-    client.stop();
-    return "";
-  }
-
-  int chunked = 0;
-  String line = "";
-  while (client.connected() && millis() < maxTime) {
-    line = client.readStringUntil('\n');
-    line.toLowerCase();
-    if (line == "\r") {
-      break;
-    } else if (line == "transfer-encoding: chunked\r") {
-      Serial.println("HTTP chunking enabled");
-      chunked = 1;
-    }
-  }
-
-  if (chunked == 0) {
-    line = client.readString();
-  } else {
-    // chunked means first length, then content, then length, then content, until length == "0"
-    String lengthline = client.readStringUntil('\n');
-    Serial.println("chunked reader got length line: '" + lengthline + "'");
-
-    line = "";
-    while (lengthline != "0\r" && (millis() < maxTime)) {
-      int bytesToRead = strtol(lengthline.c_str(), NULL, 16);
-      Serial.println("bytesToRead = " + String(bytesToRead));
-
-      int bytesRead = 0;
-      while (bytesRead < bytesToRead && (millis() < maxTime)) { // stop if less than max bytes are read
-        uint8_t buff[HTTP_BUFFER_SIZE] = {0}; // zero initialize buffer to have 0x00 at the end
-        int readNow = min(bytesToRead - bytesRead,HTTP_BUFFER_SIZE-1); // leave one byte for the 0x00 at the end
-        int thisBytesRead = client.read(buff, readNow);
-        if (thisBytesRead > 0) {
-          bytesRead += thisBytesRead;
-          line += String((char*)buff);
-        }
-      }
-
-      // skip \r\n
-      client.read();
-      client.read();
-
-      // next chunk length
-      lengthline = client.readStringUntil('\n');
-      Serial.println("chunked reader got length line: '" + lengthline + "'");
-    }
-
+  HttpReadResult result = readHttpResponse(client, HTTPS_TIMEOUT_SECONDS * 1000UL, line, statusCode);
+  if (result != HTTP_READ_OK) {
+    Serial.println("WARNING: HTTP request failed: " + String(httpReadResultToString(result)) + " (status " + String(statusCode) + "), returning empty reply...");
   }
   client.stop();
 
