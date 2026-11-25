@@ -1,6 +1,7 @@
 **6.4.1** (unreleased)
 - Harden the shared HTTPS fetch helper's response reader. It now waits for data that arrives in several pieces, accepts any valid form of chunked replies (several chunks, chunk extensions, trailers, any header spelling) and honours Content-Length. A reply that is cut short, compressed or malformed is rejected instead of being passed on as data, so the update checker can no longer show "UPD!" because of half a reply. The whole reply has to arrive within 15 seconds.
 - Add tests for that reader that run on a computer, without a device: `tests/host/run.sh`
+- Stop printing secrets to the serial console, which 6.4.0 still did in three places: the raw config file at every boot (WiFi password, LNBits invoice key and NWC URL with the wallet secret), each config value as it was loaded (the same secrets), and the LNBits websocket URL on every (re)connect (the invoice key). Secret config values now show as `<redacted, N chars>`; other values are still printed
 
 
 **6.4.0**

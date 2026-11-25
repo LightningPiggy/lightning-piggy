@@ -300,7 +300,8 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t wslength) {
             Serial.println("payload : " + String((int)payload));
             break;
         case WStype_CONNECTED:
-            Serial.printf("[WSc] Connected to url: %s, waiting for incoming payments...\r\n",  payload);
+            // payload is the websocket path, which ends with the invoice key.
+            Serial.printf("[WSc] Connected to %s<invoice key redacted>, waiting for incoming payments...\r\n", websocketApiUrl.c_str());
             // No need: webSocket.sendTXT("Connected"); // send message to server when Connected
             break;
         case WStype_TEXT:
