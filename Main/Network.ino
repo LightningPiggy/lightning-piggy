@@ -57,7 +57,11 @@ void wifiEventCallback(WiFiEvent_t eventid, WiFiEventInfo_t info) {
     // - WIFI_REASON_MIC_FAILURE? with wrong password, endstate
 
     // Boot takes around 11 seconds until wifi connection.
-    if (reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_AUTH_LEAVE || reason == WIFI_REASON_MIC_FAILURE) {
+    // Only while connecting: once the wallet is shown, a lost connection must not restart
+    // the connection steps, which draw over the display and can end in a long sleep.
+    // keepReconnectingWifi() takes care of it then.
+    bool connecting = (piggyMode == PIGGYMODE_WAITING_STA);
+    if (connecting && (reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_ASSOC_EXPIRE || reason == WIFI_REASON_AUTH_LEAVE || reason == WIFI_REASON_MIC_FAILURE)) {
       Serial.println("WARNING: This wifi error is unrecoverable or it's taking too long, needs restart.");
       piggyMode = PIGGYMODE_RECONNECT_WIFI; // try reconnecting anyway (workaround the BEACON_TIMEOUT issue on QEMU)
       // If the next watchdog restart will trigger the max and long sleep,
@@ -97,12 +101,39 @@ bool connectWifiAsync() {
   Serial.println("Connecting to " + String(ssid));
   lastWifiError = "";
   wifiStartTime = millis();
-  WiFi.onEvent(wifiEventCallback);
+  static bool wifiEventCallbackAdded = false;
+  if (!wifiEventCallbackAdded) { // WiFi.onEvent() adds the callback again on every call
+    WiFi.onEvent(wifiEventCallback);
+    wifiEventCallbackAdded = true;
+  }
   WiFi.persistent(false); // trigger esp_wifi_set_storage(WIFI_STORAGE_RAM) to workaround no reply issue in a159x36/qemu
   WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN); // make sure to scan all channels...
   WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // ...and select the Access Point with the strongest signal
   WiFi.begin(ssid, password);
   return true;
+}
+
+unsigned long wifiLostTime = 0; // when the connection was lost while the wallet was shown, 0 while connected
+unsigned long lastWifiRetryTime = 0;
+
+// Called while the wallet is shown. The ESP32's automatic reconnect gives up after
+// some errors, such as AUTH_FAIL while the access point restarts, so keep trying.
+void keepReconnectingWifi() {
+  if (wifiConnected()) {
+    if (wifiLostTime != 0) Serial.println("WiFi is back after " + String((millis() - wifiLostTime) / 1000) + "s.");
+    wifiLostTime = 0;
+    return;
+  }
+  if (wifiLostTime == 0) {
+    Serial.println("WiFi connection lost. Keeping the wallet on the display and reconnecting...");
+    wifiLostTime = millis();
+    lastWifiRetryTime = wifiLostTime; // give the automatic reconnect a chance first
+    return;
+  }
+  if (millis() - lastWifiRetryTime < WIFI_RETRY_SECONDS * 1000UL) return;
+  lastWifiRetryTime = millis();
+  Serial.println("WiFi still not connected after " + String((millis() - wifiLostTime) / 1000) + "s, trying to reconnect to " + String(ssid));
+  WiFi.begin(ssid, password);
 }
 
 // returns true if need to keep waiting, false if done waiting

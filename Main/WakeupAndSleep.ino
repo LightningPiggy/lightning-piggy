@@ -201,6 +201,10 @@ bool awakeLongEnough() {
   return true;
 }
 
+bool neverSleeps() {
+  return isConfigured(sleepMode) && String(sleepMode) == "no_sleep";
+}
+
 void hibernateDependingOnConfiguration() {
   if (!awakeLongEnough()) return;
 

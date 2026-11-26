@@ -25,11 +25,12 @@ String currentVersion = "6.4.1";
 #define PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS 17
 
 #define PIGGYMODE_STARTED_STA_CHECKUPDATE 11
-#define PIGGYMODE_FAILED_STA 3       // failed to connect to station => show warning and how to trigger config mode and go to sleep
+#define PIGGYMODE_FAILED_STA 3       // failed to connect to station => show warning and how to trigger config mode and go to sleep (or retry, in never-sleep mode)
 #define PIGGYMODE_STARTING_AP 4      // attempt to start AP + webserver and then go to started-ap
 #define PIGGYMODE_STARTED_AP 5       // AP is up-and-running: wait until user trigger /reboot
 
 #define PIGGYMODE_RECONNECT_WIFI 12
+#define PIGGYMODE_WAITING_TO_RETRY_STA 18 // never-sleep mode: wait WIFI_RETRY_SECONDS after a failed wifi connection, then try again
 
 // Configuration through access point:
 #define ACCESS_POINT_SSID          "Piggy Config"
@@ -70,6 +71,7 @@ extern const int SLEEP_HOURS_AFTER_MAX_WATCHDOG_REBOOTS = 6;
 #define TIME_BETWEEN_WEBSOCKET_CONNECTION_ATTEMPTS 1000 * 30
 
 #define WIFI_CONNECT_TIMEOUT_SECONDS 30         // after this time, it's deemed a failure
+#define WIFI_RETRY_SECONDS 60                   // while awake without wifi, try to reconnect this often
 
 #define DEFAULT_SLEEP_DURATION_SECONDS 60 * 60 * 6          // 6 hours = morning, afternoon, evening and night
 

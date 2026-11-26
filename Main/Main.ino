@@ -30,6 +30,8 @@
 long lastUpdatedBalance = -LNBITS_UPDATE_BALANCE_PERIOD_MILLIS;  // this makes it update when first run
 long apstart_time  = 0;
 long lastHeap = 0;
+bool wifiWasConnected = true; // while the wallet is shown: to update the status as soon as the wifi is lost
+unsigned long wifiRetryWaitStart = 0;
 
 int previousPiggyMode = NOT_SPECIFIED;
 int piggyMode = PIGGYMODE_INIT;
@@ -138,8 +140,15 @@ void loop() {
       }
     } // else keep waiting for wifi
   } else if (piggyMode == PIGGYMODE_STARTED_STA) {
+    keepReconnectingWifi();
+    bool wifiIsConnected = wifiConnected();
+    if (!wifiIsConnected) {
+      // Keep the balance and payments on the display and only show "Wifi:off" in the status.
+      // The refresh waits until the wifi is back, which also asks for one (ARDUINO_EVENT_WIFI_STA_CONNECTED).
+      if (wifiWasConnected || timeChanged()) displayStatus(false);
+      hibernateDependingOnConfiguration(); // go to sleep if that's necessary
     // getForceRefreshBalanceAndPayments() == true or if it has been a long time: refresh it
-    if (getForceRefreshBalanceAndPayments() ||
+    } else if (getForceRefreshBalanceAndPayments() ||
       (walletToUse() == WALLET_LNBITS && (millis() - lastUpdatedBalance) > LNBITS_UPDATE_BALANCE_PERIOD_MILLIS) ||
       (walletToUse() == WALLET_NWC && (millis() - lastUpdatedBalance) > NWC_UPDATE_BALANCE_PERIOD_MILLIS)) {
       lastUpdatedBalance = millis();
@@ -150,6 +159,7 @@ void loop() {
       if (timeChanged()) displayStatus(false);
       hibernateDependingOnConfiguration(); // go to sleep if that's necessary
     }
+    wifiWasConnected = wifiIsConnected;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_RECEIVECODE) {
       String lnurlp = getLNURLp();
       fastClearScreen(); // clear screen, otherwise the logo or boot slogan will stay there until overwritten
@@ -165,12 +175,15 @@ void loop() {
     if (getBalanceDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_BALANCE;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_BALANCE) {
     displayBalance(getBalance());
-    piggyMode = balanceChanged() ? PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS : PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+    piggyMode = (balanceChanged() || lastPaymentsFetchFailed()) ? PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS : PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_REFRESH_PAYMENTS) {
     fetchPaymentsAsync();
     piggyMode = PIGGYMODE_STARTED_STA_WAIT_PAYMENTS;
   } else if (piggyMode == PIGGYMODE_STARTED_STA_WAIT_PAYMENTS) {
-    if (fetchedPaymentsDone()) piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+    if (fetchedPaymentsDone()) {
+      keepPreviousPaymentsIfFetchFailed();
+      piggyMode = PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS;
+    }
   } else if (piggyMode == PIGGYMODE_STARTED_STA_RECEIVED_PAYMENTS) {
     displayPayments();
     piggyMode = PIGGYMODE_STARTED_STA_CHECKUPDATE;
@@ -178,8 +191,20 @@ void loop() {
       checkShowUpdateAvailable();
       piggyMode = PIGGYMODE_STARTED_STA; // go back to idling on websocket
   } else if (piggyMode == PIGGYMODE_FAILED_STA) {
-    displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 6 hours. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
-    hibernate(DEFAULT_SLEEP_DURATION_SECONDS);
+    if (neverSleeps()) {
+      displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Trying again in " + String(WIFI_RETRY_SECONDS) + "s. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+      wifiRetryWaitStart = millis();
+      piggyMode = PIGGYMODE_WAITING_TO_RETRY_STA;
+    } else {
+      displayFit("I've been trying to connect to the wifi unsuccessfully for " + String(WIFI_CONNECT_TIMEOUT_SECONDS) + "s. Going to sleep for 6 hours. Reminder: You can trigger Configuration Mode by long-pressing the General Purpose (IO39) button.", 0, 40+5, displayWidth(), displayHeight()-smallestFontHeight-5, 1, false, false, true);
+      hibernate(DEFAULT_SLEEP_DURATION_SECONDS);
+    }
+  } else if (piggyMode == PIGGYMODE_WAITING_TO_RETRY_STA) {
+    if (wifiConnected()) {
+      piggyMode = PIGGYMODE_WAITING_STA; // the automatic reconnect got there first: carry on as connected
+    } else if (millis() - wifiRetryWaitStart > WIFI_RETRY_SECONDS * 1000UL) {
+      piggyMode = PIGGYMODE_RECONNECT_WIFI;
+    }
   } else if (piggyMode == PIGGYMODE_STARTING_AP) {
     if (apstart_time == 0) {
       stop_webserver();

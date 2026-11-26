@@ -6,6 +6,11 @@ int currentBalance = NOT_SPECIFIED;
 String payments[MAX_PAYMENTS];
 int nrOfPayments = NOT_SPECIFIED;
 
+// The payments shown before the current fetch, to keep them on the display if it fails.
+String previousPayments[MAX_PAYMENTS];
+int nrOfPreviousPayments = 0;
+bool paymentsFetchFailed = false;
+
 bool fetchedAllPayments;
 bool getBalanceIsDone;
 
@@ -26,14 +31,21 @@ int walletToUse() {
 void getWalletBalanceAsync() {
   oldBalance = currentBalance;
   if (walletToUse() == WALLET_LNBITS) {
-    currentBalance = getWalletBalance();
+    int balance = getWalletBalance();
+    if (balance != NOT_SPECIFIED) {
+      currentBalance = balance;
+    } else {
+      Serial.println("WARNING: could not get the balance, keeping the previous one on the display.");
+    }
     setGetBalanceDone(true);
   } else if (walletToUse() == WALLET_NWC) {
-    nwc_getBalance();
+    nwc_getBalance(); // keeps the previous balance if it fails or times out
   } // else do nothing
 }
 
 void fetchPaymentsAsync() {
+  nrOfPreviousPayments = max(nrOfPayments, 0);
+  for (int i = 0; i < nrOfPreviousPayments; i++) previousPayments[i] = payments[i];
   fetchedAllPayments = false;
   nrOfPayments = 0;
   if (walletToUse() == WALLET_LNBITS) {
@@ -41,6 +53,21 @@ void fetchPaymentsAsync() {
   } else if (walletToUse() == WALLET_NWC) {
     fetchNWCPayments(MAX_PAYMENTS);
   } // else do nothing
+}
+
+// A wallet's incoming payments don't disappear, so getting none after having some
+// means the fetch failed (no wifi, a server error or a timeout). Then keep the previous
+// ones on the display, and fetch them again at the next refresh.
+void keepPreviousPaymentsIfFetchFailed() {
+  paymentsFetchFailed = (nrOfPayments <= 0 && nrOfPreviousPayments > 0);
+  if (!paymentsFetchFailed) return;
+  Serial.println("WARNING: got no payments, keeping the " + String(nrOfPreviousPayments) + " previous ones on the display.");
+  for (int i = 0; i < nrOfPreviousPayments; i++) payments[i] = previousPayments[i];
+  nrOfPayments = nrOfPreviousPayments;
+}
+
+bool lastPaymentsFetchFailed() {
+  return paymentsFetchFailed;
 }
 
 String getPayment(int nr) {

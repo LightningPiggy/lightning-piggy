@@ -1,3 +1,10 @@
+**6.4.2**
+- Keep the balance and payments on the display when the WiFi connection is lost, and only show "Wifi:off" in the status (right away instead of within a minute). Before, the next refresh cleared them and showed "Unknown Balance" without payments. A failed balance or payments fetch now also keeps the previous ones on the display
+- Keep reconnecting a lost WiFi connection every minute while the piggy is awake. Before, it relied on the ESP32's automatic reconnect, which gives up after some errors (such as while the router restarts), and then stayed offline until its restart every 23 hours
+- Never-sleep mode: retry a failed WiFi connection every minute instead of sleeping for 6 hours
+- LNBits: fix the piggy waiting forever for the payments when fetching them failed, which stopped all further refreshes until the restart every 23 hours
+
+
 **6.4.1**
 - Harden the shared HTTPS fetch helper's response reader. It now waits for data that arrives in several pieces, accepts any valid form of chunked replies (several chunks, chunk extensions, trailers, any header spelling) and honours Content-Length. A reply that is cut short, compressed or malformed is rejected instead of being passed on as data, so the update checker can no longer show "UPD!" because of half a reply. The whole reply has to arrive within 15 seconds.
 - Add tests for that reader that run on a computer, without a device: `tests/host/run.sh`
