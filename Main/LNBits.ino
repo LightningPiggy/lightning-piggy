@@ -57,6 +57,7 @@ void fetchLNURLPayments(int limit) {
   {
     Serial.print("deserializeJson() failed: ");
     Serial.println(error.f_str());
+    setFetchedPaymentsDone(true); // done, without payments, otherwise the piggy keeps waiting for them
     return;
   }
 
