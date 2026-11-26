@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-String currentVersion = "6.4.1";
+String currentVersion = "6.4.2";
 
 /**
  * The piggy can be in different 'modes':
