@@ -1,3 +1,7 @@
+**Unreleased**
+- Add Portuguese (pt) locale: boot slogans and weekday names, selectable in the config portal's Language dropdown (`pt_BR` settings resolve to it too)
+- Support Brazilian Real (BRL) as fiat currency (CoinGecko price lookups accept `brl`; the portal's fiat hint now lists it)
+
 **6.4.2**
 - Keep the balance and payments on the display when the WiFi connection is lost, and only show "Wifi:off" in the status (right away instead of within a minute). Before, the next refresh cleared them and showed "Unknown Balance" without payments. A failed balance or payments fetch now also keeps the previous ones on the display
 - Keep reconnecting a lost WiFi connection every minute while the piggy is awake. Before, it relied on the ESP32's automatic reconnect, which gives up after some errors (such as while the router restarts), and then stayed offline until its restart every 23 hours
