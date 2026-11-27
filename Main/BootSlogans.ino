@@ -45,7 +45,7 @@ const char* bitcoinSlogans_en[] PROGMEM = {
   "'Stay humble, stack sats.' - Matt Odell",
   "'Bitcoin is a strange game where the only winning move is to play.' - Bitstein",
   "'If privacy is outlawed, only outlaws will have privacy.' - Phil Zimmermann",
-  "'We reject: kings, presidents, and voting. We believe in: rough consensus and running code.' — David Clark"
+  "'We reject: kings, presidents, and voting. We believe in: rough consensus and running code.' - David Clark"
 };
 
 const char* bitcoinSlogans_nl[] PROGMEM = {
@@ -304,7 +304,7 @@ const char* bitcoinSlogans_pt[] PROGMEM = {
   "'Seja humilde, acumule sats.' - Matt Odell",
   "'O Bitcoin é um jogo estranho onde o único movimento vencedor é jogar.' - Bitstein",
   "'Se a privacidade for proibida, apenas os marginais terão privacidade.' - Phil Zimmermann",
-  "'Rejeitamos: reis, presidentes e votação. Acreditamos em: consenso aproximado e código que funciona.' — David Clark"
+  "'Rejeitamos: reis, presidentes e votação. Acreditamos em: consenso aproximado e código que funciona.' - David Clark"
 };
 
 struct SloganLocale {
