@@ -1,4 +1,4 @@
-**Unreleased**
+**6.5.0**
 - Add Portuguese (pt) locale: boot slogans and weekday names, selectable in the config portal's Language dropdown
 - Support Brazilian Real (BRL) as fiat currency (CoinGecko price lookups accept `brl`; the portal's fiat hint now lists it)
 - Fix a wrong character where a line wraps inside an accented letter (such as ã or é), which the Portuguese boot slogans hit often
