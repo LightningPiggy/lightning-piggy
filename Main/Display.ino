@@ -181,7 +181,15 @@ int fitMaxText(String text, int maxWidth) {
     w = u8g2Fonts.getUTF8Width(text.substring(0, maxLength + 2).c_str());
     ++maxLength;
   }
-  return maxLength;
+  // Don't break the line inside a multi-byte UTF-8 character (such as ã, é or ç):
+  // move the break back to the start of that character.
+  int end = maxLength;
+  while (end > 0 && end < text.length() && (text[end] & 0xC0) == 0x80) --end;
+  if (end == 0) { // a single character wider than the line: keep it whole
+    end = maxLength;
+    while (end < text.length() && (text[end] & 0xC0) == 0x80) ++end;
+  }
+  return end;
 }
 
 int drawLines(String stringArray[], int nrOfItems, int startX, int endX, int startY, bool invert, bool alignRight) {

@@ -35,7 +35,7 @@ String getDayOfWeekString(int dayOfWeek) {
   }
   if (strncmp(localeSetting,"de",2) == 0) {
      return deWeekdays[dayOfWeek];
-  } else if (strncmp(localeSetting,"dk",2) == 0) {
+  } else if (strncmp(localeSetting,"da",2) == 0 || strncmp(localeSetting,"dk",2) == 0) {
      return dkWeekdays[dayOfWeek];
   } else if (strncmp(localeSetting,"nl",2) == 0) {
     return nlWeekdays[dayOfWeek];

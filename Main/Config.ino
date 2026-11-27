@@ -141,6 +141,8 @@ bool parseConfig(String paramFileString) {
 
     // Display:
     tryGetJsonValue(doc, "config_fiat_currency", &btcPriceCurrencyChar, MAX_CONFIG_LENGTH);
+    // The currency code is compared in upper case (USD, BRL...), so accept "brl" or "Brl" too
+    for (char *c = btcPriceCurrencyChar; c && *c; ++c) *c = toupper((unsigned char)*c);
     tryGetJsonValue(doc, "config_balance_bias", &balanceBias, MAX_CONFIG_LENGTH);
     tryGetJsonValue(doc, "config_thousands_separator", &thousandsSeparator, MAX_CONFIG_LENGTH, defaultThousandsSeparator);
     tryGetJsonValue(doc, "config_decimal_separator", &decimalSeparator, MAX_CONFIG_LENGTH, defaultDecimalSeparator);

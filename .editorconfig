@@ -13,3 +13,7 @@ insert_final_newline = true
 
 [*.py]
 indent_size = 4
+
+# Makefile recipes must be indented with tabs
+[{Makefile,*.mk}]
+indent_style = tab

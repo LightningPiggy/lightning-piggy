@@ -1,6 +1,11 @@
 **Unreleased**
-- Add Portuguese (pt) locale: boot slogans and weekday names, selectable in the config portal's Language dropdown (`pt_BR` settings resolve to it too)
+- Add Portuguese (pt) locale: boot slogans and weekday names, selectable in the config portal's Language dropdown
 - Support Brazilian Real (BRL) as fiat currency (CoinGecko price lookups accept `brl`; the portal's fiat hint now lists it)
+- Fix a wrong character where a line wraps inside an accented letter (such as ã or é), which the Portuguese boot slogans hit often
+- Show the currency symbol when the fiat currency is typed in lower case (such as `brl` or `Eur`). Before, the piggy showed the amount without a symbol. The config portal now also suggests capitals in that field
+- Show Danish weekday names when the language is Danish (`da`). Before, they were in English
+- Use a plain hyphen in the David Clark boot slogan (English and Portuguese). The display font has no em dash, so it showed a gap
+- Config portal: the separator hints say what an empty field means (a comma for thousands, a dot for decimals), the Boot Salutation field keeps the keyboard's capitals and spell-check, and autocorrect is turned off with the HTML attribute rather than the JavaScript property, which not every browser has
 
 **6.4.2**
 - Keep the balance and payments on the display when the WiFi connection is lost, and only show "Wifi:off" in the status (right away instead of within a minute). Before, the next refresh cleared them and showed "Unknown Balance" without payments. A failed balance or payments fetch now also keeps the previous ones on the display

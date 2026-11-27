@@ -108,8 +108,8 @@
       ["config_static_receive_code", "Lightning Address or LNURL-pay code (to receive sats)", "Like oink@demo.lnpiggy.com or LNURL1... from the LNBits 'Pay Links' extension."],
       ["config_fiat_currency", "Fiat Currency", "Example: USD, EUR, DKK, BRL, etc. Leave empty to hide fiat amounts."],
       ["config_balance_bias", "Balance Bias", "Satoshis to add (or subtract if negative) to adjust your balance."],
-      ["config_thousands_separator", "Thousands Separator", "Example: . or , or a space. Leave empty to use locale default."],
-      ["config_decimal_separator", "Decimal Separator", "Example: . or , or a space. Leave empty to use locale default."],
+      ["config_thousands_separator", "Thousands Separator", "Example: . or , or a space. Leave empty for a comma (,)."],
+      ["config_decimal_separator", "Decimal Separator", "Example: . or , or a space. Leave empty for a dot (.)."],
       ["config_show_boot_wisdom", "Show Boot Wisdom", "Set to YES to display a quote at startup instead of the logo."],
       ["config_boot_salutation", "Boot Salutation", "Greeting at startup. Example: 'Some wisdom from your favorite uncle:'."],
       ["config_locale", "Language (Locale)", "Language to use for boot wisdom etc."],
@@ -287,9 +287,16 @@
           inputEl.placeholder = label;
           // keep lowercase for WiFi/URLs on Android/iOS keyboards
           if (inputEl.tagName !== "SELECT") {
-            inputEl.autocapitalize = "none";
-            inputEl.autocorrect = false;
-            inputEl.spellcheck = false;
+            if (name === "config_boot_salutation") {
+              // Free text shown on the display: keep the keyboard's usual capitals and spell-check
+              inputEl.setAttribute("autocapitalize", "sentences");
+              inputEl.setAttribute("autocorrect", "on");
+              inputEl.setAttribute("spellcheck", "true");
+            } else {
+              inputEl.setAttribute("autocapitalize", name === "config_fiat_currency" ? "characters" : "none");
+              inputEl.setAttribute("autocorrect", "off");
+              inputEl.setAttribute("spellcheck", "false");
+            }
           }
           inputEl.className =
             "mt-1 block w-full border-2 rounded-md shadow-sm p-2 focus:outline-none focus:border-[var(--primary)]";
